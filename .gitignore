@@ -1,0 +1,16 @@
+
+
+# ignore backup files of vim
+*~
+# ignore makefile
+Makefile
+# ignore moc files of qt
+moc_*.cpp
+*.o
+
+# ignore binary translation files of qt
+*.qm
+# ignore main binary
+dea_editor
+
+
