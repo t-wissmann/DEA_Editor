@@ -1,21 +1,16 @@
 #include "dedit_graphicalstate.h"
 #include <DEA/dea_state.h>
-#include "dedit_widgetpainter.h"
+
 #include <QLineF>
 
 int DEdit_GraphicalState::m_nDiameter = 100;
 
 DEdit_GraphicalState::DEdit_GraphicalState(DEA_State* state)
 {
-    m_bChangedSinceRepaint = TRUE; // at beginning, all states has to be repainted
     m_pData = state;
-    m_pWidgetPainter = NULL;
     m_nX = 0;
     m_nY = 0;
     
-    m_bStartState = 0;
-    m_bCurrentlyExecutedState = 0;
-    m_eResultIndicator = NoResult;
     isHovered = 0;
     isDragged = 0;
     isSelected = 0;
@@ -44,18 +39,6 @@ bool DEdit_GraphicalState::isPointContained(QPoint pointToCheck)
     bool result;
     QLineF distance(m_nX, m_nY, pointToCheck.x(), pointToCheck.y());
     result = distance.length() <= (((double)m_nDiameter)/2);
-    if(m_bStartState && m_pWidgetPainter)
-    {
-        QPoint pixelpos = pointToCheck
-                - (positionToQPoint() + m_pWidgetPainter->m_cStartStateIndicatorPosition);
-        
-        if(m_pWidgetPainter->m_cStartStateIndicatorAlphaMask.rect().contains(pixelpos))
-        {// only check, if position is WITHIN m_cStartStateIndicatorAlphaMask
-            bool overStartState = (qRgb(255, 255, 255)
-                    == m_pWidgetPainter->m_cStartStateIndicatorAlphaMask.pixel(pixelpos));
-             result = result || overStartState;
-        }
-    }
     
     return result;
 }
@@ -63,21 +46,5 @@ bool DEdit_GraphicalState::isPointContained(QPoint pointToCheck)
 QPoint DEdit_GraphicalState::positionToQPoint() const
 {
     return QPoint(m_nX, m_nY);
-}
-
-
-bool DEdit_GraphicalState::wasChangedSinceRepaint() const
-{
-    return m_bChangedSinceRepaint;
-}
-
-void DEdit_GraphicalState::setWasChanged()
-{
-    m_bChangedSinceRepaint = TRUE;
-}
-
-void DEdit_GraphicalState::setToNotChanged()
-{
-    m_bChangedSinceRepaint = FALSE;
 }
 

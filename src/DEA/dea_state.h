@@ -27,8 +27,6 @@ public:
     void removeTransition(DEA_Transition* transition);
     std::vector<DEA_Transition*> connectionList();
     
-    DEA_Transition* findTransitionForSymbol(char symbol);
-    
 private:
     bool    m_bIsFinalState;
     char    m_szName[80];

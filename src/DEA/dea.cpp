@@ -8,7 +8,6 @@
 #include <vector>
 #include <io/xmlparser.h>
 
-
 using namespace std;
 
 DEA::DEA()
@@ -26,7 +25,7 @@ DEA::~DEA()
 {
     // free all states
     setStateCount(0);
-    // free all transitions
+    // free all connections
     setTransitionCount(0);
 }
 
@@ -153,7 +152,7 @@ void DEA::setTransitionCount(unsigned int count)
     //printf("Transition count set to %d\n", m_uTransitionCount);
 }
 
-unsigned int DEA::transitionCount()
+unsigned int DEA::connectionCount()
 {
     return m_uTransitionCount;
 }
@@ -202,7 +201,7 @@ bool DEA::run(char* inputString)
         connectionList = pCurrentState->connectionList();
         // clear current state
         pCurrentState = NULL;
-        // find right transition
+        // find right connection
         for(int i = 0; i < connectionList.size(); ++i)
         {
             pCurrentTransition = connectionList.at(i);
@@ -210,7 +209,7 @@ bool DEA::run(char* inputString)
             {
                 continue;
             }
-            if(pCurrentTransition->hasInputSymbol(inputString[uSymbolIndex]))
+            if(pCurrentTransition->inputSymbol() == inputString[uSymbolIndex])
             {
                 pCurrentState = pCurrentTransition->end();
                 break;
@@ -322,7 +321,8 @@ bool DEA::initStatesFromStateList(xmlObject* stateList)
     setStartState(startState);
     if(!startState)
     {
-        printf("WARNING: requested start state \'%s\' not existing in \'zustaende\'\n", currentAttribute->value());
+        printf("ERROR: requested start state \'%s\' not existing in \'zustaende\'\n", currentAttribute->value());
+        return false;
     }
     
     
@@ -372,8 +372,11 @@ bool DEA::initTransitionsFromTransitionList(xmlObject* transitionList)
             return false;
         }
         char* symbols = currentAttribute->value();
-        DEA_Transition* transition = createTransition(pStateStart, pStateEnd, '\0');
-        transition->setInputSymbols(symbols);
+        for(int ch = 0; symbols[ch] != '\0'; ch++)
+        {
+            chInputSymbol = symbols[ch];
+            createTransition(pStateStart, pStateEnd, chInputSymbol);
+        }
         
     }
     
@@ -469,90 +472,4 @@ int DEA::indexOf(DEA_Transition* transition)
     return -1;
 }
 
-
-void DEA::writeToFile(xmlObject* file)
-{
-    if(!file)
-    {
-        return;
-    }
-    file->setName("automat");
-    xmlObject* states = file->cAddObject("zustaende");
-    states->cAddAttribute("start", m_pStartState ? m_pStartState->name() : "");
-    writeStatesToFile(states);
-    
-    xmlObject* transitions = file->cAddObject("uebergaenge");
-    writeTransitionsToFile(transitions);
-    
-}
-
-
-void DEA::writeStatesToFile(xmlObject* stateList)
-{
-    if(!stateList)
-    {
-        return;
-    }
-    DEA_State* currentState;
-    xmlObject* stateXmlObject;
-    for(int i = 0; i < m_uStateCount; ++i)
-    {
-        currentState = m_pStateBuf[i];
-        if(!currentState)
-        {
-            continue;
-        }
-        stateXmlObject = stateList->cAddObject("zustand");
-        stateXmlObject->cAddAttribute("name", currentState->name());
-        stateXmlObject->cAddAttribute("finalzustand",
-                                      currentState->isFinalState() ? "1" : "0");
-    }
-    
-}
-
-void DEA::writeTransitionsToFile(xmlObject* transitionList)
-{
-    if(!transitionList)
-    {
-        return;
-    }
-    DEA_Transition* currentTransition;
-    xmlObject* transitionXmlObject;
-    DEA_State* pStateTmp;
-    for(int i = 0; i < m_uTransitionCount; ++i)
-    {
-        currentTransition = m_pTransitionBuf[i];
-        if(!currentTransition)
-        {
-            continue;
-        }
-        transitionXmlObject = transitionList->cAddObject("uebergang");
-        pStateTmp = currentTransition->start();
-        transitionXmlObject->cAddAttribute("from", pStateTmp ? pStateTmp->name() : "");
-        pStateTmp = currentTransition->end();
-        transitionXmlObject->cAddAttribute("to", pStateTmp ? pStateTmp->name() : "");
-        transitionXmlObject->cAddAttribute("symbol", currentTransition->inputSymbols());
-    }
-}
-
-
-DEA_Transition* DEA::transitionAt(int index)
-{
-    if(index < 0 || index >= m_uTransitionCount)
-    {
-        return NULL;
-    }
-    return m_pTransitionBuf[index];
-}
-
-
-DEA_State** DEA::stateBuf()
-{
-    return m_pStateBuf;
-}
-
-DEA_Transition** DEA::transitionBuf()
-{
-    return m_pTransitionBuf;
-}
 

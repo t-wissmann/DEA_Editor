@@ -24,8 +24,6 @@
 /**
 	@author Thorsten Wissmann <kollegstufe@thorsten-wissmann.de>
 */
-#include <QByteArray>
-
 class xmlEncoder{
 public:
     xmlEncoder();
@@ -34,8 +32,6 @@ public:
     
     static char* xmlCodeToString(char* string);
     static char* stringToXmlCode(char* string);
-protected:
-    static QByteArray s_szReturnByteArray;
 
 };
 

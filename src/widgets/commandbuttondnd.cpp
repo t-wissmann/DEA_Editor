@@ -74,18 +74,11 @@ void CommandButtonDND::startDrag()
     QMimeData *mimeData = new QMimeData;
     mimeData->setData(m_szMimeType, m_szCommand.toAscii());
     QDrag* drag = new QDrag(this);
-    /*
-    // new: allways don't use drag n drop pixmap
-#ifndef Q_WS_WIN
-    // on windows, the image is to large for drag'n'drop pixmap -.-
     drag->setPixmap(m_cDNDPixmap);
-    drag->setHotSpot(QPoint(m_cDNDPixmap.width(), m_cDNDPixmap.height())/2);
-#endif
-    */
-    
+    drag->setHotSpot(QPoint(m_cDNDPixmap.width()/2, m_cDNDPixmap.height()/2));
     drag->setMimeData(mimeData);
     drag->start(Qt::MoveAction);
-    clearFocus(); // remove focus from widget after drag and drop
+    clearFocus(); // remove focus from widget
 }
 
 

@@ -27,10 +27,6 @@
 #include <string.h>
 #include "error.h"
 
-// default value:
-// #define TW_XML_STRLEN 80
-// highly experimental: 
-#define TW_XML_STRLEN 1024 
 
 class xmlAttribute
 {
@@ -40,16 +36,16 @@ class xmlAttribute
         SetValue("");
     };
     public:
-        char    szName[TW_XML_STRLEN];
-        char    szValue[TW_XML_STRLEN];
+        char    szName[80];
+        char    szValue[80];
         int     nValueToInt(void);
         float   nValueToFloat(void);
         double  nValueToDouble(void);
         void    SetValueToInt(int nNewValue);
         void    SetValueToFloat(float nNewValue);
         void    SetValueToDouble(double nNewValue);
-        void    SetName(const char* szNewName);
-        void    SetValue(const char* szNewValue);
+        void    SetName(char* szNewName);
+        void    SetValue(char* szNewValue);
         char*   name(){ return szName; };
         char*   value(){ return szValue; };
         char*   nameToXmlCode();
@@ -62,7 +58,7 @@ class xmlObject
 {
     public:
         //MEMBER_Variables
-        char           szName[TW_XML_STRLEN];
+        char           szName[80];
         
         //FUNCTIONS
         //CON-/DESTRUCTOR
@@ -75,8 +71,8 @@ class xmlObject
         long            nSetAttributeValueByName (char* szAttributeName, char* szAttributeValue);
         xmlAttribute*   cGetAttributeByName (char* szAttributeName);
         long            nSetAttributeByIdentifier (int nIdentifier, char* szAttributeName, char* szAttributeValue);
-        long            nAddAttribute (const char* szAttributeName, const char* szAttributeValue);
-        xmlAttribute*   cAddAttribute (const char* szAttributeName, const char* szAttributeValue);
+        long            nAddAttribute (char* szAttributeName, char* szAttributeValue);
+        xmlAttribute*   cAddAttribute (char* szAttributeName, char* szAttributeValue);
         int             nDeleteAttribute(int nIdentifier);
         xmlAttribute*   cGetAttributeByIdentifier (int nIdentifier);
         int             nGetAttributeIdentifierByName (char* szAttributeName);
@@ -93,9 +89,9 @@ class xmlObject
         int             nDeleteObject(xmlObject* objectToDelete);
         xmlObject*      cTakeObjectFromList(xmlObject* object);
         xmlObject*      cGetObjectByIdentifier (int nIdentifier);
-        xmlObject*      cGetObjectByName (char szObjectName[TW_XML_STRLEN]);
-        xmlObject*      cGetObjectByAttributeValue (char szAttributeName[TW_XML_STRLEN], char szAttributeValue[TW_XML_STRLEN]);
-        int             nGetObjectIdentifierByAttributeValue (char szAttributeName[TW_XML_STRLEN], char szAttributeValue[TW_XML_STRLEN]);
+        xmlObject*      cGetObjectByName (char szObjectName[80]);
+        xmlObject*      cGetObjectByAttributeValue (char szAttributeName[80], char szAttributeValue[80]);
+        int             nGetObjectIdentifierByAttributeValue (char szAttributeName[80], char szAttributeValue[80]);
         void            swapObjects(xmlObject* objectOne, xmlObject* objectTwo);
         void            swapObjects(int objectOne, int objectTwo);
         void            moveObjectTo(xmlObject* objectToMove, int newPosition);
@@ -109,8 +105,8 @@ class xmlObject
         //about name
         char*          szGetName( void );
         char*          name(){ return szGetName(); };
-        void           setName(const char* szNewName);
-        void           setNameFromXmlCode(const char* xmlcodestring);
+        void           setName(char* szNewName);
+        void           setNameFromXmlCode(char* xmlcodestring);
         char*          nameToXmlCode();
         
 //        xmlAttribute*  cGetAttribute(int n AttributeCounter);
