@@ -18,6 +18,7 @@ Dia_DeaSourceViewer::Dia_DeaSourceViewer(QWidget* parent)
     setAttribute(Qt::WA_QuitOnClose, FALSE);
     createGui();
     retranslateUi();
+    resize(600, 360);
 }
 
 Dia_DeaSourceViewer::~Dia_DeaSourceViewer()
@@ -85,7 +86,6 @@ void Dia_DeaSourceViewer::refresh()
     }
     free (szBuf);
     // write text to widget
-    
 }
 
 

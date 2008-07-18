@@ -39,7 +39,7 @@ DEdit_GraphicalTransition::~DEdit_GraphicalTransition()
 bool DEdit_GraphicalTransition::hasValidPointers() const
 {
     bool result = m_pStart && m_pEnd
-            && m_pStart->m_pData && m_pEnd->m_pData;
+            && m_pStart->m_pData && m_pEnd->m_pData && m_pData;
     return result;
 }
 
@@ -84,15 +84,10 @@ bool DEdit_GraphicalTransition::isConnectedWith(DEdit_GraphicalState* state) con
 
 void DEdit_GraphicalTransition::applySymbolsToDEA_Transitions()
 {
-    if(m_DataList.size() <= 0)
+    if(!m_pData)
     {
         return;
     }
-    char symb = '\0';
-    if(m_szSymbols.size() > 0)
-    {
-        symb = m_szSymbols.at(0).toAscii();
-    }
-    m_DataList.first()->setInputSymbol(symb);
+    m_pData->setInputSymbols(m_szSymbols.toAscii().data());
 }
 

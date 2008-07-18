@@ -11,6 +11,8 @@ DEdit_GraphicalState::DEdit_GraphicalState(DEA_State* state)
     m_nX = 0;
     m_nY = 0;
     
+    m_bStartState = 0;
+    
     isHovered = 0;
     isDragged = 0;
     isSelected = 0;

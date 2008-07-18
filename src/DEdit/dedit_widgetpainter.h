@@ -10,6 +10,7 @@ class DEdit_GraphicalTransition;
 class QPainter;
 #include <QPixmap>
 #include <QPen>
+#include <QPen>
 #include <QFont>
 
 
@@ -33,9 +34,10 @@ public:
     void recreateStateSelectedTemplate();
     void recreateTransitionPens();
     void recreateStatePens();
+    void recreateStartStateIndicator();
     
     void paintTransition(QPainter* painter, DEdit_GraphicalTransition* transition);
-    void paintTransition(QPainter* painter, QLineF line);
+    void paintTransition(QPainter* painter, QLineF line, bool bigDotAtStart = TRUE);
     void paintTransitionLabel(QPainter* painter, DEdit_GraphicalTransition* transition);
     void recomputeTransitionLabelArea(DEdit_GraphicalTransition* transition);
     static QPixmap recreateStateTemplate(QColor color, int diameter, bool invertedGradient = FALSE);
@@ -52,6 +54,8 @@ private:
     QPixmap  m_cStateHoveredTemplate;
     QPixmap  m_cStateDraggedTemplate;
     QPixmap  m_cStateSelectedTemplate;
+    QPixmap  m_cStartStateIndicator;
+    QPoint   m_cStartStateIndicatorPosition; // relativ positon to center
     QPen     m_cStateLabelPen;
     QFont    m_cStateLabelFont;
     QPen     m_cTransitionPen;

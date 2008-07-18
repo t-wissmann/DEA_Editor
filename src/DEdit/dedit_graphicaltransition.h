@@ -3,7 +3,6 @@
 
 class DEdit_GraphicalState;
 class DEA_Transition;
-#include <QList>
 #include <QPoint>
 #include <QImage>
 #include <QString>
@@ -20,7 +19,7 @@ public:
     DEdit_GraphicalState* m_pStart;
     DEdit_GraphicalState* m_pEnd;
     QString m_szSymbols;
-    QList<DEA_Transition*>  m_DataList;
+    DEA_Transition*  m_pData;
     QImage  m_cAlphaMask;
     QRect   m_cLabelArea;
     

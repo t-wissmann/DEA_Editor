@@ -41,6 +41,7 @@ void DEdit_EditStateDia::allocateWidgets()
     lblName = new QLabel;
     txtName = new QLineEdit;
     chkIsFinalState = new QCheckBox;
+    chkIsStartState = new QCheckBox;
     
     // buttons on the bottom
     boxBottom = new QDialogButtonBox;
@@ -59,6 +60,7 @@ void DEdit_EditStateDia::createLayouts()
     
     layoutParent = new QVBoxLayout;
     layoutParent->addLayout(layoutName);
+    layoutParent->addWidget(chkIsStartState);
     layoutParent->addWidget(chkIsFinalState);
     layoutParent->addWidget(boxBottom);
     
@@ -77,6 +79,7 @@ void DEdit_EditStateDia::retranslateUi()
     setWindowTitle(tr("Edit State"));
     
     lblName->setText(tr("Name:"));
+    chkIsStartState->setText(tr("Start State"));
     chkIsFinalState->setText(tr("Final State"));
     // buttons on the bottom
     btnOk->setText(tr("OK"));
@@ -93,7 +96,7 @@ void DEdit_EditStateDia::setStateToEdit(DEdit_GraphicalState* state)
     }
     txtName->setText(m_pStateToEdit->m_pData->name());
     chkIsFinalState->setChecked(m_pStateToEdit->m_pData->isFinalState());
-    
+    chkIsStartState->setChecked(m_pStateToEdit->m_bStartState);
 }
 
 DEdit_GraphicalState* DEdit_EditStateDia::stateToEdit()
@@ -122,6 +125,7 @@ void DEdit_EditStateDia::applyChanges()
     }
     m_pStateToEdit->m_pData->setName(name.toAscii().data());
     m_pStateToEdit->m_pData->setFinalState(chkIsFinalState->isChecked());
+    m_pStateToEdit->m_bStartState = chkIsStartState->isChecked();
     accept();
 }
 

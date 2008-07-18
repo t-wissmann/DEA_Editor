@@ -32,11 +32,13 @@ DEdit_Widget::DEdit_Widget() :
     // init some members
     m_pDea = NULL;
     m_eMode = ModeNormal;
+    m_nGridSize = 0; // disable grid per default
     // for states
     m_pDraggedState = NULL;
     m_pHoveredState = NULL;
     m_nSelectedStateIndex = -1;
     m_bAboutToDrop = FALSE;
+    m_pStartState = NULL;
     // for transitions
     m_pHoveredTransition = NULL;
     m_pSelectedTransition = NULL;
@@ -131,7 +133,6 @@ void DEdit_Widget::removeState()
     {
         return;
     }
-    
     DEdit_GraphicalState* state = &(m_StateList[m_nSelectedStateIndex]);
     
     // remove all transitions, that use state
@@ -142,6 +143,12 @@ void DEdit_Widget::removeState()
             removeTransition(&(m_TransitionList[i]));
             i--;
         }
+    }
+    // if state was start state
+    if(m_pStartState == state)
+    {
+        m_pStartState = NULL;
+        m_pDea->setStartState(NULL);
     }
     
     // remove state in dea
@@ -268,6 +275,13 @@ bool DEdit_Widget::handleStateDrag(QMouseEvent* event)
         newX = (newX >= width()) ? width() : newX;
         newY = (newY < 0) ? 0 : newY;
         newY = (newY >= height()) ? height() : newY;
+        
+        // move to axis of grid
+        if(m_nGridSize != 0)
+        {
+            newX = newX - newX % m_nGridSize;
+            newY = newY - newY % m_nGridSize;
+        }
         
         m_pDraggedState->move(newX, newY);
         hasToRepaint = TRUE;
@@ -652,7 +666,7 @@ void DEdit_Widget::createTransition(DEdit_GraphicalState* from, DEdit_GraphicalS
     DEA_Transition* transition = m_pDea->createTransition(from->m_pData, to->m_pData, '\0');
     // init new graphical transition
     DEdit_GraphicalTransition newGTransition(from, to);
-    newGTransition.m_DataList.append(transition);
+    newGTransition.m_pData = transition;
     // add new graphical transition to list
     m_TransitionList.append(newGTransition);
     update();
@@ -708,11 +722,8 @@ void DEdit_Widget::removeTransition(DEdit_GraphicalTransition* transition)
         return;
     }
     
-    // remove ALL transitions from m_pDea 
-    for(int i = 0; i < transition->m_DataList.size(); ++i)
-    {
-        m_pDea->removeTransition(transition->m_DataList[i]);
-    }
+    // remove transition from m_pDe
+    m_pDea->removeTransition(transition->m_pData);
     m_TransitionList.removeAt(index);
 }
 
@@ -765,8 +776,28 @@ void DEdit_Widget::editSelectedState()
     {
         m_diaEditState = new DEdit_EditStateDia(this);
     }
-    m_diaEditState->setStateToEdit(&m_StateList[m_nSelectedStateIndex]);
+    DEdit_GraphicalState* state = &m_StateList[m_nSelectedStateIndex];
+    m_diaEditState->setStateToEdit(state);
     m_diaEditState->exec();
+    // if just edited state is the new start state
+    if(state->m_bStartState && (m_pStartState != state))
+    {
+        // then unselect old startstate
+        if(m_pStartState)
+        {
+            m_pStartState->m_bStartState = FALSE;
+        }
+        // then set just edited state to new start state
+        m_pStartState = state;
+        // apply changes to dea
+        m_pDea->setStartState(m_pStartState->m_pData);
+    }
+    else if(!state->m_bStartState && (m_pStartState == state))
+    {// if just edited state now don't wants to be start state anymore
+        m_pDea->setStartState(NULL);
+        m_pStartState = NULL;
+    }
+    
     update();
 }
 
@@ -813,11 +844,12 @@ DEdit_GraphicalState* DEdit_Widget::findStateByName(QString name)
 
 void DEdit_Widget::writeDeaToFile(xmlObject* file)
 {
-    if(!file)
+    if(!file || !m_pDea)
     {
         return;
     }
-    file->setName("test");
+    //file->setName("test");
+    m_pDea->writeToFile(file);
     
 }
 

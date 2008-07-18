@@ -14,6 +14,8 @@ public:
     bool initTransitionsFromTransitionList(xmlObject* transitionList);
     
     void writeToFile(xmlObject* file);
+    void writeStatesToFile(xmlObject* stateList);
+    void writeTransitionsToFile(xmlObject* transitionList);
     
     void setStateCount(unsigned int count);
     unsigned int stateCount();

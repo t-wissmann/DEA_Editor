@@ -13,7 +13,8 @@ public:
     
     int m_nX;
     int m_nY;
-    // attributs
+    bool m_bStartState;
+    // attributes
     bool isHovered;
     bool isDragged;
     bool isSelected;

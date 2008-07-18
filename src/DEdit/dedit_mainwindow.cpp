@@ -214,6 +214,7 @@ void DEdit_MainWindow::showSourceCode()
         m_diaSourceViewer = new Dia_DeaSourceViewer(this);
         m_diaSourceViewer->setDeaToView(wdgEditor);
     }
+    m_diaSourceViewer->refresh();
     m_diaSourceViewer->show();
 }
 

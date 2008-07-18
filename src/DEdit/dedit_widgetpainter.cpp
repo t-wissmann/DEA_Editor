@@ -79,7 +79,7 @@ void DEdit_WidgetPainter::paint()
             // paint line of new transition
             int stateRadius = DEdit_GraphicalState::m_nDiameter/2;
             imagePainter.setPen(m_cTransitionPen);
-            
+            imagePainter.setBrush(m_cTransitionPen.brush());
             QLineF newLine (m_pWidget->m_cNewTransitionLine);
             
             // if another item is hovered
@@ -155,22 +155,31 @@ void DEdit_WidgetPainter::paintStateLabel(QPainter* painter, DEdit_GraphicalStat
     if(!painter  || !state  || !state->m_pData){
         return;
     }
-    int radius = DEdit_GraphicalState::m_nDiameter/2;
+    int margin = DEdit_GraphicalState::m_nDiameter*0.3/2;
+    int radius = DEdit_GraphicalState::m_nDiameter/2 - margin;
     QRect labelArea(state->m_nX-radius, state->m_nY-radius,
-               DEdit_GraphicalState::m_nDiameter,
-               DEdit_GraphicalState::m_nDiameter);
+                    radius*2, radius*2);
     QString label = state->m_pData->name();
     int labelFlags = Qt::AlignVCenter | Qt::AlignHCenter | Qt::TextWrapAnywhere;
     painter->drawText(labelArea, labelFlags, label);
     
     
-    radius *= 0.7;
+    
     if(state->m_pData->isFinalState())
     {
         QRect finalStateIndicator(state->m_nX-radius, state->m_nY-radius,
                                 radius*2, radius*2);
         // now illustrate attributes
         painter->drawEllipse(finalStateIndicator);
+    }
+    if(state->m_bStartState)
+    {
+        QRect source(0, 0,
+                     m_cStartStateIndicator.width(),
+                     m_cStartStateIndicator.height());
+        QRect target(source);
+        target.moveTo(state->positionToQPoint()+m_cStartStateIndicatorPosition);
+        painter->drawPixmap(target, m_cStartStateIndicator, source);
     }
     
 }
@@ -338,13 +347,17 @@ void DEdit_WidgetPainter::recomputeTransitionLabelArea
     transition->m_cLabelArea = result;
 }
 
-void DEdit_WidgetPainter::paintTransition(QPainter* painter, QLineF line)
+void DEdit_WidgetPainter::paintTransition(QPainter* painter, QLineF line,
+                                          bool bigDotAtStart)
 {
     int penwidth = m_cTransitionPen.width();
     QPointF arrowPos = line.p2(); // arrowposition
     qreal arrowAngle = -90;
-    painter->drawEllipse(line.x1()-penwidth, line.y1()-penwidth,
+    if(bigDotAtStart)
+    {
+        painter->drawEllipse(line.x1()-penwidth, line.y1()-penwidth,
                     penwidth*2, penwidth*2);
+    }
     if(line.length() != 0)
     {
         // simply paint line,
@@ -403,11 +416,14 @@ void DEdit_WidgetPainter::recreateAllTemplates()
     recreateStateSelectedTemplate();
     // transitions
     recreateTransitionPens();
+    // start state indicator after recreateTransitionPens
+    // because recreateStartStateIndicator() needs some transition pens
+    recreateStartStateIndicator();
 }
 
 void DEdit_WidgetPainter::recreateStatePens()
 {
-    m_cStateLabelPen.setWidth(2);
+    m_cStateLabelPen.setWidth(3);
     m_cStateLabelPen.setColor(QColor(238, 238, 238));
     m_cStateLabelFont.setBold(TRUE);
 }
@@ -435,6 +451,41 @@ void DEdit_WidgetPainter::recreateStateSelectedTemplate(){
 }
 
 
+void DEdit_WidgetPainter::recreateStartStateIndicator()
+{
+    // init font
+    QFont font;
+    font.setPointSize(15);
+    font.setBold(TRUE);
+    QString text = QObject::tr("Start");
+    QFontMetrics fm(font);
+    int textmarginX = 14;
+    int textmarginY = 0;
+    int textwidth = fm.width(text) + textmarginX*2;
+    int textheight = fm.height() + textmarginY*2;
+    int lineWidth = DEdit_GraphicalTransition::m_nLineWidth;
+    int width = textwidth + lineWidth*4;
+    int height = textheight + lineWidth*4;
+    // init pixmap
+    m_cStartStateIndicator = QPixmap(width, height);
+    m_cStartStateIndicator.fill(QColor(0, 0, 0, 0));
+    m_cStartStateIndicatorPosition = QPoint
+            (-width-DEdit_GraphicalState::m_nDiameter/2+lineWidth, -textheight-lineWidth);
+    
+    QPainter painter(&m_cStartStateIndicator);
+    painter.setRenderHint(QPainter::Antialiasing);
+    painter.setPen(m_cTransitionPen);
+    QLine line(lineWidth, textheight + lineWidth,
+               width-lineWidth, textheight + lineWidth);
+    painter.setFont(font);
+    int flags = Qt::AlignHCenter | Qt::AlignBottom;
+    painter.drawText(QRect(0, 0, width,
+                     textheight + lineWidth), flags, text);
+    paintTransition(&painter, line, FALSE);
+    painter.end();
+}
+
+
 void DEdit_WidgetPainter::recreateTransitionPens()
 {
     
@@ -458,6 +509,7 @@ void DEdit_WidgetPainter::recreateTransitionPens()
     m_cTransitionLabelPen.setColor(QColor(238, 238, 238));
     m_cTransitionLabelFont.setBold(TRUE);
 }
+
 
 QPixmap DEdit_WidgetPainter::recreateStateTemplate(QColor color, int diameter, bool invertedGradient)
 {

@@ -44,6 +44,7 @@ private:
     QLabel* lblName;
     QLineEdit* txtName;
     QCheckBox* chkIsFinalState;
+    QCheckBox* chkIsStartState;
     
     // buttons on the bottom
     QDialogButtonBox* boxBottom;
@@ -53,6 +54,7 @@ private:
     // layouts
     QVBoxLayout* layoutParent;
     QHBoxLayout* layoutName;
+    
     
     
     // members

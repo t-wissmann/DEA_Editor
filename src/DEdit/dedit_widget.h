@@ -125,6 +125,7 @@ private:
     QList<DEdit_GraphicalState> m_StateList;
     DEdit_GraphicalState*       m_pDraggedState;
     DEdit_GraphicalState*       m_pHoveredState;
+    DEdit_GraphicalState*       m_pStartState;
     int                         m_nSelectedStateIndex;
     QPoint                      m_cDropPreviewPosition;
     bool                        m_bAboutToDrop;
@@ -137,6 +138,9 @@ private:
     QLine                       m_cNewTransitionLine;
     DEdit_GraphicalTransition*  m_pHoveredTransition;
     DEdit_GraphicalTransition*  m_pSelectedTransition;
+    
+    // some properties
+    int             m_nGridSize;
     
     // context menu
     QMenu*          m_mnuContextMenu;
