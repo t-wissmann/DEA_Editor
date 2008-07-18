@@ -3,6 +3,7 @@
 #include "dedit_widget.h"
 #include "dedit_graphicalstate.h"
 #include "dedit_graphicaltransition.h"
+#include <DEA/dea_state.h>
 #include <io/debug_msg.h>
 #include <math.h>
 
@@ -13,6 +14,7 @@
 #include <QRadialGradient>
 #include <QPen>
 #include <QPainterPath>
+#include <QFontMetrics>
 
 DEdit_WidgetPainter::DEdit_WidgetPainter(DEdit_Widget* widget)
 {
@@ -45,6 +47,7 @@ void DEdit_WidgetPainter::paint()
         // paint transitions
         QList<DEdit_GraphicalTransition>* transitionList = &m_pWidget->m_TransitionList;
         //imagePainter.setPen(m_cTransitionPen);
+        
         for(int i = 0; i < transitionList->size(); ++i)
         {
             if(&(*transitionList)[i] == m_pWidget->m_pHoveredTransition)
@@ -53,6 +56,7 @@ void DEdit_WidgetPainter::paint()
                 // it will be painted at last
                 continue;
             }
+            recomputeTransitionLabelArea(&(*transitionList)[i]);
             paintTransition(&imagePainter, &(*transitionList)[i]);
         }
         // paint selected transition
@@ -63,6 +67,8 @@ void DEdit_WidgetPainter::paint()
         QList<DEdit_GraphicalState>* stateList = &m_pWidget->m_StateList;
         // init pen
         imagePainter.setPen(Qt::NoPen);
+        imagePainter.setBrush(Qt::NoBrush);
+        imagePainter.setFont(m_cStateLabelFont);
         for(int i = 0; i < stateList->size(); ++i)
         {
             paintState(&imagePainter, &(*stateList)[i]);
@@ -86,9 +92,19 @@ void DEdit_WidgetPainter::paint()
             imagePainter.setPen(m_cTransitionPen);
             paintTransition(&imagePainter, newLine);
         }
+        if(m_pWidget->m_bAboutToDrop) // if there is an state, that will be dropped so
+        {
+            int width = m_cStateDraggedTemplate.width();
+            QRectF source(0, 0, width, width);
+            QRectF target(m_pWidget->m_cDropPreviewPosition.x()-width/2,
+                        m_pWidget->m_cDropPreviewPosition.y()-width/2, width, width);
+            imagePainter.drawPixmap(target, m_cStateNormalTemplate, source);
+        }
         
         imagePainter.end();
     }
+    
+    
     // paint to widget
     {
         QPainter widgetpainter(m_pWidget);
@@ -102,6 +118,9 @@ void DEdit_WidgetPainter::paintState(QPainter* painter, DEdit_GraphicalState* st
     if(!painter  || !state){
         return;
     }
+    
+    painter->setPen(Qt::NoPen);
+    
     int width = m_cStateNormalTemplate.width();
     QRectF source(0, 0, width, width);
     QRectF target(state->m_nX-width/2, state->m_nY-width/2, width, width);
@@ -123,6 +142,37 @@ void DEdit_WidgetPainter::paintState(QPainter* painter, DEdit_GraphicalState* st
     {
         painter->drawPixmap(target, m_cStateHoveredTemplate, source);
     }
+    
+    
+    // draw label
+    painter->setPen(m_cStateLabelPen);
+    paintStateLabel(painter, state);
+}
+
+
+void DEdit_WidgetPainter::paintStateLabel(QPainter* painter, DEdit_GraphicalState* state)
+{
+    if(!painter  || !state  || !state->m_pData){
+        return;
+    }
+    int radius = DEdit_GraphicalState::m_nDiameter/2;
+    QRect labelArea(state->m_nX-radius, state->m_nY-radius,
+               DEdit_GraphicalState::m_nDiameter,
+               DEdit_GraphicalState::m_nDiameter);
+    QString label = state->m_pData->name();
+    int labelFlags = Qt::AlignVCenter | Qt::AlignHCenter | Qt::TextWrapAnywhere;
+    painter->drawText(labelArea, labelFlags, label);
+    
+    
+    radius *= 0.7;
+    if(state->m_pData->isFinalState())
+    {
+        QRect finalStateIndicator(state->m_nX-radius, state->m_nY-radius,
+                                radius*2, radius*2);
+        // now illustrate attributes
+        painter->drawEllipse(finalStateIndicator);
+    }
+    
 }
 
 
@@ -161,12 +211,34 @@ void DEdit_WidgetPainter::paintTransition
     {
         line.setLength(line.length() - DEdit_GraphicalState::m_nDiameter/2);
     }
-    // paint to painter
+    // paint line and label background to painter
     paintTransition(painter, line);
+    QRect lblArea = transition->m_cLabelArea;
+    if(lblArea.isValid())
+    {
+        painter->setBrush(painter->pen().brush());
+        painter->drawRect(lblArea);
+    }
+    
+    // paint label
+    painter->setPen(m_cTransitionLabelPen);
+    painter->setFont(m_cTransitionLabelFont);
+    paintTransitionLabel(painter, transition);
+    
     
     // paint to alpha mask
     int alphaMaskWidth = abs(line.dx())*2+lineWidth*3;
     int alphaMaskHeight = abs(line.dy())*2+lineWidth*3;
+    // ensure, that label is within alpha mask
+    if(alphaMaskWidth < transition->m_cLabelArea.width())
+    {
+        alphaMaskWidth = transition->m_cLabelArea.width();
+    }
+    if(alphaMaskHeight < transition->m_cLabelArea.height())
+    {
+        alphaMaskHeight = transition->m_cLabelArea.height();
+    }
+    
     if(line.length() == 0)
     {
         alphaMaskWidth = DEdit_GraphicalState::m_nDiameter + DEdit_GraphicalTransition::m_nWithItselfTransitionRadius * 2 +
@@ -185,10 +257,15 @@ void DEdit_WidgetPainter::paintTransition
     int offsetX = alphaMask.width()/2;
     int offsetY = alphaMask.height()/2;
     
+    
+    // paint line and label background to alpha
+    int dx = offsetX - line.x1();
+    int dy = offsetY -line.y1();
+    alphaPainter.drawRect(transition->m_cLabelArea.adjusted(dx, dy, dx, dy));
     line = QLineF(offsetX, offsetY, offsetX+line.dx(),
                   offsetY+line.dy());
-    
     paintTransition(&alphaPainter, line);
+    
     alphaPainter.end();
     {
         /// very useful to understand code above
@@ -196,6 +273,69 @@ void DEdit_WidgetPainter::paintTransition
     }
     transition->m_cAlphaMask = alphaMask;
     
+}
+
+
+void DEdit_WidgetPainter::paintTransitionLabel
+        (QPainter* painter, DEdit_GraphicalTransition* transition)
+{
+    if(!painter || !transition || !transition->hasValidPointers())
+    {
+        return;
+    }
+    if(transition->m_szSymbols.isEmpty())
+    {
+        // nothing to do if label would be empty
+        return;
+    }
+    QString label = transition->m_szSymbols;
+    int flags = Qt::AlignVCenter | Qt::AlignHCenter;
+    painter->drawText(transition->m_cLabelArea, flags, label);
+}
+
+
+void DEdit_WidgetPainter::recomputeTransitionLabelArea
+        (DEdit_GraphicalTransition* transition)
+{
+    if(!transition)
+    {
+        return;
+    }
+    QRect result;
+    if(transition->m_szSymbols.isEmpty())
+    {
+        result.setRect(0, 0, 0, 0);
+    }else
+    {
+        int margin = m_cTransitionPen.width()/2;
+        QFontMetrics fm(m_cTransitionLabelFont);
+        result.setWidth(fm.width(transition->m_szSymbols) + 2*margin);
+        result.setHeight(fm.height() + margin);
+        QPoint lblPos = (transition->m_pStart->positionToQPoint()*0.55 + 
+                transition->m_pEnd->positionToQPoint()*0.45);
+        if(transition->m_pStart->positionToQPoint()
+           != transition->m_pEnd->positionToQPoint())
+        {
+            result.moveCenter(lblPos);
+        }
+        else
+        {
+            int radius = DEdit_GraphicalState::m_nDiameter/2 + 
+                    DEdit_GraphicalTransition::m_nWithItselfTransitionRadius;
+            
+            /*
+            calculation of HALF_SQRT_OF_2plus1
+            HALF_SQRT_OF_2plus1 = 1 + sqrt(2) / 2;
+            1 : move to center of big circle
+            sqrt(2)/2 : move to line of circle ( sqrt(2)/2 = sin(45°))
+            */
+#define HALF_SQRT_OF_2plus1 1.70710
+            int delta = (HALF_SQRT_OF_2plus1 * radius);
+            result.moveCenter(lblPos + QPoint(delta, -delta));
+#undef HALF_SQRT_OF_2plus1 // undef, because only needed for int delta
+        }
+    }
+    transition->m_cLabelArea = result;
 }
 
 void DEdit_WidgetPainter::paintTransition(QPainter* painter, QLineF line)
@@ -255,11 +395,21 @@ void DEdit_WidgetPainter::paintTransition(QPainter* painter, QLineF line)
 
 void DEdit_WidgetPainter::recreateAllTemplates()
 {
+    // states
+    recreateStatePens();
     recreateStateNormalTemplate();
     recreateStateHoveredTemplate();
     recreateStateDraggedTemplate();
     recreateStateSelectedTemplate();
+    // transitions
     recreateTransitionPens();
+}
+
+void DEdit_WidgetPainter::recreateStatePens()
+{
+    m_cStateLabelPen.setWidth(2);
+    m_cStateLabelPen.setColor(QColor(238, 238, 238));
+    m_cStateLabelFont.setBold(TRUE);
 }
 
 void DEdit_WidgetPainter::recreateStateNormalTemplate()
@@ -288,15 +438,25 @@ void DEdit_WidgetPainter::recreateStateSelectedTemplate(){
 void DEdit_WidgetPainter::recreateTransitionPens()
 {
     
+    m_cTransitionPen.setCapStyle(Qt::RoundCap);
+    m_cTransitionPen.setJoinStyle(Qt::RoundJoin);
     m_cTransitionPen.setWidth(DEdit_GraphicalTransition::m_nLineWidth);
     m_cTransitionPen.setCapStyle(Qt::RoundCap);
     m_cTransitionPen.setColor(QColor(0, 0, 0));
+    m_cTransitionPenHovered.setCapStyle(Qt::RoundCap);
+    m_cTransitionPenHovered.setJoinStyle(Qt::RoundJoin);
     m_cTransitionPenHovered.setWidth(DEdit_GraphicalTransition::m_nLineWidth);
     m_cTransitionPenHovered.setCapStyle(Qt::RoundCap);
-    m_cTransitionPenHovered.setColor(QColor(66, 90, 130));
+    m_cTransitionPenHovered.setColor(QColor(204, 0, 0));
+    m_cTransitionPenSelected.setCapStyle(Qt::RoundCap);
+    m_cTransitionPenSelected.setJoinStyle(Qt::RoundJoin);
     m_cTransitionPenSelected.setWidth(DEdit_GraphicalTransition::m_nLineWidth);
     m_cTransitionPenSelected.setCapStyle(Qt::RoundCap);
-    m_cTransitionPenSelected.setColor(QColor(111, 67, 117));
+    m_cTransitionPenSelected.setColor(QColor(239, 41, 41));
+    
+    // for label
+    m_cTransitionLabelPen.setColor(QColor(238, 238, 238));
+    m_cTransitionLabelFont.setBold(TRUE);
 }
 
 QPixmap DEdit_WidgetPainter::recreateStateTemplate(QColor color, int diameter, bool invertedGradient)

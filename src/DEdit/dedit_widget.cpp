@@ -4,15 +4,26 @@
 #include <DEA/dea_state.h>
 #include <DEA/dea_transition.h>
 #include <io/debug_msg.h>
+#include <io/xmlparser.h>
+
+// dialogs
+#include <DEdit/dedit_editstatedia.h>
+#include <DEdit/dedit_edittransitiondia.h>
 
 // qt classes
 #include <QSizePolicy>
 #include <QCursor>
+// widgets
+#include <QMenu>
+#include <QAction>
+
 // events
 #include <QMouseEvent>
 #include <QKeyEvent>
 #include <QDragEnterEvent>
 #include <QDropEvent>
+#include <QDragMoveEvent>
+#include <QContextMenuEvent>
 
 DEdit_Widget::DEdit_Widget() :
   QWidget(),
@@ -25,9 +36,14 @@ DEdit_Widget::DEdit_Widget() :
     m_pDraggedState = NULL;
     m_pHoveredState = NULL;
     m_nSelectedStateIndex = -1;
+    m_bAboutToDrop = FALSE;
     // for transitions
     m_pHoveredTransition = NULL;
     m_pSelectedTransition = NULL;
+    
+    // init dialogs
+    m_diaEditState = NULL;
+    m_diaEditTransition = NULL;
     
     // set size policy, so that this is the biggest widget in the window
     setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding));
@@ -36,8 +52,13 @@ DEdit_Widget::DEdit_Widget() :
     
     // activate mouse tracking to activate hover effect
     setMouseTracking(TRUE);
+    // activate focus to activate keyPressEvent
+    setFocusPolicy(Qt::ClickFocus);
     // activate drops
     setAcceptDrops(TRUE);
+    // activate context menu
+    setContextMenuPolicy(Qt::DefaultContextMenu);
+    createContextMenu();
 }
 
 DEdit_Widget::~DEdit_Widget(){
@@ -45,6 +66,17 @@ DEdit_Widget::~DEdit_Widget(){
 }
 
 
+
+void DEdit_Widget::createContextMenu()
+{
+    m_mnuContextMenu = new QMenu(this);
+    m_mnaRemoveItem = m_mnuContextMenu->addAction("Remove");
+    m_mnaEditItem   = m_mnuContextMenu->addAction("Edit");
+    // connect slots
+    
+    connect(m_mnaRemoveItem, SIGNAL(triggered()), this, SLOT(removeSelectedItem()));
+    connect(m_mnaEditItem, SIGNAL(triggered()), this, SLOT(editItem()));
+}
 
 
 void DEdit_Widget::setDea(DEA* pDea)
@@ -73,7 +105,12 @@ void DEdit_Widget::addState(QPoint atPosition)
         return;
     }
     setCurrentMode(ModeNormal);
-    DEA_State* newState = m_pDea->addState("New State");
+    QString stateName = QString::number(m_StateList.size()+1);
+    int number = 0;
+    // find first free name
+    while(findStateByName(QString::number(++number)));
+    
+    DEA_State* newState = m_pDea->addState(QString::number(number).toAscii().data());
     DEdit_GraphicalState graphicalState(newState);
     graphicalState.move(atPosition.x(), atPosition.y());
     m_StateList.append(graphicalState);
@@ -123,6 +160,11 @@ void DEdit_Widget::addTransition()
     if(!m_pDea)
     {
         DEBUG_MSG("addTransition()", "m_pDea = 0");
+        return;
+    }
+    if(m_eMode == ModeAddTransitionSelectFrom)
+    {
+        // nothing to do ;D
         return;
     }
     if(m_eMode != ModeNormal)
@@ -275,6 +317,7 @@ bool DEdit_Widget::handleStateDrag(QMouseEvent* event)
 
 void DEdit_Widget::mousePressEvent(QMouseEvent* event)
 {
+    
     if(!event)
     {
         return;
@@ -296,12 +339,16 @@ void DEdit_Widget::mousePressEvent(QMouseEvent* event)
             if(m_eMode == ModeNormal)
             {
                 // only start drag if there is currently normal mode
-                currentState->isDragged = TRUE;
-                currentState->m_nDragOffsetX = event->pos().x() - currentState->m_nX;
-                currentState->m_nDragOffsetY = event->pos().y() - currentState->m_nY;
-                // item was found, we don't need to search anymore
-                m_pDraggedState = currentState;
-                setCurrentMode(ModeDragState);
+                // and only if left mousebutton is pressed
+                if(event->button() == Qt::LeftButton)
+                {
+                    currentState->isDragged = TRUE;
+                    currentState->m_nDragOffsetX = event->pos().x() - currentState->m_nX;
+                    currentState->m_nDragOffsetY = event->pos().y() - currentState->m_nY;
+                    // item was found, we don't need to search anymore
+                    m_pDraggedState = currentState;
+                    setCurrentMode(ModeDragState);
+                }
             }
             if(m_eMode == ModeAddTransitionSelectFrom)
             {
@@ -393,6 +440,11 @@ void DEdit_Widget::mouseReleaseEvent(QMouseEvent*)
     }
 }
 
+void DEdit_Widget::mouseDoubleClickEvent(QMouseEvent*)
+{
+    editItem();
+}
+
 
 bool DEdit_Widget::isInDragMode() const
 {
@@ -405,7 +457,15 @@ void DEdit_Widget::keyPressEvent(QKeyEvent* event)
     {
         return;
     }
-    event->ignore();
+    if(event->key() == Qt::Key_Delete) // if del gets pressed
+    {
+        // then remove currently selected item
+        removeSelectedItem();
+    }
+    else
+    {
+        event->ignore();
+    }
 }
 
 void DEdit_Widget::keyReleaseEvent(QKeyEvent* event)
@@ -423,6 +483,11 @@ void DEdit_Widget::dragEnterEvent(QDragEnterEvent* event)
     if(event->mimeData()->hasFormat(dndMimeFormat()))
     {
         event->acceptProposedAction();
+#ifdef Q_WS_WIN
+        // only needed for drag'n'drop pixmap
+        // replacement
+        m_bAboutToDrop = TRUE;
+#endif
     }
 }
 QString DEdit_Widget::dndMimeFormat() const
@@ -442,7 +507,29 @@ void DEdit_Widget::dropEvent(QDropEvent* event)
     {
         addState(event->pos());
     }
+    m_bAboutToDrop = FALSE;
 }
+
+
+void DEdit_Widget::dragMoveEvent (QDragMoveEvent* event )
+{
+    m_cDropPreviewPosition = event->pos();
+    if(m_bAboutToDrop)
+    {
+        update();
+    }
+}
+
+void DEdit_Widget::contextMenuEvent(QContextMenuEvent* event)
+{
+    // only show context menu
+    // if an item is selected
+    if(m_pSelectedTransition || (m_nSelectedStateIndex >= 0))
+    {
+        m_mnuContextMenu->exec(event->globalPos());
+    }
+}
+
 
 void DEdit_Widget::moveSelectionUp()
 {
@@ -542,6 +629,8 @@ void DEdit_Widget::setCurrentMode(EMode mode)
         }
     }
     setCursor(newCursor);
+    
+    emit currentModeChanged(m_eMode);
 }
 
 
@@ -630,13 +719,106 @@ void DEdit_Widget::removeTransition(DEdit_GraphicalTransition* transition)
 
 
 
-
-
 QPixmap DEdit_Widget::stateTemplatePixmap() const
 {
     return m_cWidgetPainter.m_cStateNormalTemplate;
 }
 
+void DEdit_Widget::removeSelectedItem()
+{
+    if(m_pSelectedTransition)
+    {
+        removeTransition();
+    }
+    else
+    {
+        removeState();
+    }
+}
 
+
+void DEdit_Widget::editItem()
+{
+    if(m_pSelectedTransition)
+    {
+        editSelectedTransition();
+    }
+    else if(m_nSelectedStateIndex >= 0)
+    {
+        editSelectedState();
+    }
+}
+
+
+void DEdit_Widget::editSelectedState()
+{
+    if(!m_pDea)
+    {
+        DEBUG_MSG("editSelectedState()", "m_pDea = 0");
+        return;
+    }
+    if(m_nSelectedStateIndex < 0 || m_nSelectedStateIndex > m_StateList.size()){
+        // no item selected
+        return;
+    }
+    if(!m_diaEditState)
+    {
+        m_diaEditState = new DEdit_EditStateDia(this);
+    }
+    m_diaEditState->setStateToEdit(&m_StateList[m_nSelectedStateIndex]);
+    m_diaEditState->exec();
+    update();
+}
+
+void DEdit_Widget::editSelectedTransition()
+{
+    if(!m_pDea)
+    {
+        DEBUG_MSG("editSelectedTransition()", "m_pDea = 0");
+        return;
+    }
+    
+    if(!m_pSelectedTransition)
+    {
+        // no transition selected
+        return;
+    }
+    if(!m_diaEditTransition)
+    {
+        m_diaEditTransition = new DEdit_EditTransitionDia(this);
+    }
+    m_diaEditTransition->setTransitionToEdit(m_pSelectedTransition);
+    m_diaEditTransition->exec();
+    update();
+}
+
+
+DEdit_GraphicalState* DEdit_Widget::findStateByName(QString name)
+{
+    DEdit_GraphicalState* result = NULL;
+    DEdit_GraphicalState* currentItem;
+    for(int i = 0; i < m_StateList.size(); ++i)
+    {
+        currentItem = & m_StateList[i];
+        if(currentItem->m_pData
+           && name == currentItem->m_pData->name())
+        {
+            result = currentItem;
+            break;
+        }
+    }
+    return result;
+}
+
+
+void DEdit_Widget::writeDeaToFile(xmlObject* file)
+{
+    if(!file)
+    {
+        return;
+    }
+    file->setName("test");
+    
+}
 
 

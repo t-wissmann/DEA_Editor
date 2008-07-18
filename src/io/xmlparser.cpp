@@ -27,7 +27,7 @@
 
 #include <QtCore>
 
-int nLayer; //nLayer shows the depth of the current object
+int nLayer = 0; //nLayer shows the depth of the current object
 
 int xmlAttribute::nValueToInt()
 {

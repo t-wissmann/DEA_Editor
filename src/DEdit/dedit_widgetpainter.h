@@ -10,6 +10,7 @@ class DEdit_GraphicalTransition;
 class QPainter;
 #include <QPixmap>
 #include <QPen>
+#include <QFont>
 
 
 class DEdit_WidgetPainter
@@ -22,6 +23,7 @@ public:
     
     void paint();
     void paintState(QPainter* painter, DEdit_GraphicalState* state);
+    void paintStateLabel(QPainter* painter, DEdit_GraphicalState* state);
     
     // create templates
     void recreateAllTemplates();
@@ -30,9 +32,12 @@ public:
     void recreateStateDraggedTemplate();
     void recreateStateSelectedTemplate();
     void recreateTransitionPens();
+    void recreateStatePens();
     
     void paintTransition(QPainter* painter, DEdit_GraphicalTransition* transition);
     void paintTransition(QPainter* painter, QLineF line);
+    void paintTransitionLabel(QPainter* painter, DEdit_GraphicalTransition* transition);
+    void recomputeTransitionLabelArea(DEdit_GraphicalTransition* transition);
     static QPixmap recreateStateTemplate(QColor color, int diameter, bool invertedGradient = FALSE);
     
     // general paint functions
@@ -47,9 +52,13 @@ private:
     QPixmap  m_cStateHoveredTemplate;
     QPixmap  m_cStateDraggedTemplate;
     QPixmap  m_cStateSelectedTemplate;
+    QPen     m_cStateLabelPen;
+    QFont    m_cStateLabelFont;
     QPen     m_cTransitionPen;
     QPen     m_cTransitionPenHovered;
     QPen     m_cTransitionPenSelected;
+    QPen     m_cTransitionLabelPen;
+    QFont    m_cTransitionLabelFont;
 };
 
 #endif

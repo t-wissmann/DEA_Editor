@@ -81,3 +81,18 @@ bool DEdit_GraphicalTransition::isConnectedWith(DEdit_GraphicalState* state) con
     return (m_pStart == state) || (m_pEnd == state);
 }
 
+
+void DEdit_GraphicalTransition::applySymbolsToDEA_Transitions()
+{
+    if(m_DataList.size() <= 0)
+    {
+        return;
+    }
+    char symb = '\0';
+    if(m_szSymbols.size() > 0)
+    {
+        symb = m_szSymbols.at(0).toAscii();
+    }
+    m_DataList.first()->setInputSymbol(symb);
+}
+

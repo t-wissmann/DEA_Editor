@@ -7,6 +7,7 @@ class DEA_Transition;
 #include <QPoint>
 #include <QImage>
 #include <QString>
+#include <QRect>
 
 class DEdit_GraphicalTransition{
 public:
@@ -21,7 +22,7 @@ public:
     QString m_szSymbols;
     QList<DEA_Transition*>  m_DataList;
     QImage  m_cAlphaMask;
-    
+    QRect   m_cLabelArea;
     
     // attributes
     bool m_bHovered;
@@ -32,6 +33,8 @@ public:
     bool isPointContained(QPoint pointToCheck);
     double distanceTo(QPoint point) const;
     bool isConnectedWith(DEdit_GraphicalState* state) const;
+    void applySymbolsToDEA_Transitions();
+    
     
     // static attributes
     static int m_nLineWidth;

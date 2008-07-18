@@ -473,3 +473,13 @@ int DEA::indexOf(DEA_Transition* transition)
 }
 
 
+void DEA::writeToFile(xmlObject* file)
+{
+    if(!file)
+    {
+        return;
+    }
+    file->setName("automat");
+}
+
+

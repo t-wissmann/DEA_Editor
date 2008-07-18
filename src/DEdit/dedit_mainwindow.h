@@ -5,12 +5,20 @@
 
 #include <DEA/dea.h>
 
-
+// dialogs
+class Dia_DeaSourceViewer;
 
 // widgets
-class DEdit_Widget;
+#include<DEdit/dedit_widget.h>
 class QPushButton;
 class CommandButtonDND;
+class QStatusBar;
+class QDockWidget;
+
+// menus
+class QMenuBar;
+class QMenu;
+class QAction;
 
 // layouts
 class QHBoxLayout;
@@ -24,11 +32,15 @@ public:
     virtual ~DEdit_MainWindow();
     
     void retranslateUi();
-    
+public slots:
+    void resetStatusBarText(DEdit_Widget::EMode mode);
+    void showSourceCode();
 private:
     void initMembers();
     void allocateWidgets();
     void createLayouts();
+    void createActions();
+    void createMenuBar();
     void connectSlots();
     void initWidgets();
     
@@ -37,14 +49,33 @@ private:
     // tool buttons
     CommandButtonDND* btnAddState;
     QPushButton* btnAddTransition;
-    QPushButton* btnRemoveState;
-    QPushButton* btnRemoveTransition;
+    QPushButton* btnRemoveItem;
+    QPushButton* btnEditItem;
     QPushButton* btnMoveUp;
     QPushButton* btnMoveDown;
+    
+    // dock widgets
+    QDockWidget* dockToolButtons;
+    
+    // actions
+    // mnuFile
+    QAction*     mnaQuit;
+    // mnuView
+    QAction*     mnaShowToolButtonsDock;
+    QAction*     mnaShowSourceCode;
+    // mnuSettings
+    QAction*     mnaShowStatusBar;
+    // menus in menubar
+    QMenu*       mnuFile;
+    QMenu*       mnuView;
+    QMenu*       mnuSettings;
     
     // layouts
     QVBoxLayout* layoutToolButtons;
     QHBoxLayout* layoutParent;
+    
+    // dialogs
+    Dia_DeaSourceViewer* m_diaSourceViewer;
     
     // members
     DEA m_cDea;

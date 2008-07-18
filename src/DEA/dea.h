@@ -13,6 +13,8 @@ public:
     bool initStatesFromStateList(xmlObject* stateList);
     bool initTransitionsFromTransitionList(xmlObject* transitionList);
     
+    void writeToFile(xmlObject* file);
+    
     void setStateCount(unsigned int count);
     unsigned int stateCount();
     

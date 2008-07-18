@@ -12,26 +12,44 @@ CONFIG += qt warn_on #Debugging-Informationen und Warnungen werden ausgegeben
 INCLUDEPATH += . src
 
 # Input
-HEADERS += src/DEA/dea.h \
+HEADERS += \ # DEA
+           src/DEA/dea.h \
            src/DEA/dea_state.h \
            src/DEA/dea_transition.h \
+           \ # file - io
            src/io/xmlparser.h \
            src/io/xmlencoder.h \
            src/io/xmlloader.h \
-           src/widgets/commandbuttondnd.h \
+           \ # widgets
+           src/widgets/commandbuttondnd.h \ 
+           \ # general dialogs
+           src/dialogs/dia_deasourceviewer.h \
+           \ # dialogs for editor
+           src/DEdit/dedit_editstatedia.h \
+           src/DEdit/dedit_edittransitiondia.h \
+           \ # Main Editor
            src/DEdit/dedit_mainwindow.h \
            src/DEdit/dedit_widget.h \
            src/DEdit/dedit_graphicalstate.h \
            src/DEdit/dedit_graphicaltransition.h \
            src/DEdit/dedit_widgetpainter.h
 SOURCES += src/main.cpp \
+           \ # DEA
            src/DEA/dea.cpp \
            src/DEA/dea_state.cpp \
            src/DEA/dea_transition.cpp \
+           \ # file - io
            src/io/xmlparser.cpp \
            src/io/xmlencoder.cpp \
            src/io/xmlloader.cpp \
+           \ # widgets
            src/widgets/commandbuttondnd.cpp \ 
+           \ # general dialogs
+           src/dialogs/dia_deasourceviewer.cpp \
+           \ # dialogs for editor
+           src/DEdit/dedit_editstatedia.cpp \
+           src/DEdit/dedit_edittransitiondia.cpp \
+           \ # Main Editor
            src/DEdit/dedit_mainwindow.cpp \
            src/DEdit/dedit_widget.cpp \
            src/DEdit/dedit_graphicalstate.cpp \
