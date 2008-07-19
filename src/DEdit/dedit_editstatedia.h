@@ -30,7 +30,7 @@ public:
     DEdit_GraphicalState* stateToEdit();
     
     void retranslateUi();
-    
+    void reloadIcons();
 public slots:
     void applyChanges();
     

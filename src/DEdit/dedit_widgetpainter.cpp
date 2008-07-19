@@ -454,34 +454,66 @@ void DEdit_WidgetPainter::recreateStateSelectedTemplate(){
 void DEdit_WidgetPainter::recreateStartStateIndicator()
 {
     // init font
-    QFont font;
-    font.setPointSize(15);
-    font.setBold(TRUE);
+    QFont font = m_cTransitionLabelFont;
     QString text = QObject::tr("Start");
     QFontMetrics fm(font);
-    int textmarginX = 14;
-    int textmarginY = 0;
-    int textwidth = fm.width(text) + textmarginX*2;
-    int textheight = fm.height() + textmarginY*2;
+    int textmarginX = m_cTransitionPen.width();
+    int textmarginY = m_cTransitionPen.width()/2;
+    int arrowspace = 15; // in px
+    int textwidth = fm.width(text) + textmarginX;
+    int textheight = fm.height() + textmarginY;
     int lineWidth = DEdit_GraphicalTransition::m_nLineWidth;
-    int width = textwidth + lineWidth*4;
+    int width = textwidth + lineWidth*4+arrowspace;
     int height = textheight + lineWidth*4;
+    QRect labelBackground(lineWidth, lineWidth*2, textwidth, textheight);
     // init pixmap
     m_cStartStateIndicator = QPixmap(width, height);
     m_cStartStateIndicator.fill(QColor(0, 0, 0, 0));
     m_cStartStateIndicatorPosition = QPoint
-            (-width-DEdit_GraphicalState::m_nDiameter/2+lineWidth, -textheight-lineWidth);
+            (-width-DEdit_GraphicalState::m_nDiameter/2+lineWidth, -height/2);
     
     QPainter painter(&m_cStartStateIndicator);
-    painter.setRenderHint(QPainter::Antialiasing);
-    painter.setPen(m_cTransitionPen);
-    QLine line(lineWidth, textheight + lineWidth,
-               width-lineWidth, textheight + lineWidth);
     painter.setFont(font);
-    int flags = Qt::AlignHCenter | Qt::AlignBottom;
-    painter.drawText(QRect(0, 0, width,
-                     textheight + lineWidth), flags, text);
-    paintTransition(&painter, line, FALSE);
+    painter.setPen(m_cTransitionPen);
+    painter.setBrush(m_cTransitionPen.brush());
+    painter.setRenderHint(QPainter::Antialiasing);
+    QLine line(lineWidth*2, height/2,
+               width-lineWidth, height/2);
+    int arrowheight = m_cTransitionPen.width();
+   // draw label background
+    painter.drawRect(labelBackground); 
+    
+    // draw arrow
+    painter.drawLine(line);
+    QLine arrowLine(line.p2(), line.p2()-QPoint(arrowheight*2,arrowheight));
+    painter.drawLine(arrowLine);
+    arrowLine = QLine(arrowLine.p1(), arrowLine.p2()+QPoint(0, arrowheight*2));
+    painter.drawLine(arrowLine);
+    
+    // draw text
+    painter.setBrush(Qt::NoBrush);
+    painter.setPen(m_cTransitionLabelPen);
+    int flags = Qt::AlignHCenter | Qt::AlignVCenter;
+    painter.drawText(labelBackground, flags, text);
+    
+    // draw alpha mask
+    {
+        m_cStartStateIndicatorAlphaMask = QImage(width, height, QImage::Format_Mono);
+        QPainter alphaPainter(&m_cStartStateIndicatorAlphaMask);
+        QPen alphaPen(m_cTransitionPen);
+        alphaPen.setColor(QColor(255, 255, 255));
+        alphaPainter.setPen(alphaPen);
+        alphaPainter.fillRect(m_cStartStateIndicatorAlphaMask.rect(),
+                              QBrush(QColor(0, 0, 0)));
+        alphaPainter.drawLine(line);
+        alphaPainter.drawLine(arrowLine);
+        arrowLine = QLine(arrowLine.p1(), arrowLine.p2()-QPoint(0, arrowheight*2));
+        alphaPainter.drawLine(arrowLine);
+        alphaPainter.drawRect(labelBackground);
+        alphaPainter.end();
+        /// only for debug
+        //m_cStartStateIndicatorAlphaMask.save("/home/thorsten/alphamask.png");
+    }
     painter.end();
 }
 

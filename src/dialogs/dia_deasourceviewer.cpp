@@ -1,6 +1,7 @@
 
 #include "dia_deasourceviewer.h"
 #include <io/xmlparser.h>
+#include <io/iconcatcher.h>
 #include <DEdit/dedit_widget.h>
 
 #include <QPushButton>
@@ -18,6 +19,7 @@ Dia_DeaSourceViewer::Dia_DeaSourceViewer(QWidget* parent)
     setAttribute(Qt::WA_QuitOnClose, FALSE);
     createGui();
     retranslateUi();
+    reloadIcons();
     resize(600, 360);
 }
 
@@ -31,6 +33,7 @@ void Dia_DeaSourceViewer::createGui()
 {
     // allocate widgets
     btnRefresh = new QPushButton;
+    btnClose = new QPushButton;
     txtSource = new QTextEdit;
     txtSource->setReadOnly(TRUE);
     txtSource->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
@@ -41,22 +44,32 @@ void Dia_DeaSourceViewer::createGui()
     layoutToolButtons->setMargin(0);
     layoutToolButtons->addWidget(btnRefresh);
     layoutToolButtons->addStretch();
+    layoutToolButtons->addWidget(btnClose);
     
     layoutParent = new QVBoxLayout;
     layoutParent->setMargin(2);
-    layoutParent->addLayout(layoutToolButtons);
     layoutParent->addWidget(txtSource);
+    layoutParent->addLayout(layoutToolButtons);
     setLayout(layoutParent);
     
     // connect slots
     connect(btnRefresh, SIGNAL(clicked()), this, SLOT(refresh()));
+    connect(btnClose, SIGNAL(clicked()), this, SLOT(close()));
 }
 
 
 void Dia_DeaSourceViewer::retranslateUi()
 {
     btnRefresh->setText(tr("Refresh"));
+    btnClose->setText(tr("Close"));
     setWindowTitle(tr("DEA - Source Code"));
+}
+
+
+void Dia_DeaSourceViewer::reloadIcons()
+{
+    btnRefresh->setIcon(IconCatcher::getIcon("reload"));
+    btnClose->setIcon(IconCatcher::getIcon("fileclose"));
 }
 
 void Dia_DeaSourceViewer::refresh()

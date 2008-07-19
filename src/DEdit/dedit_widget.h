@@ -49,6 +49,7 @@ public:
 
 signals:
     void currentModeChanged(DEdit_Widget::EMode);
+    void selectedStateIndexChanged(int index);
 public:
     friend class DEdit_WidgetPainter; // needed to paint all items
     DEdit_Widget();
@@ -74,7 +75,21 @@ public:
     DEdit_GraphicalState* findStateByName(QString name);
     
     // write and read functions
+    bool createDeaFromFile(xmlObject* file);
+    bool createGraphicalStatesFromFile(xmlObject* stateList);
+    bool createGraphicalTransitionsFromFile(xmlObject* transitionList);
+    QString lastSyntaxError();
     void writeDeaToFile(xmlObject* file);
+    void writeGraphicalStatesToFile(xmlObject* stateList);
+    
+    void retranslateUi();
+    void reloadIcons();
+    
+    
+    // some options
+    void setGridResolution(int resolution);
+    int gridResolution() const;
+    
     
 public slots:
     void addState();
@@ -88,6 +103,10 @@ public slots:
     void editSelectedTransition();
     void moveSelectionUp();
     void moveSelectionDown();
+    void setSelectedState_FinalState(bool finalState);
+    void setSelectedState_StartState(bool startState);
+    void updateStateContextMenu();
+    void clearCompleteDEA();
 protected:
     virtual void paintEvent(QPaintEvent* event);
     // mouse
@@ -140,12 +159,16 @@ private:
     DEdit_GraphicalTransition*  m_pSelectedTransition;
     
     // some properties
-    int             m_nGridSize;
+    int             m_nGridResolution;
+    QString         m_szLastSyntaxError; // needed for createDeaFromFile()
     
     // context menu
-    QMenu*          m_mnuContextMenu;
+    QMenu*          m_mnuContextMenuState;
+    QMenu*          m_mnuContextMenuTransition;
     QAction*        m_mnaRemoveItem;
     QAction*        m_mnaEditItem;
+    QAction*        m_mnaSetFinalState;
+    QAction*        m_mnaSetStartState;
     
     // dialogs
     DEdit_EditStateDia* m_diaEditState;

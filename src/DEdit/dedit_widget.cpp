@@ -5,6 +5,7 @@
 #include <DEA/dea_transition.h>
 #include <io/debug_msg.h>
 #include <io/xmlparser.h>
+#include <io/iconcatcher.h>
 
 // dialogs
 #include <DEdit/dedit_editstatedia.h>
@@ -32,7 +33,7 @@ DEdit_Widget::DEdit_Widget() :
     // init some members
     m_pDea = NULL;
     m_eMode = ModeNormal;
-    m_nGridSize = 0; // disable grid per default
+    m_nGridResolution = 0; // disable grid per default
     // for states
     m_pDraggedState = NULL;
     m_pHoveredState = NULL;
@@ -61,6 +62,9 @@ DEdit_Widget::DEdit_Widget() :
     // activate context menu
     setContextMenuPolicy(Qt::DefaultContextMenu);
     createContextMenu();
+    
+    retranslateUi();
+    reloadIcons();
 }
 
 DEdit_Widget::~DEdit_Widget(){
@@ -71,15 +75,55 @@ DEdit_Widget::~DEdit_Widget(){
 
 void DEdit_Widget::createContextMenu()
 {
-    m_mnuContextMenu = new QMenu(this);
-    m_mnaRemoveItem = m_mnuContextMenu->addAction("Remove");
-    m_mnaEditItem   = m_mnuContextMenu->addAction("Edit");
-    // connect slots
+    // menus
+    m_mnuContextMenuState = new QMenu(this);
+    m_mnuContextMenuTransition = new QMenu(this);
     
+    // actions
+    m_mnaRemoveItem = new QAction(NULL);
+    m_mnaEditItem = new QAction(NULL);
+    
+    m_mnaSetFinalState = new QAction(NULL);
+    m_mnaSetFinalState->setCheckable(TRUE);
+    m_mnaSetStartState = new QAction(NULL);
+    m_mnaSetStartState->setCheckable(TRUE);
+    
+    // for state
+    m_mnuContextMenuState->addAction(m_mnaSetStartState);
+    m_mnuContextMenuState->addAction(m_mnaSetFinalState);
+    m_mnuContextMenuState->addSeparator();
+    m_mnuContextMenuState->addAction(m_mnaRemoveItem);
+    m_mnuContextMenuState->addAction(m_mnaEditItem);
+    // for transition
+    m_mnuContextMenuTransition->addAction(m_mnaRemoveItem);
+    m_mnuContextMenuTransition->addAction(m_mnaEditItem);
+    
+    // connect slots
     connect(m_mnaRemoveItem, SIGNAL(triggered()), this, SLOT(removeSelectedItem()));
     connect(m_mnaEditItem, SIGNAL(triggered()), this, SLOT(editItem()));
+    connect(m_mnaSetStartState, SIGNAL(toggled(bool)), this,
+            SLOT(setSelectedState_StartState(bool)));
+    connect(m_mnaSetFinalState, SIGNAL(toggled(bool)), this,
+            SLOT(setSelectedState_FinalState(bool)));
+    // slot, to update context menu
+    connect(this, SIGNAL(selectedStateIndexChanged(int)), this, SLOT(updateStateContextMenu()));
 }
 
+
+void DEdit_Widget::retranslateUi()
+{
+    m_mnaRemoveItem->setText(tr("Remove"));
+    m_mnaEditItem->setText(tr("Edit"));
+    m_mnaSetFinalState->setText(tr("Final State"));
+    m_mnaSetStartState->setText(tr("Start State"));
+    
+}
+
+void DEdit_Widget::reloadIcons()
+{
+    m_mnaRemoveItem->setIcon(IconCatcher::getIcon("remove"));
+    m_mnaEditItem->setIcon(IconCatcher::getIcon("edit"));
+}
 
 void DEdit_Widget::setDea(DEA* pDea)
 {
@@ -114,6 +158,7 @@ void DEdit_Widget::addState(QPoint atPosition)
     
     DEA_State* newState = m_pDea->addState(QString::number(number).toAscii().data());
     DEdit_GraphicalState graphicalState(newState);
+    graphicalState.m_pWidgetPainter = &m_cWidgetPainter;
     graphicalState.move(atPosition.x(), atPosition.y());
     m_StateList.append(graphicalState);
     // state was added
@@ -277,10 +322,10 @@ bool DEdit_Widget::handleStateDrag(QMouseEvent* event)
         newY = (newY >= height()) ? height() : newY;
         
         // move to axis of grid
-        if(m_nGridSize != 0)
+        if(m_nGridResolution > 0)
         {
-            newX = newX - newX % m_nGridSize;
-            newY = newY - newY % m_nGridSize;
+            newX = newX - newX % m_nGridResolution;
+            newY = newY - newY % m_nGridResolution;
         }
         
         m_pDraggedState->move(newX, newY);
@@ -336,6 +381,7 @@ void DEdit_Widget::mousePressEvent(QMouseEvent* event)
     {
         return;
     }
+    int oldSelectedStateIndex = m_nSelectedStateIndex;
     m_nSelectedStateIndex = -1;
     DEdit_GraphicalState* currentState;
     // start with last item
@@ -408,6 +454,15 @@ void DEdit_Widget::mousePressEvent(QMouseEvent* event)
         {
             currentTransition->m_bSelected = FALSE;
         }
+    }
+    
+    // if something has been changed
+    if(oldSelectedStateIndex != m_nSelectedStateIndex)
+    {
+        // then emit signal
+        
+        emit selectedStateIndexChanged(m_nSelectedStateIndex);
+        
     }
     
     //qDebug("item %d was selected", m_nSelectedStateIndex);
@@ -504,6 +559,7 @@ void DEdit_Widget::dragEnterEvent(QDragEnterEvent* event)
 #endif
     }
 }
+
 QString DEdit_Widget::dndMimeFormat() const
 {
     return "dea_editor/command_add_state";
@@ -538,9 +594,13 @@ void DEdit_Widget::contextMenuEvent(QContextMenuEvent* event)
 {
     // only show context menu
     // if an item is selected
-    if(m_pSelectedTransition || (m_nSelectedStateIndex >= 0))
+    if(m_pSelectedTransition)
     {
-        m_mnuContextMenu->exec(event->globalPos());
+        m_mnuContextMenuTransition->exec(event->globalPos());
+    }
+    else if(m_nSelectedStateIndex >= 0)
+    {
+        m_mnuContextMenuState->exec(event->globalPos());
     }
 }
 
@@ -779,24 +839,7 @@ void DEdit_Widget::editSelectedState()
     DEdit_GraphicalState* state = &m_StateList[m_nSelectedStateIndex];
     m_diaEditState->setStateToEdit(state);
     m_diaEditState->exec();
-    // if just edited state is the new start state
-    if(state->m_bStartState && (m_pStartState != state))
-    {
-        // then unselect old startstate
-        if(m_pStartState)
-        {
-            m_pStartState->m_bStartState = FALSE;
-        }
-        // then set just edited state to new start state
-        m_pStartState = state;
-        // apply changes to dea
-        m_pDea->setStartState(m_pStartState->m_pData);
-    }
-    else if(!state->m_bStartState && (m_pStartState == state))
-    {// if just edited state now don't wants to be start state anymore
-        m_pDea->setStartState(NULL);
-        m_pStartState = NULL;
-    }
+    setSelectedState_StartState(state->m_bStartState);
     
     update();
 }
@@ -850,7 +893,293 @@ void DEdit_Widget::writeDeaToFile(xmlObject* file)
     }
     //file->setName("test");
     m_pDea->writeToFile(file);
+    xmlObject* stateList = file->cAddObject("graphicalstates");
+    writeGraphicalStatesToFile(stateList);
     
 }
 
 
+void DEdit_Widget::writeGraphicalStatesToFile(xmlObject* stateList)
+{
+    if(!stateList)
+    {
+        return;
+    }
+    DEdit_GraphicalState* state;
+    xmlObject*            object;
+    int x, y;
+    const char* szName;
+    for(int i = 0; i < m_StateList.size(); ++i)
+    {
+        state = &m_StateList[i];
+        if(!state->m_pData)
+        {
+            // if state is invalid, then continue
+            continue;
+        }
+        // get attributes
+        x = state->m_nX;
+        y = state->m_nY;
+        szName = state->m_pData->name();
+        
+        // write attributes to statelist
+        object = stateList->cAddObject("stateposition");
+        object->cAddAttribute("name", szName);
+        object->cAddAttribute("x", QString::number(x).toAscii().data());
+        object->cAddAttribute("y", QString::number(y).toAscii().data());
+    }
+}
+
+bool DEdit_Widget::createDeaFromFile(xmlObject* file)
+{
+    clearCompleteDEA();
+    if(!m_pDea)
+    {
+        m_szLastSyntaxError = "Internal Error: m_pDea = NULL";
+        return FALSE;
+    }
+    /// at first: init m_pDea
+    if(!m_pDea->initFromFile(file))
+    {
+        m_szLastSyntaxError = "Error in state or transition list";
+        return FALSE;
+    }
+    
+    xmlObject* graphicalStates = file->cGetObjectByName("graphicalstates");
+    if(!graphicalStates)
+    {
+        m_szLastSyntaxError = "Arbitrary tag <graphicalstates> is missing in <automat>";
+        return FALSE;
+    }
+    if(!createGraphicalStatesFromFile(graphicalStates))
+    {
+        return FALSE;
+    }
+    if(!createGraphicalTransitionsFromFile(file))
+    {
+        return FALSE;
+    }
+    update();
+    return TRUE;
+}
+
+
+bool DEdit_Widget::createGraphicalStatesFromFile(xmlObject* stateList)
+{
+    if(!stateList || !m_pDea)
+    {
+        return FALSE;
+    }
+    xmlObject* stateObject;
+    xmlAttribute* attribute;
+    DEdit_GraphicalState graphicalState;
+    DEA_State*      pState;
+    char*     szStateName;
+    int x, y;
+    for(int i = 0; i < stateList->nGetObjectCounter(); ++i)
+    {
+        stateObject = stateList->cGetObjectByIdentifier(i);
+        if(!stateObject)
+        {
+            continue;
+        }
+        /// read attribute name
+        attribute = stateObject->cGetAttributeByName("name");
+        if(!attribute)
+        {
+            m_szLastSyntaxError = "in <stateposition>: attribute name=\"\" is missing";
+            return FALSE;
+        }
+        szStateName = attribute->value();
+        pState = m_pDea->findState(szStateName);
+        if(!pState)
+        {
+            m_szLastSyntaxError = "<stateposition> has name " + QString(szStateName) + "\n";
+            m_szLastSyntaxError += "but there is no such state in <zustaende>";
+            return FALSE;
+        }
+        /// read attribute positon: x and y
+        attribute = stateObject->cGetAttributeByName("x");
+        if(!attribute)
+        {
+            m_szLastSyntaxError = "in <stateposition>: attribute x=\"\" is missing";
+            return FALSE;
+        }
+        x = attribute->nValueToInt();
+        attribute = stateObject->cGetAttributeByName("y");
+        if(!attribute)
+        {
+            m_szLastSyntaxError = "in <stateposition>: attribute y=\"\" is missing";
+            return FALSE;
+        }
+        y = attribute->nValueToInt();
+        
+        /// init graphical state from attribute values
+        graphicalState = DEdit_GraphicalState(pState);
+        graphicalState.m_pWidgetPainter = &m_cWidgetPainter;
+        graphicalState.m_bStartState = (pState == m_pDea->startState());
+        graphicalState.move(x, y);
+        m_StateList.append(graphicalState);
+    }
+    
+    return TRUE;
+}
+
+
+bool DEdit_Widget::createGraphicalTransitionsFromFile(xmlObject*)
+{
+    // info: parameter xmlObject* transitionList not needed yet
+    if(!m_pDea)
+    {
+        return FALSE;
+    }
+    DEdit_GraphicalTransition graphicalTransition;
+    DEA_Transition* transition;
+    DEA_State *from, *to;
+    DEdit_GraphicalState *graphFrom, *graphTo;
+    for(int i = 0; i < m_pDea->transitionCount(); ++i)
+    {
+        transition = m_pDea->transitionAt(i);
+        if(!transition)
+        {
+            continue;
+        }
+        /// load attributes for graphical transition
+        // data start and end
+        from = transition->start();
+        to   = transition->end();
+        if(!from || !to)
+        {
+            m_szLastSyntaxError = "Creating graphical transitions: Internal Pointer Error: (!from || !to)";
+            return FALSE;
+        }
+        // graphical start and end
+        graphFrom = findStateByName(from->name());
+        graphTo   = findStateByName(to->name());
+        if(!graphFrom || !graphTo)
+        {
+            m_szLastSyntaxError = "Creating graphical transitions: Internal Pointer Error: (!graphFrom || !graphTo)";
+            return FALSE;
+        }
+        
+        /// init graphical transition
+        graphicalTransition = DEdit_GraphicalTransition(graphFrom, graphTo);
+        graphicalTransition.m_pData = transition;
+        graphicalTransition.m_szSymbols = transition->inputSymbols();
+        m_TransitionList.append(graphicalTransition);
+    }
+    
+    return TRUE;
+}
+
+QString DEdit_Widget::lastSyntaxError()
+{
+    return m_szLastSyntaxError;
+}
+
+
+void DEdit_Widget::clearCompleteDEA()
+{
+    /// clear GRAPHICAL DEA
+    // states
+    m_StateList.clear();
+    m_pDraggedState = NULL;
+    m_pHoveredState = NULL;
+    m_pStartState = NULL;
+    m_nSelectedStateIndex = -1;
+    // transitions
+    m_TransitionList.clear();
+    m_pAddTransitionStateFrom = NULL;
+    m_pAddTransitionStateTo = NULL;
+    m_pHoveredTransition = NULL;
+    m_pSelectedTransition = NULL;
+    /// clear m_pDea
+    if(m_pDea)
+    {
+        m_pDea->setStartState(NULL);
+        m_pDea->setStateCount(0);
+        m_pDea->setTransitionCount(0);
+    }
+    update();
+}
+
+
+void DEdit_Widget::setSelectedState_FinalState(bool finalState)
+{
+    if(m_nSelectedStateIndex < 0 || m_nSelectedStateIndex >= m_StateList.size())
+    {
+        return;
+    }
+    DEdit_GraphicalState* state = &m_StateList[m_nSelectedStateIndex];
+    if(state->m_pData)
+    {
+        state->m_pData->setFinalState(finalState);
+    }
+    update();
+}
+
+void DEdit_Widget::setSelectedState_StartState(bool startState)
+{
+    if(m_nSelectedStateIndex < 0 || m_nSelectedStateIndex >= m_StateList.size())
+    {
+        return;
+    }
+    
+    DEdit_GraphicalState* state = &m_StateList[m_nSelectedStateIndex];
+    state->m_bStartState = startState;
+    // if just edited state is the new start state
+    if(state->m_bStartState && (m_pStartState != state))
+    {
+        // then unselect old startstate
+        if(m_pStartState)
+        {
+            m_pStartState->m_bStartState = FALSE;
+        }
+        // then set just edited state to new start state
+        m_pStartState = state;
+        // apply changes to dea
+        m_pDea->setStartState(m_pStartState->m_pData);
+    }
+    else if(!state->m_bStartState && (m_pStartState == state))
+    {// if just edited state now don't wants to be start state anymore
+        m_pDea->setStartState(NULL);
+        m_pStartState = NULL;
+    }
+    
+    update();
+}
+
+
+void DEdit_Widget::updateStateContextMenu()
+{
+    if(m_nSelectedStateIndex < 0 || m_nSelectedStateIndex >= m_StateList.size())
+    {
+        return;
+    }
+    
+    DEdit_GraphicalState* state = &m_StateList[m_nSelectedStateIndex];
+    m_mnaSetFinalState->setChecked(state->m_pData && state->m_pData->isFinalState());
+    m_mnaSetStartState->setChecked(state->m_bStartState);
+}
+
+
+
+/// START SOME VISUAL OPTIONS
+void DEdit_Widget::setGridResolution(int resolution)
+{
+    m_nGridResolution = resolution;
+    if(m_nGridResolution < 0)
+    {
+        m_nGridResolution = 0;
+    }
+    if(m_nGridResolution > width()/2)
+    {
+        m_nGridResolution = width()/2;
+    }
+}
+
+int DEdit_Widget::gridResolution() const
+{
+    return m_nGridResolution;
+}
+/// END SOME VISUAL OPTIONS

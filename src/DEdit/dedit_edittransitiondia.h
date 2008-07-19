@@ -27,6 +27,7 @@ public:
     DEdit_GraphicalTransition* transitionToEdit();
     
     void retranslateUi();
+    void reloadIcons();
 public slots:
     
     void applyChanges();

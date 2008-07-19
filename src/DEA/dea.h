@@ -21,7 +21,7 @@ public:
     unsigned int stateCount();
     
     void setTransitionCount(unsigned int count);
-    unsigned int connectionCount();
+    unsigned int transitionCount();
     
     DEA_State* addState(const DEA_State& state);
     void removeState(DEA_State* state);
@@ -36,6 +36,7 @@ public:
     DEA_Transition* createTransition(DEA_State* start, DEA_State* end, char symbol);
     void removeTransition(DEA_Transition* transition);
     int indexOf(DEA_Transition* transition);
+    DEA_Transition* transitionAt(int index);
     
     void putDebugMessage(char* msg);
 private:

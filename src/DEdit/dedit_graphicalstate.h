@@ -3,6 +3,7 @@
 
 #include <QPoint>
 class DEA_State;
+class DEdit_WidgetPainter;
 
 class DEdit_GraphicalState
 {
@@ -21,6 +22,9 @@ public:
     // only needed for drag
     int m_nDragOffsetX;
     int m_nDragOffsetY;
+    // needed for isPointContained
+    DEdit_WidgetPainter* m_pWidgetPainter;
+    
     // functions
     void move(int x, int y);
     bool isPointContained(QPoint pointToCheck);

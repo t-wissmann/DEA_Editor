@@ -4,7 +4,7 @@
 #include <QColor>
 
 class DEdit_Widget;
-class DEdit_GraphicalState;
+#include <DEdit/dedit_graphicalstate.h>
 class DEdit_GraphicalTransition;
 // painter
 class QPainter;
@@ -18,6 +18,7 @@ class DEdit_WidgetPainter
 {
     // friends
     friend class DEdit_Widget;
+    friend bool DEdit_GraphicalState::isPointContained(QPoint pointToCheck);
 public:
     DEdit_WidgetPainter(DEdit_Widget* widget = 0);
     ~DEdit_WidgetPainter();
@@ -25,6 +26,8 @@ public:
     void paint();
     void paintState(QPainter* painter, DEdit_GraphicalState* state);
     void paintStateLabel(QPainter* painter, DEdit_GraphicalState* state);
+    
+    
     
     // create templates
     void recreateAllTemplates();
@@ -55,6 +58,7 @@ private:
     QPixmap  m_cStateDraggedTemplate;
     QPixmap  m_cStateSelectedTemplate;
     QPixmap  m_cStartStateIndicator;
+    QImage   m_cStartStateIndicatorAlphaMask;
     QPoint   m_cStartStateIndicatorPosition; // relativ positon to center
     QPen     m_cStateLabelPen;
     QFont    m_cStateLabelFont;

@@ -25,7 +25,7 @@ DEA::~DEA()
 {
     // free all states
     setStateCount(0);
-    // free all connections
+    // free all transitions
     setTransitionCount(0);
 }
 
@@ -152,7 +152,7 @@ void DEA::setTransitionCount(unsigned int count)
     //printf("Transition count set to %d\n", m_uTransitionCount);
 }
 
-unsigned int DEA::connectionCount()
+unsigned int DEA::transitionCount()
 {
     return m_uTransitionCount;
 }
@@ -535,4 +535,13 @@ void DEA::writeTransitionsToFile(xmlObject* transitionList)
     }
 }
 
+
+DEA_Transition* DEA::transitionAt(int index)
+{
+    if(index < 0 || index >= m_uTransitionCount)
+    {
+        return NULL;
+    }
+    return m_pTransitionBuf[index];
+}
 

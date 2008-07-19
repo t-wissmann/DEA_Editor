@@ -44,8 +44,8 @@ class xmlAttribute
         void    SetValueToInt(int nNewValue);
         void    SetValueToFloat(float nNewValue);
         void    SetValueToDouble(double nNewValue);
-        void    SetName(char* szNewName);
-        void    SetValue(char* szNewValue);
+        void    SetName(const char* szNewName);
+        void    SetValue(const char* szNewValue);
         char*   name(){ return szName; };
         char*   value(){ return szValue; };
         char*   nameToXmlCode();
@@ -71,8 +71,8 @@ class xmlObject
         long            nSetAttributeValueByName (char* szAttributeName, char* szAttributeValue);
         xmlAttribute*   cGetAttributeByName (char* szAttributeName);
         long            nSetAttributeByIdentifier (int nIdentifier, char* szAttributeName, char* szAttributeValue);
-        long            nAddAttribute (char* szAttributeName, char* szAttributeValue);
-        xmlAttribute*   cAddAttribute (char* szAttributeName, char* szAttributeValue);
+        long            nAddAttribute (const char* szAttributeName, const char* szAttributeValue);
+        xmlAttribute*   cAddAttribute (const char* szAttributeName, const char* szAttributeValue);
         int             nDeleteAttribute(int nIdentifier);
         xmlAttribute*   cGetAttributeByIdentifier (int nIdentifier);
         int             nGetAttributeIdentifierByName (char* szAttributeName);
@@ -105,8 +105,8 @@ class xmlObject
         //about name
         char*          szGetName( void );
         char*          name(){ return szGetName(); };
-        void           setName(char* szNewName);
-        void           setNameFromXmlCode(char* xmlcodestring);
+        void           setName(const char* szNewName);
+        void           setNameFromXmlCode(const char* xmlcodestring);
         char*          nameToXmlCode();
         
 //        xmlAttribute*  cGetAttribute(int n AttributeCounter);

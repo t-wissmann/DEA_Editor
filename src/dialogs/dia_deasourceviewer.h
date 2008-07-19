@@ -20,6 +20,7 @@ public:
     ~Dia_DeaSourceViewer();
     
     void retranslateUi();
+    void reloadIcons();
     
     void setDeaToView(DEdit_Widget* dw);
     DEdit_Widget* dea();
@@ -31,6 +32,7 @@ private:
     void createGui();
     
     QPushButton* btnRefresh;
+    QPushButton* btnClose;
     QTextEdit* txtSource;
     
     QVBoxLayout* layoutParent;

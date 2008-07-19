@@ -20,10 +20,13 @@ HEADERS += \ # DEA
            src/io/xmlparser.h \
            src/io/xmlencoder.h \
            src/io/xmlloader.h \
+           src/io/iconcatcher.h \
            \ # widgets
            src/widgets/commandbuttondnd.h \ 
+           src/widgets/colorbutton.h \ 
            \ # general dialogs
            src/dialogs/dia_deasourceviewer.h \
+           src/dialogs/dia_configurededitwidget.h \
            \ # dialogs for editor
            src/DEdit/dedit_editstatedia.h \
            src/DEdit/dedit_edittransitiondia.h \
@@ -42,10 +45,13 @@ SOURCES += src/main.cpp \
            src/io/xmlparser.cpp \
            src/io/xmlencoder.cpp \
            src/io/xmlloader.cpp \
+           src/io/iconcatcher.cpp \
            \ # widgets
            src/widgets/commandbuttondnd.cpp \ 
+           src/widgets/colorbutton.cpp \ 
            \ # general dialogs
            src/dialogs/dia_deasourceviewer.cpp \
+           src/dialogs/dia_configurededitwidget.cpp \
            \ # dialogs for editor
            src/DEdit/dedit_editstatedia.cpp \
            src/DEdit/dedit_edittransitiondia.cpp \

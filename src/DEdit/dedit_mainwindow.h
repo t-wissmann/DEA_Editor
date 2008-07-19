@@ -7,6 +7,7 @@
 
 // dialogs
 class Dia_DeaSourceViewer;
+class Dia_ConfigureDEditWidget;
 
 // widgets
 #include<DEdit/dedit_widget.h>
@@ -32,9 +33,18 @@ public:
     virtual ~DEdit_MainWindow();
     
     void retranslateUi();
+    void reloadIcons();
+    
+    
+    QString loadFromFile(QString filename); // returns errormsg
+    QString saveToFile(QString filename); // returns errormsg
 public slots:
+    void openFile();
     void resetStatusBarText(DEdit_Widget::EMode mode);
     void showSourceCode();
+    void showConfigureEditorDialog();
+    void saveFile();
+    void saveFileAs();
 private:
     void initMembers();
     void allocateWidgets();
@@ -59,12 +69,16 @@ private:
     
     // actions
     // mnuFile
+    QAction*     mnaOpen;
+    QAction*     mnaSave;
+    QAction*     mnaSaveAs;
     QAction*     mnaQuit;
     // mnuView
     QAction*     mnaShowToolButtonsDock;
     QAction*     mnaShowSourceCode;
     // mnuSettings
     QAction*     mnaShowStatusBar;
+    QAction*     mnaConfigureEditor;
     // menus in menubar
     QMenu*       mnuFile;
     QMenu*       mnuView;
@@ -75,9 +89,11 @@ private:
     QHBoxLayout* layoutParent;
     
     // dialogs
-    Dia_DeaSourceViewer* m_diaSourceViewer;
+    Dia_DeaSourceViewer*      m_diaSourceViewer;
+    Dia_ConfigureDEditWidget* m_diaConfigureDEditWidget;
     
     // members
+    QString m_szFilename;
     DEA m_cDea;
 };
 

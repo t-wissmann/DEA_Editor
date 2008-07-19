@@ -1,0 +1,38 @@
+<automat>
+ <zustaende start="start">
+  <zustand name="start" finalzustand="0"></zustand>
+  <zustand name="H_einer" finalzustand="0"></zustand>
+  <zustand name="H_zehner" finalzustand="0"></zustand>
+  <zustand name="R_reached" finalzustand="1"></zustand>
+  <zustand name="H_reached" finalzustand="0"></zustand>
+  <zustand name="U_reached" finalzustand="0"></zustand>
+  <zustand name="trenner" finalzustand="0"></zustand>
+  <zustand name="M_zehner" finalzustand="0"></zustand>
+  <zustand name="M_einer" finalzustand="1"></zustand>
+  <zustand name="space" finalzustand="0"></zustand>
+ </zustaende>
+ <uebergaenge>
+  <uebergang from="H_reached" to="R_reached" symbol="r"></uebergang>
+  <uebergang from="U_reached" to="H_reached" symbol="h"></uebergang>
+  <uebergang from="start" to="H_zehner" symbol="0123456789"></uebergang>
+  <uebergang from="H_zehner" to="H_einer" symbol="0123456789"></uebergang>
+  <uebergang from="H_einer" to="trenner" symbol=".:"></uebergang>
+  <uebergang from="trenner" to="M_zehner" symbol="0123456789"></uebergang>
+  <uebergang from="M_zehner" to="M_einer" symbol="0123456789"></uebergang>
+  <uebergang from="M_einer" to="space" symbol=" "></uebergang>
+  <uebergang from="space" to="U_reached" symbol="Uu"></uebergang>
+  <uebergang from="M_einer" to="U_reached" symbol="Uu"></uebergang>
+ </uebergaenge>
+ <graphicalstates>
+  <stateposition name="start" x="380" y="60"></stateposition>
+  <stateposition name="H_einer" x="620" y="260"></stateposition>
+  <stateposition name="H_zehner" x="540" y="120"></stateposition>
+  <stateposition name="R_reached" x="220" y="120"></stateposition>
+  <stateposition name="H_reached" x="120" y="260"></stateposition>
+  <stateposition name="U_reached" x="140" y="420"></stateposition>
+  <stateposition name="trenner" x="600" y="420"></stateposition>
+  <stateposition name="M_zehner" x="480" y="540"></stateposition>
+  <stateposition name="M_einer" x="280" y="540"></stateposition>
+  <stateposition name="space" x="380" y="320"></stateposition>
+ </graphicalstates>
+</automat>

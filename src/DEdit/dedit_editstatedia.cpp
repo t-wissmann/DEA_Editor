@@ -3,7 +3,7 @@
 #include <DEdit/dedit_graphicalstate.h>
 #include <DEdit/dedit_widget.h>
 #include <DEA/dea_state.h>
-
+#include <io/iconcatcher.h>
 // widgets
 #include <QPushButton>
 #include <QLineEdit>
@@ -28,6 +28,7 @@ DEdit_EditStateDia::DEdit_EditStateDia(DEdit_Widget* parent)
     createLayouts();
     connectSlots();
     retranslateUi();
+    reloadIcons();
 }
 
 DEdit_EditStateDia::~DEdit_EditStateDia()
@@ -86,6 +87,11 @@ void DEdit_EditStateDia::retranslateUi()
     btnCancel->setText(tr("Cancel"));
 }
 
+void DEdit_EditStateDia::reloadIcons()
+{
+    btnOk->setIcon(IconCatcher::getIcon("button_ok"));
+    btnCancel->setIcon(IconCatcher::getIcon("button_cancel"));
+}
 
 void DEdit_EditStateDia::setStateToEdit(DEdit_GraphicalState* state)
 {

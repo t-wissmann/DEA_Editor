@@ -2,6 +2,7 @@
 #include "dedit_edittransitiondia.h"
 
 #include <DEdit/dedit_graphicaltransition.h>
+#include <io/iconcatcher.h>
 
 // widgets
 #include <QPushButton>
@@ -24,6 +25,7 @@ DEdit_EditTransitionDia::DEdit_EditTransitionDia(QWidget* parent)
     createLayouts();
     connectSlots();
     retranslateUi();
+    reloadIcons();
 }
 
 DEdit_EditTransitionDia::~DEdit_EditTransitionDia()
@@ -68,6 +70,12 @@ void DEdit_EditTransitionDia::retranslateUi()
     btnOk->setText(tr("OK"));
     btnCancel->setText(tr("Cancel"));
     lblSymbols->setText(tr("Symbols to accept:"));
+}
+
+void DEdit_EditTransitionDia::reloadIcons()
+{
+    btnOk->setIcon(IconCatcher::getIcon("button_ok"));
+    btnCancel->setIcon(IconCatcher::getIcon("button_cancel"));
 }
 
 void DEdit_EditTransitionDia::applyChanges()

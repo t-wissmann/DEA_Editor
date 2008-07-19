@@ -63,13 +63,13 @@ void    xmlAttribute::SetValueToDouble(double nNewValue)
     sprintf(szValue, "%lf", nNewValue);
 }
 
-void    xmlAttribute::SetName(char* szNewName)
+void    xmlAttribute::SetName(const char* szNewName)
 {
     strncpy(szName, szNewName, 79);
     szName[79] = '\0';
 }
 
-void    xmlAttribute::SetValue(char* szNewValue)
+void    xmlAttribute::SetValue(const char* szNewValue)
 {
     strncpy(szValue, szNewValue, 79);
     szValue[79] = '\0';
@@ -128,16 +128,16 @@ char*          xmlObject::szGetName( void )
     return szName;
 }
 
-void           xmlObject::setName(char* szNewName)
+void           xmlObject::setName(const char* szNewName)
 {
     strncpy(szName, szNewName, 79);
     szName[79] = '\0';
 }
 
 
-void           xmlObject::setNameFromXmlCode(char* xmlcodestring)
+void           xmlObject::setNameFromXmlCode(const char* xmlcodestring)
 {
-    setName(xmlEncoder::xmlCodeToString(xmlcodestring));
+    setName(xmlEncoder::xmlCodeToString((char*)xmlcodestring));
 }
 
 char*          xmlObject::nameToXmlCode()
@@ -264,7 +264,7 @@ long            xmlObject::nSetAttributeByIdentifier (int nIdentifier, char* szA
 }
 
 
-long            xmlObject::nAddAttribute (char* szAttributeName, char* szAttributeValue)
+long            xmlObject::nAddAttribute (const char* szAttributeName, const char* szAttributeValue)
 {
     int nNewAttributeId;
     
@@ -279,7 +279,7 @@ long            xmlObject::nAddAttribute (char* szAttributeName, char* szAttribu
 }
 
 
-xmlAttribute*   xmlObject::cAddAttribute (char* szAttributeName, char* szAttributeValue)
+xmlAttribute*   xmlObject::cAddAttribute (const char* szAttributeName, const char* szAttributeValue)
 {
     xmlAttribute* newAttribute = NULL;
     

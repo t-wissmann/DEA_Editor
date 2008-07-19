@@ -1,6 +1,6 @@
 #include "dedit_graphicalstate.h"
 #include <DEA/dea_state.h>
-
+#include "dedit_widgetpainter.h"
 #include <QLineF>
 
 int DEdit_GraphicalState::m_nDiameter = 100;
@@ -8,6 +8,7 @@ int DEdit_GraphicalState::m_nDiameter = 100;
 DEdit_GraphicalState::DEdit_GraphicalState(DEA_State* state)
 {
     m_pData = state;
+    m_pWidgetPainter = NULL;
     m_nX = 0;
     m_nY = 0;
     
@@ -41,6 +42,18 @@ bool DEdit_GraphicalState::isPointContained(QPoint pointToCheck)
     bool result;
     QLineF distance(m_nX, m_nY, pointToCheck.x(), pointToCheck.y());
     result = distance.length() <= (((double)m_nDiameter)/2);
+    if(m_bStartState && m_pWidgetPainter)
+    {
+        QPoint pixelpos = pointToCheck
+                - (positionToQPoint() + m_pWidgetPainter->m_cStartStateIndicatorPosition);
+        
+        if(m_pWidgetPainter->m_cStartStateIndicatorAlphaMask.rect().contains(pixelpos))
+        {// only check, if position is WITHIN m_cStartStateIndicatorAlphaMask
+            bool overStartState = (qRgb(255, 255, 255)
+                    == m_pWidgetPainter->m_cStartStateIndicatorAlphaMask.pixel(pixelpos));
+             result = result || overStartState;
+        }
+    }
     
     return result;
 }
