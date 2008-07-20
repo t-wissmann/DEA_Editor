@@ -17,6 +17,7 @@ DEdit_GraphicalTransition::DEdit_GraphicalTransition()
     m_bSelected = FALSE;
     m_pStart = NULL;
     m_pEnd = NULL;
+    m_bJustExecuted = FALSE;
 }
 
 
@@ -25,6 +26,7 @@ DEdit_GraphicalTransition::DEdit_GraphicalTransition(DEdit_GraphicalState* start
 {
     m_bHovered = FALSE;
     m_bSelected = FALSE;
+    m_bJustExecuted = FALSE;
     m_pStart = start;
     m_pEnd = end;
 }
@@ -82,12 +84,73 @@ bool DEdit_GraphicalTransition::isConnectedWith(DEdit_GraphicalState* state) con
 }
 
 
-void DEdit_GraphicalTransition::applySymbolsToDEA_Transitions()
+
+QString DEdit_GraphicalTransition::graphicalLabel() const
+{
+    if(!m_pData)
+    {
+        return "";
+    }
+    QString result = m_pData->inputSymbols();
+    result.replace(" ", "0x20");
+    bool lower = result.contains("abcdefghijklmnopqrstuvwxyz");
+    bool upper = result.contains("ABCDEFGHIJKLMNOPQRSTUVWXYZ");
+    bool digits = result.contains("0123456789");
+    
+    if(lower)
+    {
+        result.remove("abcdefghijklmnopqrstuvwxyz");
+        // add space
+        if(!result.isEmpty())
+        {
+            result += " ";
+        }
+        // add abbreviation
+        result += "a-z";
+    }
+    if(upper)
+    {
+        result.remove("ABCDEFGHIJKLMNOPQRSTUVWXYZ");
+        // add space
+        if(!result.isEmpty())
+        {
+            result += " ";
+        }
+        // add abbreviation
+        result += "A-Z";
+    }
+    if(digits)
+    {
+        result.remove("0123456789");
+        // add space
+        if(!result.isEmpty())
+        {
+            result += " ";
+        }
+        // add abbreviation
+        result += "0-9";
+    }
+    
+    return result;
+}
+
+void DEdit_GraphicalTransition::setSymbols(QString symbols)
 {
     if(!m_pData)
     {
         return;
     }
-    m_pData->setInputSymbols(m_szSymbols.toAscii().data());
+    m_pData->setInputSymbols(symbols.toAscii().data());
 }
+
+QString DEdit_GraphicalTransition::symbols()
+{
+    if(!m_pData)
+    {
+        return "";
+    }
+    return m_pData->inputSymbols();
+}
+
+
 

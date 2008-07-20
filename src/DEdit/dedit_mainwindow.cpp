@@ -1,6 +1,6 @@
 
 #include "dedit_mainwindow.h"
-
+#include <DEdit/dedit_execdeawidget.h>
 #include <io/xmlparser.h>
 #include <io/iconcatcher.h>
 #include <io/xmlloader.h>
@@ -24,6 +24,8 @@
 #include <QMenu>
 #include <QPixmap>
 #include <QDir>
+#include <QFileInfo>
+#include <QSizePolicy>
 
 // layouts
 #include <QHBoxLayout>
@@ -68,8 +70,16 @@ void DEdit_MainWindow::allocateWidgets()
     btnRemoveItem = new QPushButton;
     btnEditItem = new QPushButton;
     btnMoveUp = new QPushButton;
+    btnMoveUp->setVisible(FALSE);
     btnMoveDown = new QPushButton;
+    btnMoveDown->setVisible(FALSE);
     dockToolButtons = new QDockWidget;
+    
+    // exec dea
+    dockExecDea = new QDockWidget;
+    wdgExecDea = new DEdit_ExecDeaWidget;
+    wdgExecDea->setDeaWidget(wdgEditor);
+    
     
     // create statusbar
     statusBar();
@@ -77,6 +87,7 @@ void DEdit_MainWindow::allocateWidgets()
 
 void DEdit_MainWindow::createLayouts()
 {
+    // dock tool buttons
     layoutToolButtons = new QVBoxLayout;
     layoutToolButtons->setMargin(4);
     layoutToolButtons->addWidget(btnAddState);
@@ -90,6 +101,11 @@ void DEdit_MainWindow::createLayouts()
     wdgFoo->setLayout(layoutToolButtons);
     dockToolButtons->setWidget(wdgFoo);
     addDockWidget(Qt::LeftDockWidgetArea, dockToolButtons);
+    
+    // dock exec dea
+    dockExecDea->setWidget(wdgExecDea);
+    addDockWidget(Qt::BottomDockWidgetArea, dockExecDea);
+    
     
     layoutParent = new QHBoxLayout;
     layoutParent->setMargin(0);
@@ -113,6 +129,10 @@ void DEdit_MainWindow::createActions()
     mnaShowToolButtonsDock = new QAction(NULL);
     mnaShowToolButtonsDock->setCheckable(TRUE);
     mnaShowToolButtonsDock->setChecked(TRUE);
+    
+    mnaShowExecDeaDock = new QAction(NULL);
+    mnaShowExecDeaDock->setCheckable(TRUE);
+    mnaShowExecDeaDock->setChecked(TRUE);
     // mnuSettings
     mnaShowStatusBar = new QAction(NULL);
     mnaShowStatusBar->setCheckable(TRUE);
@@ -132,6 +152,7 @@ void DEdit_MainWindow::createMenuBar()
     
     mnuView = menuBar()->addMenu("view");
     mnuView->addAction(mnaShowToolButtonsDock);
+    mnuView->addAction(mnaShowExecDeaDock);
     mnuView->addSeparator();
     mnuView->addAction(mnaShowSourceCode);
     
@@ -151,6 +172,7 @@ void DEdit_MainWindow::connectSlots()
     connect(wdgEditor, SIGNAL(currentModeChanged(DEdit_Widget::EMode)), this,
             SLOT(resetStatusBarText(DEdit_Widget::EMode)));
     
+    
     // connections for actions
     // mnuFile
     connect(mnaOpen, SIGNAL(triggered()), this, SLOT(openFile()));
@@ -159,18 +181,23 @@ void DEdit_MainWindow::connectSlots()
     connect(mnaQuit, SIGNAL(triggered()), this, SLOT(close()));
     // mnuView
     connect(mnaShowSourceCode, SIGNAL(triggered()), this, SLOT(showSourceCode()));
-    connect(mnaShowToolButtonsDock, SIGNAL(toggled(bool)),
-            dockToolButtons, SLOT(setVisible(bool)));
-    connect(dockToolButtons, SIGNAL(visibilityChanged(bool)),
-            mnaShowToolButtonsDock, SLOT(setChecked(bool)));
+    connect(mnaShowToolButtonsDock, SIGNAL(toggled(bool)), dockToolButtons, SLOT(setVisible(bool)));
+    connect(dockToolButtons, SIGNAL(visibilityChanged(bool)), mnaShowToolButtonsDock, SLOT(setChecked(bool)));
+    connect(mnaShowExecDeaDock, SIGNAL(toggled(bool)), dockExecDea, SLOT(setVisible(bool)));
+    connect(dockExecDea, SIGNAL(visibilityChanged(bool)), mnaShowExecDeaDock, SLOT(setChecked(bool)));
     // mnuSettings
     connect(mnaShowStatusBar, SIGNAL(toggled(bool)), statusBar(), SLOT(setVisible(bool)));
     connect(mnaConfigureEditor, SIGNAL(triggered()), this, SLOT(showConfigureEditorDialog()));
+    
 }
 
 void DEdit_MainWindow::initWidgets()
 {
     wdgEditor->setDea(&m_cDea);
+    
+    // disable tabs for docks
+    setDockOptions(AnimatedDocks);
+    
 }
 
 void DEdit_MainWindow::retranslateUi()
@@ -178,12 +205,14 @@ void DEdit_MainWindow::retranslateUi()
     setWindowTitle(tr("DEA Editor"));
     // tool buttons
     dockToolButtons->setWindowTitle(tr("Tool Buttons"));
+    dockExecDea->setWindowTitle(tr("Execute Dea"));
     btnAddState->setText(tr("Add State"));
     btnAddTransition->setText(tr("Add Transition"));
     btnRemoveItem->setText(tr("Remove"));
     btnEditItem->setText(tr("Edit"));
     btnMoveUp->setText(tr("Move up"));
     btnMoveDown->setText(tr("Move down"));
+    
     // actions
     // mnuFile
     mnaOpen->setText(tr("Open ..."));
@@ -192,6 +221,7 @@ void DEdit_MainWindow::retranslateUi()
     mnaQuit->setText(tr("Quit"));
     // mnuView
     mnaShowToolButtonsDock->setText(tr("Show Tool Buttons"));
+    mnaShowExecDeaDock->setText(tr("Show \'Execute Dea\'"));
     mnaShowSourceCode->setText(tr("Show Source Code"));
     // mnuSettings
     mnaShowStatusBar->setText(tr("Show Statusbar"));
@@ -236,6 +266,10 @@ void DEdit_MainWindow::resetStatusBarText(DEdit_Widget::EMode mode)
         }
         case DEdit_Widget::ModeAddTransitionSelectTo:{
             msg = tr("Now, drag transition to second state and release the mouse button");
+            break;
+        }
+        case DEdit_Widget::ModeLocked:{
+            msg = tr("DEA is running, so it is currently not possible to modify the DEA");
             break;
         }
         default: {
@@ -336,9 +370,13 @@ QString DEdit_MainWindow::saveToFile(QString filename) // returns errormsg
 
 void DEdit_MainWindow::openFile()
 {
+    QString openDir = m_szFilename;
+    if(openDir.isEmpty())
+    {
+        openDir = QDir::homePath();
+    }
     QString filename = QFileDialog::getOpenFileName(this, tr("Open File"),
-            "",
-            tr("DEA Files (*.xml)"));
+            openDir, tr("DEA Files (*.xml)"));
     if(filename.isEmpty())
     {
         return;

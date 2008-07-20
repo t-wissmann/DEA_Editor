@@ -11,10 +11,12 @@ class QPushButton;
 class QLabel;
 class QLineEdit;
 class QDialogButtonBox;
+class CommandButtonDND;
 
 // layouts
 class QHBoxLayout;
 class QVBoxLayout;
+class QGridLayout;
 
 class DEdit_EditTransitionDia : public QDialog
 {
@@ -31,7 +33,10 @@ public:
 public slots:
     
     void applyChanges();
-    
+    void setToAllLetters();
+    void setToAllUpperLetters();
+    void setToAllLowerLetters();
+    void setToAllDigits();
 private:
     // init functions
     void allocateWidgets();
@@ -40,14 +45,21 @@ private:
     
     // widgets
     QPushButton* btnOk;
+    QPushButton* btnApply;
     QPushButton* btnCancel;
     QDialogButtonBox* boxBottom;
+    // commandbuttons
+    CommandButtonDND* btnAllLetters;
+    CommandButtonDND* btnAllUpperLetters;
+    CommandButtonDND* btnAllLowerLetters;
+    CommandButtonDND* btnAllDigits;
     
     QLineEdit* txtSymbols;
     QLabel*    lblSymbols;
     
     // layouts
     QVBoxLayout* layoutParent;
+    QGridLayout* layoutCommands;
     QHBoxLayout* layoutSymbols;
     
     DEdit_GraphicalTransition* m_pTransitionToEdit;

@@ -15,6 +15,7 @@ class QPushButton;
 class CommandButtonDND;
 class QStatusBar;
 class QDockWidget;
+class DEdit_ExecDeaWidget;
 
 // menus
 class QMenuBar;
@@ -67,6 +68,10 @@ private:
     // dock widgets
     QDockWidget* dockToolButtons;
     
+    //dock run
+    QDockWidget* dockExecDea;
+    DEdit_ExecDeaWidget* wdgExecDea;
+    
     // actions
     // mnuFile
     QAction*     mnaOpen;
@@ -75,6 +80,7 @@ private:
     QAction*     mnaQuit;
     // mnuView
     QAction*     mnaShowToolButtonsDock;
+    QAction*     mnaShowExecDeaDock;
     QAction*     mnaShowSourceCode;
     // mnuSettings
     QAction*     mnaShowStatusBar;

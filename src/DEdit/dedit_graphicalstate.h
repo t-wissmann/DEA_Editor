@@ -19,6 +19,7 @@ public:
     bool isHovered;
     bool isDragged;
     bool isSelected;
+    bool m_bCurrentlyExecutedState; // current state in execution of dea
     // only needed for drag
     int m_nDragOffsetX;
     int m_nDragOffsetY;

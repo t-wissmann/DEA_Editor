@@ -34,6 +34,8 @@ DEdit_Widget::DEdit_Widget() :
     m_pDea = NULL;
     m_eMode = ModeNormal;
     m_nGridResolution = 0; // disable grid per default
+    m_bAutoEditNewStates = FALSE; // disable auto edit per default
+    m_bAutoEditNewTransitions = FALSE; // disable auto edit per default
     // for states
     m_pDraggedState = NULL;
     m_pHoveredState = NULL;
@@ -135,6 +137,10 @@ DEA* DEdit_Widget::dea()
     return m_pDea;
 }
 
+DEdit_GraphicalState* DEdit_Widget::graphicalStartState()
+{
+    return m_pStartState;
+}
 
 
 void DEdit_Widget::addState()
@@ -145,6 +151,11 @@ void DEdit_Widget::addState()
 
 void DEdit_Widget::addState(QPoint atPosition)
 {
+    if(isLocked())
+    {
+        // return if widget was locked
+        return;
+    }
     if(!m_pDea)
     {
         DEBUG_MSG("addState(QPoint)", "m_pDea = 0");
@@ -162,6 +173,13 @@ void DEdit_Widget::addState(QPoint atPosition)
     graphicalState.move(atPosition.x(), atPosition.y());
     m_StateList.append(graphicalState);
     // state was added
+    if(m_bAutoEditNewStates)
+    {
+        // popup edit dialog if wanted
+        setStateSelected(m_StateList.size()-1);
+        editSelectedState();
+    }
+    
     // now refresh widget
     update();
 }
@@ -169,6 +187,11 @@ void DEdit_Widget::addState(QPoint atPosition)
 
 void DEdit_Widget::removeState()
 {
+    if(isLocked())
+    {
+        // return if widget was locked
+        return;
+    }
     if(!m_pDea)
     {
         DEBUG_MSG("removeState()", "m_pDea = 0");
@@ -209,6 +232,11 @@ void DEdit_Widget::removeState()
 
 void DEdit_Widget::addTransition()
 {
+    if(isLocked())
+    {
+        // return if widget was locked
+        return;
+    }
     if(!m_pDea)
     {
         DEBUG_MSG("addTransition()", "m_pDea = 0");
@@ -376,7 +404,11 @@ bool DEdit_Widget::handleStateDrag(QMouseEvent* event)
 
 void DEdit_Widget::mousePressEvent(QMouseEvent* event)
 {
-    
+    if(isLocked())
+    {
+        // return if widget was locked
+        return;
+    }
     if(!event)
     {
         return;
@@ -472,6 +504,11 @@ void DEdit_Widget::mousePressEvent(QMouseEvent* event)
 
 void DEdit_Widget::mouseReleaseEvent(QMouseEvent*)
 {
+    if(isLocked())
+    {
+        // return if widget was locked
+        return;
+    }
     if(m_pDraggedState)
     {
         // set isDragged Attribute to false
@@ -495,6 +532,8 @@ void DEdit_Widget::mouseReleaseEvent(QMouseEvent*)
         {// then create the new transition
             // currently hovered item is "To" for new Transition
             m_pAddTransitionStateTo = m_pHoveredState;
+            // switch back to normal mode
+            setCurrentMode(ModeNormal);
             createTransition(m_pAddTransitionStateFrom, m_pAddTransitionStateTo);
             
         }else
@@ -511,6 +550,11 @@ void DEdit_Widget::mouseReleaseEvent(QMouseEvent*)
 
 void DEdit_Widget::mouseDoubleClickEvent(QMouseEvent*)
 {
+    if(isLocked())
+    {
+        // return if widget was locked
+        return;
+    }
     editItem();
 }
 
@@ -522,6 +566,11 @@ bool DEdit_Widget::isInDragMode() const
 
 void DEdit_Widget::keyPressEvent(QKeyEvent* event)
 {
+    if(isLocked())
+    {
+        // return if widget was locked
+        return;
+    }
     if(!event)
     {
         return;
@@ -539,6 +588,11 @@ void DEdit_Widget::keyPressEvent(QKeyEvent* event)
 
 void DEdit_Widget::keyReleaseEvent(QKeyEvent* event)
 {
+    if(isLocked())
+    {
+        // return if widget was locked
+        return;
+    }
     if(!event)
     {
         return;
@@ -549,6 +603,11 @@ void DEdit_Widget::keyReleaseEvent(QKeyEvent* event)
 
 void DEdit_Widget::dragEnterEvent(QDragEnterEvent* event)
 {
+    if(isLocked())
+    {
+        // return if widget was locked
+        return;
+    }
     if(event->mimeData()->hasFormat(dndMimeFormat()))
     {
         event->acceptProposedAction();
@@ -572,6 +631,11 @@ QString DEdit_Widget::dndAddStateCommand() const
 
 void DEdit_Widget::dropEvent(QDropEvent* event)
 {
+    if(isLocked())
+    {
+        // return if widget was locked
+        return;
+    }
     QString text = event->mimeData()->data(dndMimeFormat());
     if(text == dndAddStateCommand())
     {
@@ -583,6 +647,11 @@ void DEdit_Widget::dropEvent(QDropEvent* event)
 
 void DEdit_Widget::dragMoveEvent (QDragMoveEvent* event )
 {
+    if(isLocked())
+    {
+        // return if widget was locked
+        return;
+    }
     m_cDropPreviewPosition = event->pos();
     if(m_bAboutToDrop)
     {
@@ -592,6 +661,11 @@ void DEdit_Widget::dragMoveEvent (QDragMoveEvent* event )
 
 void DEdit_Widget::contextMenuEvent(QContextMenuEvent* event)
 {
+    if(isLocked())
+    {
+        // return if widget was locked
+        return;
+    }
     // only show context menu
     // if an item is selected
     if(m_pSelectedTransition)
@@ -605,8 +679,65 @@ void DEdit_Widget::contextMenuEvent(QContextMenuEvent* event)
 }
 
 
+void DEdit_Widget::setStateSelected(int index)
+{
+    // deselect old selection
+    if(m_nSelectedStateIndex >= 0 && m_nSelectedStateIndex < m_StateList.size())
+    {
+        m_StateList[m_nSelectedStateIndex].isSelected = FALSE;
+    }
+    // and also deselect transitions
+    if(m_pSelectedTransition)
+    {
+        m_pSelectedTransition->m_bSelected = FALSE;
+    }
+    // select new item
+    if(index >= 0 && index < m_StateList.size())
+    {
+        m_StateList[index].isSelected = TRUE;
+    }
+    // set m_nSelectedStateIndex to new selected index
+    m_nSelectedStateIndex = index;
+    // request update
+    update();
+}
+
+void DEdit_Widget::setTransitionSelected(int index)
+{
+    // deselect old selection
+    if(m_pSelectedTransition)
+    {
+        m_pSelectedTransition->m_bSelected = FALSE;
+        m_pSelectedTransition = NULL;
+    }
+    // and also deselect states
+    if(m_nSelectedStateIndex >= 0 && m_nSelectedStateIndex < m_StateList.size())
+    {
+        m_StateList[m_nSelectedStateIndex].isSelected = FALSE;
+    }
+    m_nSelectedStateIndex = -1;
+    // select new transition
+    if(index >= 0 && index < m_TransitionList.size())
+    {
+        m_TransitionList[index].m_bSelected = TRUE;
+        m_pSelectedTransition = &m_TransitionList[index];
+    }
+    else
+    {
+        // no item is selected
+        m_pSelectedTransition = NULL;
+    }
+    
+    
+}
+
 void DEdit_Widget::moveSelectionUp()
 {
+    if(isLocked())
+    {
+        // return if widget was locked
+        return;
+    }
     // high index -> painted at last -> on the top (up)
     // move up -> draw later -> higher index
     if((m_nSelectedStateIndex >= 0)
@@ -621,6 +752,11 @@ void DEdit_Widget::moveSelectionUp()
 
 void DEdit_Widget::moveSelectionDown()
 {
+    if(isLocked())
+    {
+        // return if widget was locked
+        return;
+    }
     // low index -> painted at first -> on the bottom (down)
     // move down -> draw first -> lower index
     if((m_nSelectedStateIndex  > 0)
@@ -638,6 +774,22 @@ DEdit_Widget::EMode DEdit_Widget::currentMode() const
     return m_eMode;
 }
 
+void DEdit_Widget::setLocked(bool locked)
+{
+    if(locked)
+    {
+        setCurrentMode(ModeLocked);
+    }
+    else
+    {
+        setCurrentMode(ModeNormal);
+    }
+}
+
+bool DEdit_Widget::isLocked() const
+{
+    return m_eMode == ModeLocked;
+}
 
 int DEdit_Widget::stateIndexAt(QPoint point, bool searchFromTheEnd)
 {
@@ -696,6 +848,7 @@ void DEdit_Widget::setCurrentMode(EMode mode)
             newCursor = QCursor(Qt::ClosedHandCursor);
             break;
         }
+        case ModeLocked:
         case ModeNormal:
         default: {
             newCursor = QCursor(Qt::ArrowCursor);
@@ -711,6 +864,11 @@ void DEdit_Widget::setCurrentMode(EMode mode)
 
 void DEdit_Widget::createTransition(DEdit_GraphicalState* from, DEdit_GraphicalState* to)
 {
+    if(isLocked())
+    {
+        // return if widget was locked
+        return;
+    }
     if(!m_pDea)
     {
         DEBUG_MSG("addTransition()", "m_pDea = 0");
@@ -729,6 +887,13 @@ void DEdit_Widget::createTransition(DEdit_GraphicalState* from, DEdit_GraphicalS
     newGTransition.m_pData = transition;
     // add new graphical transition to list
     m_TransitionList.append(newGTransition);
+    if(m_bAutoEditNewTransitions)
+    {
+        // select new Transition
+        setTransitionSelected(m_TransitionList.size()-1);
+        // edit it
+        editSelectedTransition();
+    }
     update();
 }
 
@@ -747,8 +912,28 @@ DEdit_GraphicalTransition* DEdit_Widget::transitionAt(QPoint point)
     return foundItem;
 }
 
+
+DEdit_GraphicalTransition* DEdit_Widget::graphicalTransitionForData(DEA_Transition* data)
+{
+    DEdit_GraphicalTransition* foundItem = NULL;
+    
+    for(int i = m_TransitionList.size()-1; i >= 0; --i){
+        if(m_TransitionList[i].m_pData == data)
+        {
+            foundItem = &(m_TransitionList[i]);
+            break;
+        }
+    }
+    return foundItem;
+}
+
 void DEdit_Widget::removeTransition()
 {
+    if(isLocked())
+    {
+        // return if widget was locked
+        return;
+    }
     removeTransition(m_pSelectedTransition);
     // reset selection
     m_pSelectedTransition = NULL;
@@ -758,6 +943,11 @@ void DEdit_Widget::removeTransition()
 
 void DEdit_Widget::removeTransition(DEdit_GraphicalTransition* transition)
 {
+    if(isLocked())
+    {
+        // return if widget was locked
+        return;
+    }
     if(!m_pDea)
     {
         DEBUG_MSG("removeTransition(DEdit_GraphicalState*)", "m_pDea = 0");
@@ -797,6 +987,11 @@ QPixmap DEdit_Widget::stateTemplatePixmap() const
 
 void DEdit_Widget::removeSelectedItem()
 {
+    if(isLocked())
+    {
+        // return if widget was locked
+        return;
+    }
     if(m_pSelectedTransition)
     {
         removeTransition();
@@ -810,6 +1005,11 @@ void DEdit_Widget::removeSelectedItem()
 
 void DEdit_Widget::editItem()
 {
+    if(isLocked())
+    {
+        // return if widget was locked
+        return;
+    }
     if(m_pSelectedTransition)
     {
         editSelectedTransition();
@@ -823,6 +1023,11 @@ void DEdit_Widget::editItem()
 
 void DEdit_Widget::editSelectedState()
 {
+    if(isLocked())
+    {
+        // return if widget was locked
+        return;
+    }
     if(!m_pDea)
     {
         DEBUG_MSG("editSelectedState()", "m_pDea = 0");
@@ -840,12 +1045,17 @@ void DEdit_Widget::editSelectedState()
     m_diaEditState->setStateToEdit(state);
     m_diaEditState->exec();
     setSelectedState_StartState(state->m_bStartState);
-    
+    updateStateContextMenu();
     update();
 }
 
 void DEdit_Widget::editSelectedTransition()
 {
+    if(isLocked())
+    {
+        // return if widget was locked
+        return;
+    }
     if(!m_pDea)
     {
         DEBUG_MSG("editSelectedTransition()", "m_pDea = 0");
@@ -932,6 +1142,11 @@ void DEdit_Widget::writeGraphicalStatesToFile(xmlObject* stateList)
 
 bool DEdit_Widget::createDeaFromFile(xmlObject* file)
 {
+    if(isLocked())
+    {
+        // return if widget was locked
+        return;
+    }
     clearCompleteDEA();
     if(!m_pDea)
     {
@@ -966,6 +1181,11 @@ bool DEdit_Widget::createDeaFromFile(xmlObject* file)
 
 bool DEdit_Widget::createGraphicalStatesFromFile(xmlObject* stateList)
 {
+    if(isLocked())
+    {
+        // return if widget was locked
+        return FALSE;
+    }
     if(!stateList || !m_pDea)
     {
         return FALSE;
@@ -1020,6 +1240,11 @@ bool DEdit_Widget::createGraphicalStatesFromFile(xmlObject* stateList)
         graphicalState.m_bStartState = (pState == m_pDea->startState());
         graphicalState.move(x, y);
         m_StateList.append(graphicalState);
+        // if just added state is start state
+        if(graphicalState.m_bStartState)
+        {
+            m_pStartState = &m_StateList.last();
+        }
     }
     
     return TRUE;
@@ -1028,6 +1253,11 @@ bool DEdit_Widget::createGraphicalStatesFromFile(xmlObject* stateList)
 
 bool DEdit_Widget::createGraphicalTransitionsFromFile(xmlObject*)
 {
+    if(isLocked())
+    {
+        // return if widget was locked
+        return FALSE;
+    }
     // info: parameter xmlObject* transitionList not needed yet
     if(!m_pDea)
     {
@@ -1065,7 +1295,6 @@ bool DEdit_Widget::createGraphicalTransitionsFromFile(xmlObject*)
         /// init graphical transition
         graphicalTransition = DEdit_GraphicalTransition(graphFrom, graphTo);
         graphicalTransition.m_pData = transition;
-        graphicalTransition.m_szSymbols = transition->inputSymbols();
         m_TransitionList.append(graphicalTransition);
     }
     
@@ -1080,6 +1309,11 @@ QString DEdit_Widget::lastSyntaxError()
 
 void DEdit_Widget::clearCompleteDEA()
 {
+    if(isLocked())
+    {
+        // return if widget was locked
+        return;
+    }
     /// clear GRAPHICAL DEA
     // states
     m_StateList.clear();
@@ -1106,6 +1340,11 @@ void DEdit_Widget::clearCompleteDEA()
 
 void DEdit_Widget::setSelectedState_FinalState(bool finalState)
 {
+    if(isLocked())
+    {
+        // return if widget was locked
+        return;
+    }
     if(m_nSelectedStateIndex < 0 || m_nSelectedStateIndex >= m_StateList.size())
     {
         return;
@@ -1120,11 +1359,15 @@ void DEdit_Widget::setSelectedState_FinalState(bool finalState)
 
 void DEdit_Widget::setSelectedState_StartState(bool startState)
 {
+    if(isLocked())
+    {
+        // return if widget was locked
+        return;
+    }
     if(m_nSelectedStateIndex < 0 || m_nSelectedStateIndex >= m_StateList.size())
     {
         return;
     }
-    
     DEdit_GraphicalState* state = &m_StateList[m_nSelectedStateIndex];
     state->m_bStartState = startState;
     // if just edited state is the new start state
@@ -1182,4 +1425,25 @@ int DEdit_Widget::gridResolution() const
 {
     return m_nGridResolution;
 }
+
+void DEdit_Widget::setAutoEditNewStates(bool on)
+{
+    m_bAutoEditNewStates = on;
+}
+
+bool DEdit_Widget::autoEditNewStates() const
+{
+    return m_bAutoEditNewStates;
+}
+
+void DEdit_Widget::setAutoEditNewTransitions(bool on)
+{
+    m_bAutoEditNewTransitions = on;
+}
+
+bool DEdit_Widget::autoEditNewTransitions() const
+{
+    return m_bAutoEditNewTransitions;
+}
+
 /// END SOME VISUAL OPTIONS

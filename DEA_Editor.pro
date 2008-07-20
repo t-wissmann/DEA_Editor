@@ -33,9 +33,10 @@ HEADERS += \ # DEA
            \ # Main Editor
            src/DEdit/dedit_mainwindow.h \
            src/DEdit/dedit_widget.h \
+           src/DEdit/dedit_widgetpainter.h \
            src/DEdit/dedit_graphicalstate.h \
            src/DEdit/dedit_graphicaltransition.h \
-           src/DEdit/dedit_widgetpainter.h
+           src/DEdit/dedit_execdeawidget.h
 SOURCES += src/main.cpp \
            \ # DEA
            src/DEA/dea.cpp \
@@ -58,6 +59,7 @@ SOURCES += src/main.cpp \
            \ # Main Editor
            src/DEdit/dedit_mainwindow.cpp \
            src/DEdit/dedit_widget.cpp \
+           src/DEdit/dedit_widgetpainter.cpp \
            src/DEdit/dedit_graphicalstate.cpp \
            src/DEdit/dedit_graphicaltransition.cpp \
-           src/DEdit/dedit_widgetpainter.cpp
+           src/DEdit/dedit_execdeawidget.cpp

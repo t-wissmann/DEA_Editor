@@ -32,8 +32,8 @@ public:
     void retranslateUi();
     void reloadIcons();
 public slots:
-    void applyChanges();
-    
+    bool applyChanges();
+    void ok_clicked();
 private:
     // init functions
     void allocateWidgets();
@@ -49,6 +49,7 @@ private:
     // buttons on the bottom
     QDialogButtonBox* boxBottom;
     QPushButton* btnOk;
+    QPushButton* btnApply;
     QPushButton* btnCancel;
     
     // layouts

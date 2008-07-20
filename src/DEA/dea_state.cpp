@@ -2,6 +2,7 @@
 #include "dea_state.h"
 #include <string.h>
 #include <stdio.h>
+#include "dea_transition.h"
 
 using namespace std;
 
@@ -91,5 +92,17 @@ vector<DEA_Transition*> DEA_State::connectionList()
     return m_TransitionList;
 }
 
+
+DEA_Transition* DEA_State::findTransitionForSymbol(char symbol)
+{
+    for(int i = 0; i < m_TransitionList.size(); ++i)
+    {
+        if(m_TransitionList[i]->hasInputSymbol(symbol))
+        {
+            return m_TransitionList[i];
+        }
+    }
+    return NULL;
+}
 
 

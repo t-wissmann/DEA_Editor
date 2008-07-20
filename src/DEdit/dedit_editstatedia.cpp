@@ -48,6 +48,7 @@ void DEdit_EditStateDia::allocateWidgets()
     boxBottom = new QDialogButtonBox;
     btnOk     = boxBottom->addButton("ok", QDialogButtonBox::AcceptRole);
     btnCancel = boxBottom->addButton("cancel", QDialogButtonBox::RejectRole);
+    btnApply  = boxBottom->addButton("apply", QDialogButtonBox::ApplyRole);
 }
 
 void DEdit_EditStateDia::createLayouts()
@@ -70,7 +71,8 @@ void DEdit_EditStateDia::createLayouts()
 
 void DEdit_EditStateDia::connectSlots()
 {
-    connect(btnOk, SIGNAL(clicked()), this, SLOT(applyChanges()));
+    connect(btnOk, SIGNAL(clicked()), this, SLOT(ok_clicked()));
+    connect(btnApply, SIGNAL(clicked()), this, SLOT(applyChanges()));
     connect(btnCancel, SIGNAL(clicked()), this, SLOT(reject()));
 }
 
@@ -85,11 +87,13 @@ void DEdit_EditStateDia::retranslateUi()
     // buttons on the bottom
     btnOk->setText(tr("OK"));
     btnCancel->setText(tr("Cancel"));
+    btnApply->setText(tr("Apply"));
 }
 
 void DEdit_EditStateDia::reloadIcons()
 {
     btnOk->setIcon(IconCatcher::getIcon("button_ok"));
+    btnApply->setIcon(IconCatcher::getIcon("apply"));
     btnCancel->setIcon(IconCatcher::getIcon("button_cancel"));
 }
 
@@ -110,12 +114,19 @@ DEdit_GraphicalState* DEdit_EditStateDia::stateToEdit()
     return m_pStateToEdit;
 }
 
+void DEdit_EditStateDia::ok_clicked()
+{
+    if(applyChanges())
+    {
+        accept();
+    }
+}
 
-void DEdit_EditStateDia::applyChanges()
+bool DEdit_EditStateDia::applyChanges()
 {
     if(!m_pStateToEdit || !m_pStateToEdit->m_pData)
     {
-        return;
+        return FALSE;
     }
     QString name = txtName->text();
     DEdit_GraphicalState* item = m_pParent ? m_pParent->findStateByName(name) : NULL;
@@ -127,11 +138,15 @@ void DEdit_EditStateDia::applyChanges()
                 .replace("%statename", name) + "\n";
         msg += tr("Please choose an other name");
         QMessageBox::critical(this, title, msg);
-        return;
+        return FALSE;
     }
     m_pStateToEdit->m_pData->setName(name.toAscii().data());
     m_pStateToEdit->m_pData->setFinalState(chkIsFinalState->isChecked());
     m_pStateToEdit->m_bStartState = chkIsStartState->isChecked();
-    accept();
+    if(parentWidget())
+    {
+        parentWidget()->update();
+    }
+    return TRUE;
 }
 

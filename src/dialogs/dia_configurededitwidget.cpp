@@ -45,6 +45,9 @@ void Dia_ConfigureDEditWidget::allocateWidgets()
     btnCancel = boxBottom->addButton("cancel", QDialogButtonBox::RejectRole);
     
     
+    
+    chkAutoEditNewStates = new QCheckBox;
+    chkAutoEditNewTransitions = new QCheckBox;
     chkAlignToGrid = new QCheckBox;
     lblGridResolution = new QLabel;
     spinGridResolution = new QSpinBox;
@@ -65,6 +68,8 @@ void Dia_ConfigureDEditWidget::createLayouts()
     wdgGridResolution->setLayout(layoutGridResolution);
     
     layoutParent = new QVBoxLayout;
+    layoutParent->addWidget(chkAutoEditNewStates);
+    layoutParent->addWidget(chkAutoEditNewTransitions);
     layoutParent->addWidget(chkAlignToGrid);
     layoutParent->addWidget(wdgGridResolution);
     layoutParent->addWidget(boxBottom);
@@ -89,6 +94,8 @@ void Dia_ConfigureDEditWidget::retranslateUi()
     btnCancel->setText(tr("Cancel"));
     btnApply->setText(tr("Apply"));
     
+    chkAutoEditNewStates->setText(tr("Automatically popup edit dialog for new states"));
+    chkAutoEditNewTransitions->setText(tr("Automatically popup edit dialog for new transitions"));
     chkAlignToGrid->setText(tr("Align items to grid"));
     lblGridResolution->setText(tr("Grid resolution:"));
     spinGridResolution->setSuffix(" " + tr("pixel"));
@@ -112,6 +119,11 @@ void Dia_ConfigureDEditWidget::setWidgetToEdit(DEdit_Widget* widget)
         return;
     }
     
+    // auto edit
+    chkAutoEditNewStates->setChecked(widget->autoEditNewStates());
+    chkAutoEditNewTransitions->setChecked(widget->autoEditNewTransitions());
+    
+    // grid
     int gridResolution = m_pWidgetToEdit->gridResolution();
     chkAlignToGrid->setChecked(gridResolution > 0);
     if(gridResolution > 0)
@@ -128,6 +140,15 @@ DEdit_Widget* Dia_ConfigureDEditWidget::widgetToEdit()
 
 void Dia_ConfigureDEditWidget::applyChanges()
 {
+    if(!m_pWidgetToEdit)
+    {
+        return;
+    }
+    // auto edit
+    m_pWidgetToEdit->setAutoEditNewStates(chkAutoEditNewStates->isChecked());
+    m_pWidgetToEdit->setAutoEditNewTransitions(chkAutoEditNewTransitions->isChecked());
+    
+    // grid
     int gridResolution = 0;
     if(chkAlignToGrid->isChecked())
     {

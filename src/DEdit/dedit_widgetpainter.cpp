@@ -61,6 +61,7 @@ void DEdit_WidgetPainter::paint()
         }
         // paint selected transition
         //imagePainter.setPen(m_cTransitionPenHovered);
+        recomputeTransitionLabelArea(m_pWidget->m_pHoveredTransition);
         paintTransition(&imagePainter, m_pWidget->m_pHoveredTransition);
         
         // paint states
@@ -125,7 +126,12 @@ void DEdit_WidgetPainter::paintState(QPainter* painter, DEdit_GraphicalState* st
     QRectF source(0, 0, width, width);
     QRectF target(state->m_nX-width/2, state->m_nY-width/2, width, width);
     
-    if(state->isDragged)
+    
+    if(state->m_bCurrentlyExecutedState)
+    {
+        painter->drawPixmap(target, m_cStateCurrentlyExecutedTemplate, source);
+    }
+    else if(state->isDragged)
     {
         painter->drawPixmap(target, m_cStateDraggedTemplate, source);
     }
@@ -198,7 +204,11 @@ void DEdit_WidgetPainter::paintTransition
     }
     
     // select pen according to the current attributes of transition
-    if(transition->m_bSelected)
+    if(transition->m_bJustExecuted)
+    {
+        painter->setPen(m_cTransitionPenJustExecuted);
+    }
+    else if(transition->m_bSelected)
     {
         painter->setPen(m_cTransitionPenSelected);
     }
@@ -292,12 +302,12 @@ void DEdit_WidgetPainter::paintTransitionLabel
     {
         return;
     }
-    if(transition->m_szSymbols.isEmpty())
+    if(transition->graphicalLabel().isEmpty())
     {
         // nothing to do if label would be empty
         return;
     }
-    QString label = transition->m_szSymbols;
+    QString label = transition->graphicalLabel();
     int flags = Qt::AlignVCenter | Qt::AlignHCenter;
     painter->drawText(transition->m_cLabelArea, flags, label);
 }
@@ -311,14 +321,14 @@ void DEdit_WidgetPainter::recomputeTransitionLabelArea
         return;
     }
     QRect result;
-    if(transition->m_szSymbols.isEmpty())
+    if(transition->graphicalLabel().isEmpty())
     {
         result.setRect(0, 0, 0, 0);
     }else
     {
         int margin = m_cTransitionPen.width()/2;
         QFontMetrics fm(m_cTransitionLabelFont);
-        result.setWidth(fm.width(transition->m_szSymbols) + 2*margin);
+        result.setWidth(fm.width(transition->graphicalLabel()) + 2*margin);
         result.setHeight(fm.height() + margin);
         QPoint lblPos = (transition->m_pStart->positionToQPoint()*0.55 + 
                 transition->m_pEnd->positionToQPoint()*0.45);
@@ -414,6 +424,8 @@ void DEdit_WidgetPainter::recreateAllTemplates()
     recreateStateHoveredTemplate();
     recreateStateDraggedTemplate();
     recreateStateSelectedTemplate();
+    recreateStateCurrentlyExecutedTemplate();
+    
     // transitions
     recreateTransitionPens();
     // start state indicator after recreateTransitionPens
@@ -450,20 +462,24 @@ void DEdit_WidgetPainter::recreateStateSelectedTemplate(){
             QColor("#75507B"), DEdit_GraphicalState::m_nDiameter, TRUE);
 }
 
-
+void DEdit_WidgetPainter::recreateStateCurrentlyExecutedTemplate()
+{
+    m_cStateCurrentlyExecutedTemplate = recreateStateTemplate(
+            QColor("#73D216"), DEdit_GraphicalState::m_nDiameter, TRUE);
+}
 void DEdit_WidgetPainter::recreateStartStateIndicator()
 {
+    int lineWidth = DEdit_GraphicalTransition::m_nLineWidth;
     // init font
     QFont font = m_cTransitionLabelFont;
     QString text = QObject::tr("Start");
     QFontMetrics fm(font);
     int textmarginX = m_cTransitionPen.width();
     int textmarginY = m_cTransitionPen.width()/2;
-    int arrowspace = 15; // in px
+    int arrowspace = 14; // in px
     int textwidth = fm.width(text) + textmarginX;
     int textheight = fm.height() + textmarginY;
-    int lineWidth = DEdit_GraphicalTransition::m_nLineWidth;
-    int width = textwidth + lineWidth*4+arrowspace;
+    int width = textwidth + lineWidth*4 + arrowspace;
     int height = textheight + lineWidth*4;
     QRect labelBackground(lineWidth, lineWidth*2, textwidth, textheight);
     // init pixmap
@@ -520,22 +536,30 @@ void DEdit_WidgetPainter::recreateStartStateIndicator()
 
 void DEdit_WidgetPainter::recreateTransitionPens()
 {
-    
+    // black
     m_cTransitionPen.setCapStyle(Qt::RoundCap);
     m_cTransitionPen.setJoinStyle(Qt::RoundJoin);
     m_cTransitionPen.setWidth(DEdit_GraphicalTransition::m_nLineWidth);
     m_cTransitionPen.setCapStyle(Qt::RoundCap);
     m_cTransitionPen.setColor(QColor(0, 0, 0));
+    // light red
     m_cTransitionPenHovered.setCapStyle(Qt::RoundCap);
     m_cTransitionPenHovered.setJoinStyle(Qt::RoundJoin);
     m_cTransitionPenHovered.setWidth(DEdit_GraphicalTransition::m_nLineWidth);
     m_cTransitionPenHovered.setCapStyle(Qt::RoundCap);
     m_cTransitionPenHovered.setColor(QColor(204, 0, 0));
+    // dark red
     m_cTransitionPenSelected.setCapStyle(Qt::RoundCap);
     m_cTransitionPenSelected.setJoinStyle(Qt::RoundJoin);
     m_cTransitionPenSelected.setWidth(DEdit_GraphicalTransition::m_nLineWidth);
     m_cTransitionPenSelected.setCapStyle(Qt::RoundCap);
     m_cTransitionPenSelected.setColor(QColor(239, 41, 41));
+    // green
+    m_cTransitionPenJustExecuted.setCapStyle(Qt::RoundCap);
+    m_cTransitionPenJustExecuted.setJoinStyle(Qt::RoundJoin);
+    m_cTransitionPenJustExecuted.setWidth(DEdit_GraphicalTransition::m_nLineWidth);
+    m_cTransitionPenJustExecuted.setCapStyle(Qt::RoundCap);
+    m_cTransitionPenJustExecuted.setColor(QColor(78, 154, 6));
     
     // for label
     m_cTransitionLabelPen.setColor(QColor(238, 238, 238));

@@ -18,7 +18,6 @@ public:
     
     DEdit_GraphicalState* m_pStart;
     DEdit_GraphicalState* m_pEnd;
-    QString m_szSymbols;
     DEA_Transition*  m_pData;
     QImage  m_cAlphaMask;
     QRect   m_cLabelArea;
@@ -26,18 +25,22 @@ public:
     // attributes
     bool m_bHovered;
     bool m_bSelected;
+    bool m_bJustExecuted;
     
     // functions
     bool hasValidPointers() const;
     bool isPointContained(QPoint pointToCheck);
     double distanceTo(QPoint point) const;
     bool isConnectedWith(DEdit_GraphicalState* state) const;
-    void applySymbolsToDEA_Transitions();
     
+    void setSymbols(QString symbols);
+    QString symbols();
+    QString graphicalLabel() const; // this is a shortened version of m_szSymbols
     
     // static attributes
     static int m_nLineWidth;
     static int m_nWithItselfTransitionRadius;
+    
 };
 
 

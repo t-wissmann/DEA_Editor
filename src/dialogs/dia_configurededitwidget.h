@@ -43,6 +43,8 @@ private:
     QPushButton* btnApply;
     QDialogButtonBox* boxBottom;
     // options
+    QCheckBox*   chkAutoEditNewStates;
+    QCheckBox*   chkAutoEditNewTransitions;
     QCheckBox*   chkAlignToGrid;
     QLabel*      lblGridResolution;
     QSpinBox*    spinGridResolution;

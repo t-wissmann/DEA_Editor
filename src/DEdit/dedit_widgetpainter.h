@@ -35,6 +35,7 @@ public:
     void recreateStateHoveredTemplate();
     void recreateStateDraggedTemplate();
     void recreateStateSelectedTemplate();
+    void recreateStateCurrentlyExecutedTemplate();
     void recreateTransitionPens();
     void recreateStatePens();
     void recreateStartStateIndicator();
@@ -56,6 +57,7 @@ private:
     QPixmap  m_cStateNormalTemplate;
     QPixmap  m_cStateHoveredTemplate;
     QPixmap  m_cStateDraggedTemplate;
+    QPixmap  m_cStateCurrentlyExecutedTemplate;
     QPixmap  m_cStateSelectedTemplate;
     QPixmap  m_cStartStateIndicator;
     QImage   m_cStartStateIndicatorAlphaMask;
@@ -65,6 +67,7 @@ private:
     QPen     m_cTransitionPen;
     QPen     m_cTransitionPenHovered;
     QPen     m_cTransitionPenSelected;
+    QPen     m_cTransitionPenJustExecuted;
     QPen     m_cTransitionLabelPen;
     QFont    m_cTransitionLabelFont;
 };

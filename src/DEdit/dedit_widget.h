@@ -45,6 +45,7 @@ public:
         ModeDragState,
         ModeAddTransitionSelectFrom,
         ModeAddTransitionSelectTo,
+        ModeLocked
     };
 
 signals:
@@ -57,6 +58,7 @@ public:
     
     void setDea(DEA* pDea);
     DEA* dea();
+    DEdit_GraphicalState* graphicalStartState();
     
     bool isInDragMode() const;
     
@@ -66,6 +68,7 @@ public:
         //  --> searchFromTheEnd = true -> begin at last position
         //  --> searchFromTheEnd = false -> begin at index 0;
     DEdit_GraphicalTransition* transitionAt(QPoint point);
+    DEdit_GraphicalTransition* graphicalTransitionForData(DEA_Transition* data);
     
     QPixmap stateTemplatePixmap() const;
     
@@ -89,8 +92,11 @@ public:
     // some options
     void setGridResolution(int resolution);
     int gridResolution() const;
-    
-    
+    void setAutoEditNewStates(bool on);
+    bool autoEditNewStates() const;
+    void setAutoEditNewTransitions(bool on);
+    bool autoEditNewTransitions() const;
+    bool isLocked() const;
 public slots:
     void addState();
     void addState(QPoint atPosition);
@@ -103,10 +109,13 @@ public slots:
     void editSelectedTransition();
     void moveSelectionUp();
     void moveSelectionDown();
+    void setStateSelected(int index);
+    void setTransitionSelected(int index);
     void setSelectedState_FinalState(bool finalState);
     void setSelectedState_StartState(bool startState);
     void updateStateContextMenu();
     void clearCompleteDEA();
+    void setLocked(bool locked);
 protected:
     virtual void paintEvent(QPaintEvent* event);
     // mouse
@@ -160,6 +169,8 @@ private:
     
     // some properties
     int             m_nGridResolution;
+    bool            m_bAutoEditNewStates;
+    bool            m_bAutoEditNewTransitions;
     QString         m_szLastSyntaxError; // needed for createDeaFromFile()
     
     // context menu

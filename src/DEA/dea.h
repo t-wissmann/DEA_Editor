@@ -33,6 +33,8 @@ public:
     
     bool run(char* inputString);
     
+    
+    
     DEA_Transition* createTransition(DEA_State* start, DEA_State* end, char symbol);
     void removeTransition(DEA_Transition* transition);
     int indexOf(DEA_Transition* transition);
