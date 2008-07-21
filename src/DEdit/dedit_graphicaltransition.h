@@ -26,6 +26,9 @@ public:
     bool m_bHovered;
     bool m_bSelected;
     bool m_bJustExecuted;
+    int  m_nCurve;
+    
+    static int curveByDragPosition(QPoint p1, QPoint p2, QPoint dragPos);
     
     // functions
     bool hasValidPointers() const;

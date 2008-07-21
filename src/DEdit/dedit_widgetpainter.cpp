@@ -5,6 +5,7 @@
 #include "dedit_graphicaltransition.h"
 #include <DEA/dea_state.h>
 #include <io/debug_msg.h>
+#include <io/iconcatcher.h>
 #include <math.h>
 
 // painter
@@ -91,7 +92,7 @@ void DEdit_WidgetPainter::paint()
                 newLine.setLength(newLine.length() - stateRadius);
             }
             imagePainter.setPen(m_cTransitionPen);
-            paintTransition(&imagePainter, newLine);
+            paintTransition(&imagePainter, newLine, 0, TRUE);
         }
         if(m_pWidget->m_bAboutToDrop) // if there is an state, that will be dropped so
         {
@@ -100,6 +101,15 @@ void DEdit_WidgetPainter::paint()
             QRectF target(m_pWidget->m_cDropPreviewPosition.x()-width/2,
                         m_pWidget->m_cDropPreviewPosition.y()-width/2, width, width);
             imagePainter.drawPixmap(target, m_cStateNormalTemplate, source);
+        }
+        
+        // draw icon if is locked
+        if(m_pWidget->isLocked())
+        {
+            QRect source = m_cWidgetLockedPixmap.rect();
+            QRect target = source;
+            target.moveTo(10,10);
+            imagePainter.drawPixmap(target, m_cWidgetLockedPixmap, source);
         }
         
         imagePainter.end();
@@ -127,7 +137,17 @@ void DEdit_WidgetPainter::paintState(QPainter* painter, DEdit_GraphicalState* st
     QRectF target(state->m_nX-width/2, state->m_nY-width/2, width, width);
     
     
-    if(state->m_bCurrentlyExecutedState)
+    
+    
+    if(state->m_eResultIndicator == DEdit_GraphicalState::ResultDenied)
+    {
+        painter->drawPixmap(target, m_cStateResultDeniedTemplate, source);
+    }
+    else if(state->m_eResultIndicator == DEdit_GraphicalState::ResultAccepted)
+    {
+        painter->drawPixmap(target, m_cStateResultAcceptedTemplate, source);
+    }
+    else if(state->m_bCurrentlyExecutedState)
     {
         painter->drawPixmap(target, m_cStateCurrentlyExecutedTemplate, source);
     }
@@ -191,6 +211,30 @@ void DEdit_WidgetPainter::paintStateLabel(QPainter* painter, DEdit_GraphicalStat
 }
 
 
+
+QPoint DEdit_WidgetPainter::middlePointOfCurve(QPoint p1, QPoint p2, int curve)
+{
+    //QPoint middle = (p1 * 0.55 + p2 * 0.45);
+    QPoint middle = (p1+ p2)/2;
+    // compute delta
+    int dx = p2.x()-p1.x();
+    int dy = p2.y()-p1.y();
+    // invert sign of one delta
+    dx *= -1;
+    // swap deltas
+    int tmp = dx;
+    dx = dy;
+    dy = tmp;
+    // now stretch it
+    dx = ((double)dx) / 1000.0 * curve;
+    dy = ((double)dy) / 1000.0 * curve;
+    // now move middle
+    middle += QPoint(dx, dy);
+    return middle;
+}
+
+
+
 void DEdit_WidgetPainter::paintTransition
         (QPainter* painter, DEdit_GraphicalTransition* transition)
 {
@@ -226,12 +270,12 @@ void DEdit_WidgetPainter::paintTransition
     QLineF line(transition->m_pStart->positionToQPoint(),
                 transition->m_pEnd  ->positionToQPoint());
     // shorten transition if it connects to different states
-    if(line.length() != 0) 
+    /*if(line.length() != 0) 
     {
         line.setLength(line.length() - DEdit_GraphicalState::m_nDiameter/2);
-    }
+    }*/
     // paint line and label background to painter
-    paintTransition(painter, line);
+    paintTransition(painter, line, transition->m_nCurve);
     QRect lblArea = transition->m_cLabelArea;
     if(lblArea.isValid())
     {
@@ -248,6 +292,10 @@ void DEdit_WidgetPainter::paintTransition
     // paint to alpha mask
     int alphaMaskWidth = abs(line.dx())*2+lineWidth*3;
     int alphaMaskHeight = abs(line.dy())*2+lineWidth*3;
+    // add height and width for curve
+    alphaMaskWidth  += abs(line.dy())/1000.0*fabs(transition->m_nCurve);
+    alphaMaskHeight += abs(line.dx())/1000.0*fabs(transition->m_nCurve);
+    
     // ensure, that label is within alpha mask
     if(alphaMaskWidth < transition->m_cLabelArea.width())
     {
@@ -283,7 +331,8 @@ void DEdit_WidgetPainter::paintTransition
     alphaPainter.drawRect(transition->m_cLabelArea.adjusted(dx, dy, dx, dy));
     line = QLineF(offsetX, offsetY, offsetX+line.dx(),
                   offsetY+line.dy());
-    paintTransition(&alphaPainter, line);
+    alphaPainter.setBrush(Qt::NoBrush);
+    paintTransition(&alphaPainter, line, transition->m_nCurve);
     
     alphaPainter.end();
     {
@@ -316,7 +365,7 @@ void DEdit_WidgetPainter::paintTransitionLabel
 void DEdit_WidgetPainter::recomputeTransitionLabelArea
         (DEdit_GraphicalTransition* transition)
 {
-    if(!transition)
+    if(!transition || !transition->hasValidPointers())
     {
         return;
     }
@@ -330,8 +379,9 @@ void DEdit_WidgetPainter::recomputeTransitionLabelArea
         QFontMetrics fm(m_cTransitionLabelFont);
         result.setWidth(fm.width(transition->graphicalLabel()) + 2*margin);
         result.setHeight(fm.height() + margin);
-        QPoint lblPos = (transition->m_pStart->positionToQPoint()*0.55 + 
-                transition->m_pEnd->positionToQPoint()*0.45);
+        QPoint lblPos = middlePointOfCurve(transition->m_pStart->positionToQPoint(),
+                                           transition->m_pEnd->positionToQPoint(),
+                                           transition->m_nCurve/2);
         if(transition->m_pStart->positionToQPoint()
            != transition->m_pEnd->positionToQPoint())
         {
@@ -358,27 +408,49 @@ void DEdit_WidgetPainter::recomputeTransitionLabelArea
 }
 
 void DEdit_WidgetPainter::paintTransition(QPainter* painter, QLineF line,
-                                          bool bigDotAtStart)
+                                    int curve, bool isTransitionPreview)
 {
     int penwidth = m_cTransitionPen.width();
+    double arrowlength = 15;
+    double arrowwidth = M_PI/8; // in rad
     QPointF arrowPos = line.p2(); // arrowposition
-    qreal arrowAngle = -90;
-    if(bigDotAtStart)
-    {
-        painter->drawEllipse(line.x1()-penwidth, line.y1()-penwidth,
-                    penwidth*2, penwidth*2);
-    }
+    qreal arrowAngle = +90;
+    painter->drawEllipse(line.x1()-penwidth, line.y1()-penwidth,
+                penwidth*2, penwidth*2);
     if(line.length() != 0)
     {
         // simply paint line,
         // if length != 0
-        painter->drawLine(line);
-        arrowAngle =  180 - line.angle(QLineF(0, 0, 100, 0)); // angle to x axis
-        if(line.dy() > 0)
+        QPoint middle = middlePointOfCurve(line.p1().toPoint(), line.p2().toPoint(), curve);
+        QPainterPath path;
+        path.moveTo(line.p1());
+        path.quadTo(middle, line.p2());
+        painter->setBrush(Qt::NoBrush);
+        painter->drawPath(path);
+        QPointF arrowEnd = line.p1();
+        if(!isTransitionPreview)
         {
-            // add sign to angle if angle should be negative
-            arrowAngle *= -1;
+            // if is not a transition preview, then move arrowposition
+            qreal arrowPositionLen = path.length() - DEdit_GraphicalState::m_nDiameter/2;
+            arrowPos = path.pointAtPercent(path.percentAtLength(arrowPositionLen));
+            arrowEnd = path.pointAtPercent(path.percentAtLength(arrowPositionLen-arrowlength));
         }
+        // angle of line from p2 to controlpoint of curve, i.e. QPoint middle to x-axis
+        double dx = arrowEnd.x() - arrowPos.x();
+        double dy = (-1)*(arrowEnd.y() - arrowPos.y());
+        if(dx == 0)
+        {
+            arrowAngle = ((dy > 0) ? -90 : +90);
+        }
+        else
+        {
+            arrowAngle = atan(dy / dx) / M_PI * 180;
+        }
+        if(dx < 0)
+        {
+            arrowAngle += 180;
+        }
+        //painter->drawText(20, 20, QString("angle = ") + QString::number(arrowAngle));
     }
     else
     {// else a state is connected with itself
@@ -399,19 +471,17 @@ void DEdit_WidgetPainter::paintTransition(QPainter* painter, QLineF line,
     arrowAngle *= M_PI / 180;
     
     // draw arrow
-    double arrowlength = 15;
-    double arrowwidth = M_PI/8; // in rad
     int x, y;
     x = arrowlength*cos(arrowAngle+arrowwidth);
     y = arrowlength*sin(arrowAngle+arrowwidth);
     painter->drawLine(arrowPos.x(), arrowPos.y(),
-                      arrowPos.x()+x, arrowPos.y()+y);
+                      arrowPos.x()+x, arrowPos.y()-y);
     
     x = arrowlength*cos(arrowAngle-arrowwidth);
     y = arrowlength*sin(arrowAngle-arrowwidth);
     
     painter->drawLine(arrowPos.x(), arrowPos.y(),
-                      arrowPos.x()+x, arrowPos.y()+y);
+                      arrowPos.x()+x, arrowPos.y()-y);
     
 }
 
@@ -425,12 +495,16 @@ void DEdit_WidgetPainter::recreateAllTemplates()
     recreateStateDraggedTemplate();
     recreateStateSelectedTemplate();
     recreateStateCurrentlyExecutedTemplate();
+    recreateStateResultTemplates();
     
     // transitions
     recreateTransitionPens();
     // start state indicator after recreateTransitionPens
     // because recreateStartStateIndicator() needs some transition pens
     recreateStartStateIndicator();
+    
+    // "icons"
+    m_cWidgetLockedPixmap = IconCatcher::getIcon("lock").pixmap(16,16);
 }
 
 void DEdit_WidgetPainter::recreateStatePens()
@@ -465,8 +539,18 @@ void DEdit_WidgetPainter::recreateStateSelectedTemplate(){
 void DEdit_WidgetPainter::recreateStateCurrentlyExecutedTemplate()
 {
     m_cStateCurrentlyExecutedTemplate = recreateStateTemplate(
+            QColor("#EDD400"), DEdit_GraphicalState::m_nDiameter, TRUE);
+}
+
+
+void DEdit_WidgetPainter::recreateStateResultTemplates()
+{
+    m_cStateResultDeniedTemplate = recreateStateTemplate(
+            QColor("#EF2929"), DEdit_GraphicalState::m_nDiameter, TRUE);
+    m_cStateResultAcceptedTemplate = recreateStateTemplate(
             QColor("#73D216"), DEdit_GraphicalState::m_nDiameter, TRUE);
 }
+
 void DEdit_WidgetPainter::recreateStartStateIndicator()
 {
     int lineWidth = DEdit_GraphicalTransition::m_nLineWidth;
@@ -559,7 +643,7 @@ void DEdit_WidgetPainter::recreateTransitionPens()
     m_cTransitionPenJustExecuted.setJoinStyle(Qt::RoundJoin);
     m_cTransitionPenJustExecuted.setWidth(DEdit_GraphicalTransition::m_nLineWidth);
     m_cTransitionPenJustExecuted.setCapStyle(Qt::RoundCap);
-    m_cTransitionPenJustExecuted.setColor(QColor(78, 154, 6));
+    m_cTransitionPenJustExecuted.setColor(QColor("#EDD400"));
     
     // for label
     m_cTransitionLabelPen.setColor(QColor(238, 238, 238));
@@ -668,5 +752,6 @@ void DEdit_WidgetPainter::drawTangoCircle(QPainter* painter, int centerx, int ce
         painter->drawEllipse(circle);
     }
 }
+
 
 

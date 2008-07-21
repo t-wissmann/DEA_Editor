@@ -36,12 +36,14 @@ public:
     void recreateStateDraggedTemplate();
     void recreateStateSelectedTemplate();
     void recreateStateCurrentlyExecutedTemplate();
+    void recreateStateResultTemplates();
     void recreateTransitionPens();
     void recreateStatePens();
     void recreateStartStateIndicator();
     
+    static QPoint middlePointOfCurve(QPoint p1, QPoint p2, int curve);
     void paintTransition(QPainter* painter, DEdit_GraphicalTransition* transition);
-    void paintTransition(QPainter* painter, QLineF line, bool bigDotAtStart = TRUE);
+    void paintTransition(QPainter* painter, QLineF line, int curve, bool isTransitionPreview = FALSE);
     void paintTransitionLabel(QPainter* painter, DEdit_GraphicalTransition* transition);
     void recomputeTransitionLabelArea(DEdit_GraphicalTransition* transition);
     static QPixmap recreateStateTemplate(QColor color, int diameter, bool invertedGradient = FALSE);
@@ -58,6 +60,8 @@ private:
     QPixmap  m_cStateHoveredTemplate;
     QPixmap  m_cStateDraggedTemplate;
     QPixmap  m_cStateCurrentlyExecutedTemplate;
+    QPixmap  m_cStateResultDeniedTemplate;
+    QPixmap  m_cStateResultAcceptedTemplate;
     QPixmap  m_cStateSelectedTemplate;
     QPixmap  m_cStartStateIndicator;
     QImage   m_cStartStateIndicatorAlphaMask;
@@ -70,6 +74,7 @@ private:
     QPen     m_cTransitionPenJustExecuted;
     QPen     m_cTransitionLabelPen;
     QFont    m_cTransitionLabelFont;
+    QPixmap  m_cWidgetLockedPixmap;
 };
 
 #endif

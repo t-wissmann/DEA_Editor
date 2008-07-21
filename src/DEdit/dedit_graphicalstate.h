@@ -26,6 +26,13 @@ public:
     // needed for isPointContained
     DEdit_WidgetPainter* m_pWidgetPainter;
     
+    enum EResultIndicator {
+        NoResult,
+        ResultAccepted,
+        ResultDenied
+    };
+    EResultIndicator m_eResultIndicator;
+    
     // functions
     void move(int x, int y);
     bool isPointContained(QPoint pointToCheck);

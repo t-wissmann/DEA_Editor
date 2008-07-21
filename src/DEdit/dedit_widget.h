@@ -43,6 +43,7 @@ public:
     enum EMode {
         ModeNormal,
         ModeDragState,
+        ModeDragTransition,
         ModeAddTransitionSelectFrom,
         ModeAddTransitionSelectTo,
         ModeLocked
@@ -69,7 +70,9 @@ public:
         //  --> searchFromTheEnd = false -> begin at index 0;
     DEdit_GraphicalTransition* transitionAt(QPoint point);
     DEdit_GraphicalTransition* graphicalTransitionForData(DEA_Transition* data);
-    
+    DEdit_GraphicalTransition* graphicalTransitionForStartAndEnd
+            (DEdit_GraphicalState* start, DEdit_GraphicalState* end);
+    QList<DEdit_GraphicalTransition*> graphicalTransitionsWithStart(DEdit_GraphicalState* start);
     QPixmap stateTemplatePixmap() const;
     
     QString dndAddStateCommand() const;
@@ -81,9 +84,11 @@ public:
     bool createDeaFromFile(xmlObject* file);
     bool createGraphicalStatesFromFile(xmlObject* stateList);
     bool createGraphicalTransitionsFromFile(xmlObject* transitionList);
+    static xmlObject* findGraphicalTransitionObject(xmlObject* transitionList, const char* start, const char* end, const char* symbols);
     QString lastSyntaxError();
     void writeDeaToFile(xmlObject* file);
     void writeGraphicalStatesToFile(xmlObject* stateList);
+    void writeGraphicalTransitionsToFile(xmlObject* transitionList);
     
     void retranslateUi();
     void reloadIcons();
@@ -116,6 +121,8 @@ public slots:
     void updateStateContextMenu();
     void clearCompleteDEA();
     void setLocked(bool locked);
+    void recomputeMinimumSize();
+    void putErrorMessage(QString msg);
 protected:
     virtual void paintEvent(QPaintEvent* event);
     // mouse
@@ -166,6 +173,7 @@ private:
     QLine                       m_cNewTransitionLine;
     DEdit_GraphicalTransition*  m_pHoveredTransition;
     DEdit_GraphicalTransition*  m_pSelectedTransition;
+    DEdit_GraphicalTransition*  m_pDraggedTransition;
     
     // some properties
     int             m_nGridResolution;

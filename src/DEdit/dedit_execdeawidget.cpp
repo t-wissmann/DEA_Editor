@@ -13,6 +13,7 @@
 #include <QLineEdit>
 #include <QLabel>
 #include <QTextEdit>
+#include <QToolButton>
 
 // layouts
 #include <QHBoxLayout>
@@ -31,6 +32,7 @@ DEdit_ExecDeaWidget::DEdit_ExecDeaWidget(QWidget* parent)
     m_bPaused = FALSE;
     m_bErrorOccured = FALSE;
     m_nCurrentPosition = 0;
+    m_pCurrentState = NULL;
     // init gui
     allocateWidgets();
     createLayouts();
@@ -54,6 +56,8 @@ void DEdit_ExecDeaWidget::allocateWidgets()
     btnPause  = new QPushButton;
     btnPause->setVisible(FALSE);
     btnSingleStep = new QPushButton;
+    btnLocked = new QPushButton;
+    btnLocked->setCheckable(TRUE);
     // output / console
     txtOutput = new QTextEdit;
     txtOutput->setReadOnly(TRUE);
@@ -68,6 +72,7 @@ void DEdit_ExecDeaWidget::allocateWidgets()
     // input string
     lblInputString = new QLabel;
     txtInputString = new QLineEdit;
+    btnClearInputString = new QToolButton;
     // result
     lblResultLabel = new QLabel;
     lblResultLabel->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
@@ -91,11 +96,16 @@ void DEdit_ExecDeaWidget::createLayouts()
     layoutStartStop->addWidget(btnSingleStep);
     layoutStartStop->addWidget(btnStop);
     layoutStartStop->addStretch();
+    layoutStartStop->addWidget(btnLocked);
     
     layoutInputAndResult = new QGridLayout;
     layoutInputAndResult->setMargin(0);
     layoutInputAndResult->addWidget(lblInputString, 0, 0);
-    layoutInputAndResult->addWidget(txtInputString, 0, 1, 1, 2); // colspan = 2
+    QHBoxLayout* layoutTextbox = new QHBoxLayout;
+    layoutTextbox->setMargin(0);
+    layoutTextbox->addWidget(txtInputString);
+    layoutTextbox->addWidget(btnClearInputString);
+    layoutInputAndResult->addLayout(layoutTextbox, 0, 1, 1, 2); // colspan = 2
     layoutInputAndResult->addWidget(lblResultLabel, 1, 0);
     layoutInputAndResult->addWidget(lblResult, 1, 1);
     layoutInputAndResult->addWidget(lblCurrentResult, 1, 2);
@@ -108,7 +118,7 @@ void DEdit_ExecDeaWidget::createLayouts()
     
     
     layoutParent = new QVBoxLayout;
-    layoutParent->setMargin(0);
+    layoutParent->setMargin(2);
     layoutParent->addLayout(layoutStartStop);
     layoutParent->addLayout(layoutInputAndResult);
     layoutParent->addWidget(txtOutput);
@@ -124,11 +134,12 @@ void DEdit_ExecDeaWidget::connectSlots()
     connect(btnStop, SIGNAL(clicked()), this, SLOT(stop()));
     connect(btnPause, SIGNAL(clicked()), this, SLOT(pause()));
     connect(btnSingleStep, SIGNAL(clicked()), this, SLOT(executeToNextState()));
-    
+    connect(btnLocked, SIGNAL(toggled(bool)), this, SLOT(setEditorLocked(bool)));
     // for output / console
     connect(btnShowHideOutput, SIGNAL(toggled(bool)), txtOutput, SLOT(setVisible(bool)));
     connect(btnShowHideOutput, SIGNAL(toggled(bool)), btnClearOutput, SLOT(setVisible(bool)));
     connect(btnClearOutput, SIGNAL(clicked()), txtOutput, SLOT(clear()));
+    connect(btnClearInputString, SIGNAL(clicked()), txtInputString, SLOT(clear()));
 }
 
 
@@ -138,7 +149,9 @@ void DEdit_ExecDeaWidget::retranslateUi()
     btnStop->setText(tr("Stop"));
     btnPause->setText(tr("Pause"));
     btnSingleStep->setText(tr("Single Step"));
+    btnLocked->setText(tr("Lock Editor"));
     lblInputString->setText(tr("Text to recognize:"));
+    btnClearInputString->setToolTip(tr("Clear Field"));
     btnShowHideOutput->setText(tr("Show log"));
     btnClearOutput->setText(tr("Clear log"));
     lblResultLabel->setText(tr("Result:"));
@@ -149,9 +162,14 @@ void DEdit_ExecDeaWidget::reloadIcons()
     btnStart->setIcon(IconCatcher::getIcon("ktstart_all"));
     btnStop->setIcon(IconCatcher::getIcon("ktstop_all"));
     btnPause->setIcon(IconCatcher::getIcon("player_pause"));
+    btnLocked->setIcon(IconCatcher::getIcon("unlock"));
+    btnClearInputString->setIcon(IconCatcher::getIcon("editclear"));
     btnShowHideOutput->setIcon(IconCatcher::getIcon("konsole"));
     btnClearOutput->setIcon(IconCatcher::getIcon("editclear"));
     btnSingleStep->setIcon(IconCatcher::getIcon("1rightarrow"));
+    
+    m_cIconEditorLocked = IconCatcher::getIcon("lock");
+    m_cIconEditorUnlocked = IconCatcher::getIcon("unlock");
 }
 
 void DEdit_ExecDeaWidget::setDeaWidget(DEdit_Widget* widget)
@@ -174,8 +192,6 @@ void DEdit_ExecDeaWidget::putMessage(QString msg)
     txtOutput->setTextCursor(cursor);
 }
 
-
-
 void DEdit_ExecDeaWidget::resetWidgetProperties()
 {
     btnStart->setEnabled(!m_bRunning || m_bPaused);
@@ -183,10 +199,12 @@ void DEdit_ExecDeaWidget::resetWidgetProperties()
     btnStop->setEnabled(m_bRunning);
     btnSingleStep->setEnabled(m_bRunning);
     txtInputString->setReadOnly(m_bRunning);
-    if(m_pDeaWidget)
+    btnClearInputString->setEnabled(!m_bRunning);
+    if(m_bRunning)
     {
-        m_pDeaWidget->setLocked(m_bRunning);
+        btnLocked->setChecked(TRUE);
     }
+    btnLocked->setEnabled(!m_bRunning);
 }
 
 
@@ -207,6 +225,7 @@ void DEdit_ExecDeaWidget::start()
     {
         return;
     }
+    removeAllResultIndicators();
     putMessage(tr("Starting DEA..."));
     m_bRunning = TRUE;
     m_bPaused = FALSE;
@@ -281,6 +300,7 @@ void DEdit_ExecDeaWidget::executeToNextState()
             text = tr("End of string has been reached and current state \'%statename\' is a final state.").replace("%statename", state->name());
             text += "\n" + tr("\'%inputstring\' ACCEPTED").replace("%inputstring", m_szStringToCheck);
             putMessage(text);
+            m_pCurrentState->m_eResultIndicator = DEdit_GraphicalState::ResultAccepted;
         }
         else
         {
@@ -292,6 +312,7 @@ void DEdit_ExecDeaWidget::executeToNextState()
             // add space so that in lblResult, we can see a red rect at end of string
             m_szStringToCheck += "  ";
             putMessage(text);
+            m_pCurrentState->m_eResultIndicator = DEdit_GraphicalState::ResultDenied;
         }
         stop();
         updateResultLabel();
@@ -308,6 +329,8 @@ void DEdit_ExecDeaWidget::executeToNextState()
         m_bErrorOccured = TRUE;
         text += "\n" + tr("\'%inputstring\' DENIED").replace("%inputstring", m_szStringToCheck);
         putMessage(text);
+        m_pCurrentState->m_eResultIndicator = DEdit_GraphicalState::ResultDenied;
+        // abort
         stop();
         updateResultLabel();
         return;
@@ -390,3 +413,28 @@ void DEdit_ExecDeaWidget::updateResultLabel()
     lblCurrentResult->setText(currentResult);
 }
 
+
+void DEdit_ExecDeaWidget::setEditorLocked(bool locked)
+{
+    if(m_pDeaWidget)
+    {
+        m_pDeaWidget->setLocked(locked);
+    }
+    if(locked)
+    {
+        btnLocked->setIcon(m_cIconEditorLocked);
+    }
+    else
+    {
+        btnLocked->setIcon(m_cIconEditorUnlocked);
+        removeAllResultIndicators();
+    }
+}
+
+void DEdit_ExecDeaWidget::removeAllResultIndicators()
+{
+    if(m_pCurrentState)
+    {
+        m_pCurrentState->m_eResultIndicator = DEdit_GraphicalState::NoResult;
+    }
+}

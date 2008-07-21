@@ -16,6 +16,7 @@ class CommandButtonDND;
 class QStatusBar;
 class QDockWidget;
 class DEdit_ExecDeaWidget;
+class QScrollArea;
 
 // menus
 class QMenuBar;
@@ -40,6 +41,7 @@ public:
     QString loadFromFile(QString filename); // returns errormsg
     QString saveToFile(QString filename); // returns errormsg
 public slots:
+    void newFile();
     void openFile();
     void resetStatusBarText(DEdit_Widget::EMode mode);
     void showSourceCode();
@@ -74,6 +76,7 @@ private:
     
     // actions
     // mnuFile
+    QAction*     mnaNewFile;
     QAction*     mnaOpen;
     QAction*     mnaSave;
     QAction*     mnaSaveAs;
@@ -92,6 +95,7 @@ private:
     
     // layouts
     QVBoxLayout* layoutToolButtons;
+    QScrollArea* scrollCentral;
     QHBoxLayout* layoutParent;
     
     // dialogs

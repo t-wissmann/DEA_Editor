@@ -3,6 +3,7 @@
 #define __DEDIT_EXECDEAWIDGET_H_
 
 #include <QWidget>
+#include <QIcon>
 
 class DEdit_GraphicalState;
 class DEdit_GraphicalTransition;
@@ -11,6 +12,7 @@ class DEdit_Widget;
 class QLineEdit;
 class QLabel;
 class QPushButton;
+class QToolButton;
 class QTextEdit;
 
 // layouts
@@ -40,6 +42,7 @@ public slots:
     void stop();
     void executeToNextState();
     void updateResultLabel();
+    void setEditorLocked(bool locked);
 private:
     // init functions
     void allocateWidgets();
@@ -48,6 +51,7 @@ private:
     
     // private setter
     void resetWidgetProperties();
+    void removeAllResultIndicators();
     
     // widgets
     // toolbuttons
@@ -55,9 +59,11 @@ private:
     QPushButton* btnPause;
     QPushButton* btnSingleStep;
     QPushButton* btnStop;
+    QPushButton* btnLocked;
     // inputstring
     QLabel*      lblInputString;
     QLineEdit*   txtInputString;
+    QToolButton* btnClearInputString;
     
     // console
     QPushButton* btnShowHideOutput;
@@ -81,6 +87,10 @@ private:
     QString       m_szAcceptedSymbols;
     bool          m_bErrorOccured;
     DEdit_GraphicalTransition* m_pLastTransition;
+    
+    // icons
+    QIcon         m_cIconEditorLocked;
+    QIcon         m_cIconEditorUnlocked;
     
     // members
     bool          m_bRunning;

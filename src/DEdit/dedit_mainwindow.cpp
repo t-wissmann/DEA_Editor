@@ -18,6 +18,7 @@
 #include <QStatusBar>
 #include <QMenuBar>
 #include <QDockWidget>
+#include <QScrollArea>
 
 // other qt-classes
 #include <QAction>
@@ -105,12 +106,21 @@ void DEdit_MainWindow::createLayouts()
     // dock exec dea
     dockExecDea->setWidget(wdgExecDea);
     addDockWidget(Qt::BottomDockWidgetArea, dockExecDea);
-    
+    // scroll area
+    scrollCentral = new QScrollArea;
+    scrollCentral->setWidget(wdgEditor);
+    scrollCentral->setWidgetResizable(TRUE);
+    scrollCentral->setFrameStyle(QFrame::NoFrame);
+    QPalette pal = scrollCentral->palette();
+    QColor bgColor = pal.color(QPalette::Window);
+    bgColor.setAlpha(0);
+    pal.setColor(QPalette::Window, bgColor); // make background transparent
+    scrollCentral->setPalette(pal);
     
     layoutParent = new QHBoxLayout;
     layoutParent->setMargin(0);
     layoutParent->setSpacing(0);
-    layoutParent->addWidget(wdgEditor);
+    layoutParent->addWidget(scrollCentral);
     
     QWidget* centralWidget = new QWidget;
     centralWidget->setLayout(layoutParent);
@@ -120,6 +130,7 @@ void DEdit_MainWindow::createLayouts()
 void DEdit_MainWindow::createActions()
 {
     // mnuFile
+    mnaNewFile = new QAction(NULL);
     mnaOpen = new QAction(NULL);
     mnaSave = new QAction(NULL);
     mnaSaveAs = new QAction(NULL);
@@ -143,6 +154,7 @@ void DEdit_MainWindow::createActions()
 void DEdit_MainWindow::createMenuBar()
 {
     mnuFile = menuBar()->addMenu("file");
+    mnuFile->addAction(mnaNewFile);
     mnuFile->addAction(mnaOpen);
     mnuFile->addSeparator();
     mnuFile->addAction(mnaSave);
@@ -175,6 +187,7 @@ void DEdit_MainWindow::connectSlots()
     
     // connections for actions
     // mnuFile
+    connect(mnaNewFile, SIGNAL(triggered()), this, SLOT(newFile()));
     connect(mnaOpen, SIGNAL(triggered()), this, SLOT(openFile()));
     connect(mnaSave, SIGNAL(triggered()), this, SLOT(saveFile()));
     connect(mnaSaveAs, SIGNAL(triggered()), this, SLOT(saveFileAs()));
@@ -215,6 +228,7 @@ void DEdit_MainWindow::retranslateUi()
     
     // actions
     // mnuFile
+    mnaNewFile->setText(tr("New"));
     mnaOpen->setText(tr("Open ..."));
     mnaSave->setText(tr("Save"));
     mnaSaveAs->setText(tr("Save as ..."));
@@ -235,6 +249,7 @@ void DEdit_MainWindow::retranslateUi()
 void DEdit_MainWindow::reloadIcons()
 {
     // actions
+    mnaNewFile->setIcon(IconCatcher::getIcon("filenew"));
     mnaOpen->setIcon(IconCatcher::getIcon("fileopen"));
     mnaSave->setIcon(IconCatcher::getIcon("filesave"));
     mnaSaveAs->setIcon(IconCatcher::getIcon("filesaveas"));
@@ -243,7 +258,7 @@ void DEdit_MainWindow::reloadIcons()
     // tool buttons
     btnAddState->setIcon(IconCatcher::getIcon("add"));
     btnAddTransition->setIcon(IconCatcher::getIcon("add"));
-    btnRemoveItem->setIcon(IconCatcher::getIcon("remove"));
+    btnRemoveItem->setIcon(IconCatcher::getIcon("editdelete"));
     btnEditItem->setIcon(IconCatcher::getIcon("edit"));
     btnMoveUp->setIcon(IconCatcher::getIcon("up"));
     btnMoveDown->setIcon(IconCatcher::getIcon("down"));
@@ -258,6 +273,10 @@ void DEdit_MainWindow::resetStatusBarText(DEdit_Widget::EMode mode)
     {
         case DEdit_Widget::ModeDragState:{
             msg = tr("Drag State to wanted position");
+            break;
+        }
+        case DEdit_Widget::ModeDragTransition:{
+            msg = tr("Drag Transition to wanted curve");
             break;
         }
         case DEdit_Widget::ModeAddTransitionSelectFrom:{
@@ -367,6 +386,13 @@ QString DEdit_MainWindow::saveToFile(QString filename) // returns errormsg
     return szResult;
 }
 
+
+void DEdit_MainWindow::newFile()
+{
+    m_szFilename = ""; // clear current filename
+    // clear dea
+    wdgEditor->clearCompleteDEA();
+}
 
 void DEdit_MainWindow::openFile()
 {

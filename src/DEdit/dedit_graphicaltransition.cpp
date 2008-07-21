@@ -18,6 +18,7 @@ DEdit_GraphicalTransition::DEdit_GraphicalTransition()
     m_pStart = NULL;
     m_pEnd = NULL;
     m_bJustExecuted = FALSE;
+    m_nCurve = 0;
 }
 
 
@@ -29,6 +30,7 @@ DEdit_GraphicalTransition::DEdit_GraphicalTransition(DEdit_GraphicalState* start
     m_bJustExecuted = FALSE;
     m_pStart = start;
     m_pEnd = end;
+    m_nCurve = 0;
 }
 
 DEdit_GraphicalTransition::~DEdit_GraphicalTransition()
@@ -152,5 +154,42 @@ QString DEdit_GraphicalTransition::symbols()
     return m_pData->inputSymbols();
 }
 
+int DEdit_GraphicalTransition::curveByDragPosition(QPoint p1, QPoint p2, QPoint dragPos)
+{
+    if(QLineF(p1, p2).length() == 0)
+    {
+        return 0;
+    }
+    else
+    {
+        int dxP1P2 = p2.x() - p1.x();
+        int dyP1P2 = p2.y() - p1.y();
+        int dxP1Drag = dragPos.x() - p1.x();
+        int dyP1Drag = dragPos.y() - p1.y();
+        
+        // ueber kreuz multiplizieren
+        dyP1P2 *= dxP1Drag;
+        dyP1Drag *= dxP1P2;
+        
+        QPoint middle = (p1 + p2)/2;
+        double distance = QLineF(middle, dragPos).length();
+        int sign = 1;
+        if(dyP1P2 < dyP1Drag)
+        {
+            sign = -1;
+        }
+        double curve = sign * distance/QLineF(p1, p2).length()*1000.0*2.0;
+        // range curve
+        if(curve > 40000)
+        {
+            curve = 40000;
+        }
+        if(curve < -40000)
+        {
+            curve = -40000;
+        }
+        return (int)curve;
+    }
+}
 
 

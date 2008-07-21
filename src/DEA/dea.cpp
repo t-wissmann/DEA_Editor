@@ -321,8 +321,7 @@ bool DEA::initStatesFromStateList(xmlObject* stateList)
     setStartState(startState);
     if(!startState)
     {
-        printf("ERROR: requested start state \'%s\' not existing in \'zustaende\'\n", currentAttribute->value());
-        return false;
+        printf("WARNING: requested start state \'%s\' not existing in \'zustaende\'\n", currentAttribute->value());
     }
     
     

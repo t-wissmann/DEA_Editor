@@ -4,6 +4,7 @@
 #include <io/iconcatcher.h>
 #include <DEdit/dedit_widget.h>
 
+#include <QFont>
 #include <QPushButton>
 #include <QTextEdit>
 
@@ -38,6 +39,7 @@ void Dia_DeaSourceViewer::createGui()
     txtSource->setReadOnly(TRUE);
     txtSource->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     txtSource->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
+    txtSource->setFont(QFont("mono"));
     
     // create layouts
     layoutToolButtons = new QHBoxLayout;

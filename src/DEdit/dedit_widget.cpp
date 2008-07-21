@@ -10,6 +10,7 @@
 // dialogs
 #include <DEdit/dedit_editstatedia.h>
 #include <DEdit/dedit_edittransitiondia.h>
+#include <QMessageBox>
 
 // qt classes
 #include <QSizePolicy>
@@ -35,7 +36,7 @@ DEdit_Widget::DEdit_Widget() :
     m_eMode = ModeNormal;
     m_nGridResolution = 0; // disable grid per default
     m_bAutoEditNewStates = FALSE; // disable auto edit per default
-    m_bAutoEditNewTransitions = FALSE; // disable auto edit per default
+    m_bAutoEditNewTransitions = TRUE;
     // for states
     m_pDraggedState = NULL;
     m_pHoveredState = NULL;
@@ -45,6 +46,7 @@ DEdit_Widget::DEdit_Widget() :
     // for transitions
     m_pHoveredTransition = NULL;
     m_pSelectedTransition = NULL;
+    m_pDraggedTransition = NULL;
     
     // init dialogs
     m_diaEditState = NULL;
@@ -123,7 +125,7 @@ void DEdit_Widget::retranslateUi()
 
 void DEdit_Widget::reloadIcons()
 {
-    m_mnaRemoveItem->setIcon(IconCatcher::getIcon("remove"));
+    m_mnaRemoveItem->setIcon(IconCatcher::getIcon("editdelete"));
     m_mnaEditItem->setIcon(IconCatcher::getIcon("edit"));
 }
 
@@ -180,6 +182,9 @@ void DEdit_Widget::addState(QPoint atPosition)
         editSelectedState();
     }
     
+    // state position has Changed
+    // so recompute minimum size, so that we can see all states
+    recomputeMinimumSize(); 
     // now refresh widget
     update();
 }
@@ -226,6 +231,12 @@ void DEdit_Widget::removeState()
     // remove selection
     m_pDraggedState = NULL;
     m_nSelectedStateIndex = -1;
+    
+    // state position has changed
+    // so recompute minimum size, so that we can see all states
+    recomputeMinimumSize(); 
+    // switch back to normal mode
+    setCurrentMode(ModeNormal);
     // now refresh widget
     update();
 }
@@ -281,6 +292,21 @@ void DEdit_Widget::mouseMoveEvent(QMouseEvent* event)
     {
         case ModeDragState:
         {
+            break;
+        }
+        case ModeDragTransition:
+        {
+            if(m_pDraggedTransition
+               && m_pDraggedTransition->m_pStart
+               && m_pDraggedTransition->m_pEnd)
+            {
+                int curve = DEdit_GraphicalTransition::curveByDragPosition(
+                        m_pDraggedTransition->m_pStart->positionToQPoint(),
+                        m_pDraggedTransition->m_pEnd->positionToQPoint(),
+                        event->pos());
+                m_pDraggedTransition->m_nCurve = curve;
+            }
+            hasToRepaint = TRUE;
             break;
         }
         case ModeAddTransitionSelectFrom:
@@ -358,6 +384,7 @@ bool DEdit_Widget::handleStateDrag(QMouseEvent* event)
         
         m_pDraggedState->move(newX, newY);
         hasToRepaint = TRUE;
+        recomputeMinimumSize();
     }
     else
     {
@@ -481,6 +508,8 @@ void DEdit_Widget::mousePressEvent(QMouseEvent* event)
         {
             currentTransition->m_bSelected = TRUE;
             m_pSelectedTransition = currentTransition;
+            m_pDraggedTransition = currentTransition;
+            setCurrentMode(ModeDragTransition);
         }
         else
         {
@@ -515,6 +544,14 @@ void DEdit_Widget::mouseReleaseEvent(QMouseEvent*)
         m_pDraggedState->isDragged = FALSE;
         // m_pDraggedState now isn't dragged anymore
         m_pDraggedState = NULL;
+        setCurrentMode(ModeNormal);
+        // refresh screen
+        update();
+    }
+    if(m_pDraggedTransition)
+    {
+        // m_pDraggedTransition now isn't dragged anymore
+        m_pDraggedTransition = NULL;
         setCurrentMode(ModeNormal);
         // refresh screen
         update();
@@ -558,6 +595,26 @@ void DEdit_Widget::mouseDoubleClickEvent(QMouseEvent*)
     editItem();
 }
 
+
+void DEdit_Widget::recomputeMinimumSize()
+{
+    int margin = 10;
+    int maxX = DEdit_GraphicalState::m_nDiameter;
+    int maxY = DEdit_GraphicalState::m_nDiameter;
+    for(int i = 0; i < m_StateList.size(); ++i)
+    {
+        if(m_StateList[i].m_nX > maxX)
+        {
+            maxX = m_StateList[i].m_nX;
+        }
+        if(m_StateList[i].m_nY > maxY)
+        {
+            maxY = m_StateList[i].m_nY;
+        }
+    }
+    
+    setMinimumSize(maxX+margin, maxY+margin);
+}
 
 bool DEdit_Widget::isInDragMode() const
 {
@@ -784,6 +841,7 @@ void DEdit_Widget::setLocked(bool locked)
     {
         setCurrentMode(ModeNormal);
     }
+    update();
 }
 
 bool DEdit_Widget::isLocked() const
@@ -844,6 +902,7 @@ void DEdit_Widget::setCurrentMode(EMode mode)
             newCursor = QCursor(Qt::CrossCursor);
             break;
         }
+        case ModeDragTransition:
         case ModeDragState: {
             newCursor = QCursor(Qt::ClosedHandCursor);
             break;
@@ -880,6 +939,24 @@ void DEdit_Widget::createTransition(DEdit_GraphicalState* from, DEdit_GraphicalS
                   "Invalid parameters: DEdit_GraphicalState* from == NULL || DEdit_GraphicalState* to == NULL ");
         return;
     }
+    
+    if(graphicalTransitionForStartAndEnd(from, to))
+    {
+        // if transition already exists
+        // then don't add a new transition
+        QString msg = tr("A Transition from \'%start\' to \'%end\' already exists.");
+        if(from->m_pData)
+        {
+            msg.replace("%start", from->m_pData->name());
+        }
+        if(to->m_pData)
+        {
+            msg.replace("%end", to->m_pData->name());
+        }
+        putErrorMessage(msg);
+        return;
+    }
+    
     // create new transition in DEA
     DEA_Transition* transition = m_pDea->createTransition(from->m_pData, to->m_pData, '\0');
     // init new graphical transition
@@ -925,6 +1002,39 @@ DEdit_GraphicalTransition* DEdit_Widget::graphicalTransitionForData(DEA_Transiti
         }
     }
     return foundItem;
+}
+
+
+DEdit_GraphicalTransition* DEdit_Widget::graphicalTransitionForStartAndEnd
+        (DEdit_GraphicalState* start, DEdit_GraphicalState* end)
+{
+    DEdit_GraphicalTransition* transition;
+    for(int i = 0; i < m_TransitionList.size(); ++i)
+    {
+        transition = &m_TransitionList[i];
+        if(transition->m_pStart == start
+          && transition->m_pEnd == end)
+        {
+            return transition;
+        }
+    }
+    return NULL;
+}
+
+
+
+QList<DEdit_GraphicalTransition*> DEdit_Widget::graphicalTransitionsWithStart
+        (DEdit_GraphicalState* start)
+{
+    QList<DEdit_GraphicalTransition*> result;
+    for(int i = 0; i < m_TransitionList.size(); ++i)
+    {
+        if(m_TransitionList[i].m_pStart == start)
+        {
+            result.append(&m_TransitionList[i]);
+        }
+    }
+    return result;
 }
 
 void DEdit_Widget::removeTransition()
@@ -1073,6 +1183,16 @@ void DEdit_Widget::editSelectedTransition()
     }
     m_diaEditTransition->setTransitionToEdit(m_pSelectedTransition);
     m_diaEditTransition->exec();
+    
+    // if edit failed -> no symbol entered
+    if(m_TransitionList.last().symbols().isEmpty())
+    {
+        // then remove again
+        removeTransition(&m_TransitionList.last());
+        // reset selection
+        m_pSelectedTransition = NULL;
+        m_pHoveredTransition = NULL;
+    }
     update();
 }
 
@@ -1105,9 +1225,9 @@ void DEdit_Widget::writeDeaToFile(xmlObject* file)
     m_pDea->writeToFile(file);
     xmlObject* stateList = file->cAddObject("graphicalstates");
     writeGraphicalStatesToFile(stateList);
-    
+    xmlObject* transitionList = file->cAddObject("graphicaltransitions");
+    writeGraphicalTransitionsToFile(transitionList);
 }
-
 
 void DEdit_Widget::writeGraphicalStatesToFile(xmlObject* stateList)
 {
@@ -1140,12 +1260,48 @@ void DEdit_Widget::writeGraphicalStatesToFile(xmlObject* stateList)
     }
 }
 
+
+void DEdit_Widget::writeGraphicalTransitionsToFile(xmlObject* transitionList)
+{
+    if(!transitionList)
+    {
+        return;
+    }
+    DEdit_GraphicalTransition* transition;
+    xmlObject*     object;
+    int curve;
+    const char* startname;
+    const char* endname;
+    QString symbols;
+    for(int i = 0; i < m_TransitionList.size(); ++i)
+    {
+        transition = &m_TransitionList[i];
+        if(!transition->hasValidPointers())
+        {
+            // if transition is invalid then continue
+            continue;
+        }
+        // get attributes
+        startname = transition->m_pStart->m_pData->name();
+        endname   = transition->m_pEnd->m_pData->name();
+        curve     = transition->m_nCurve;
+        symbols   = transition->symbols();
+        // create new object
+        object = transitionList->cAddObject("transitionoption");
+        object->cAddAttribute("start", startname);
+        object->cAddAttribute("end",   endname);
+        object->cAddAttribute("symbol", symbols.toLocal8Bit().data());
+        object->cAddAttribute("curve", QString::number(curve).toAscii().data());
+    }
+}
+
 bool DEdit_Widget::createDeaFromFile(xmlObject* file)
 {
     if(isLocked())
     {
+        m_szLastSyntaxError = tr("Editor currently is locked, please unlock first");
         // return if widget was locked
-        return;
+        return FALSE;
     }
     clearCompleteDEA();
     if(!m_pDea)
@@ -1170,10 +1326,14 @@ bool DEdit_Widget::createDeaFromFile(xmlObject* file)
     {
         return FALSE;
     }
-    if(!createGraphicalTransitionsFromFile(file))
+    xmlObject* graphicalTransitions = file->cGetObjectByName("graphicaltransitions");
+    if(!createGraphicalTransitionsFromFile(graphicalTransitions))
     {
         return FALSE;
     }
+    // state position has changed
+    // so recompute minimum size, so that we can see all states
+    recomputeMinimumSize();
     update();
     return TRUE;
 }
@@ -1251,7 +1411,7 @@ bool DEdit_Widget::createGraphicalStatesFromFile(xmlObject* stateList)
 }
 
 
-bool DEdit_Widget::createGraphicalTransitionsFromFile(xmlObject*)
+bool DEdit_Widget::createGraphicalTransitionsFromFile(xmlObject* transitionList)
 {
     if(isLocked())
     {
@@ -1266,7 +1426,10 @@ bool DEdit_Widget::createGraphicalTransitionsFromFile(xmlObject*)
     DEdit_GraphicalTransition graphicalTransition;
     DEA_Transition* transition;
     DEA_State *from, *to;
+    int curve;
     DEdit_GraphicalState *graphFrom, *graphTo;
+    xmlObject* transitionGuiInfo;
+    xmlAttribute* curveAttribute;
     for(int i = 0; i < m_pDea->transitionCount(); ++i)
     {
         transition = m_pDea->transitionAt(i);
@@ -1291,14 +1454,71 @@ bool DEdit_Widget::createGraphicalTransitionsFromFile(xmlObject*)
             m_szLastSyntaxError = "Creating graphical transitions: Internal Pointer Error: (!graphFrom || !graphTo)";
             return FALSE;
         }
-        
+        transitionGuiInfo = findGraphicalTransitionObject(transitionList, from->name(), to->name(), transition->inputSymbols());
+        if(transitionGuiInfo
+           && (curveAttribute = transitionGuiInfo->cGetAttributeByName("curve")))
+        {   // if info was found, then set curve
+            curve = curveAttribute->nValueToInt();
+        }else{
+            curve = 0;
+        }
         /// init graphical transition
         graphicalTransition = DEdit_GraphicalTransition(graphFrom, graphTo);
         graphicalTransition.m_pData = transition;
+        graphicalTransition.m_nCurve = curve;
         m_TransitionList.append(graphicalTransition);
     }
     
     return TRUE;
+}
+
+
+xmlObject* DEdit_Widget::findGraphicalTransitionObject
+        (xmlObject* transitionList, const char* start, const char* end, const char* symbols)
+{
+    xmlObject* result = NULL;
+    if(!transitionList || !start || !end || !symbols)
+    {
+        return result;
+    }
+    xmlAttribute* attribute;
+    xmlObject* currentObj;
+    for(int i = 0; i < transitionList->nGetObjectCounter(); ++i)
+    {
+        //qDebug("i = %d for start=%s end=%s", i, start, end);
+        currentObj = transitionList->cGetObjectByIdentifier(i);
+        if(!currentObj)
+        {
+            continue;
+        }
+        // check all attributes
+        // check start
+        attribute = currentObj->cGetAttributeByName("start");
+        if(!attribute || !!strcmp(attribute->value(), start))
+        {
+            //qDebug("attribute start not found");
+            continue;
+        }
+        // check end
+        attribute = currentObj->cGetAttributeByName("end");
+        if(!attribute || !!strcmp(attribute->value(), end))
+        {
+            //qDebug("attribute end not found");
+            continue;
+        }
+        // check symbols
+        attribute = currentObj->cGetAttributeByName("symbol");
+        if(!attribute || !!strcmp(attribute->value(), symbols))
+        {
+            //qDebug("attribute symbol not found");
+            continue;
+        }
+        // if this point is reached,
+        // then we have found wanted transition object
+        result = currentObj;
+        break;
+    }
+    return result;
 }
 
 QString DEdit_Widget::lastSyntaxError()
@@ -1334,6 +1554,9 @@ void DEdit_Widget::clearCompleteDEA()
         m_pDea->setStateCount(0);
         m_pDea->setTransitionCount(0);
     }
+    // state position has changed
+    // so recompute minimum size, so that we can see all states
+    recomputeMinimumSize();
     update();
 }
 
@@ -1406,6 +1629,10 @@ void DEdit_Widget::updateStateContextMenu()
 }
 
 
+void DEdit_Widget::putErrorMessage(QString msg)
+{
+    QMessageBox::critical(window(), tr("DEA Editor"), msg);
+}
 
 /// START SOME VISUAL OPTIONS
 void DEdit_Widget::setGridResolution(int resolution)

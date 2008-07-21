@@ -5,6 +5,7 @@
 #include <QDialog>
 
 class DEdit_GraphicalTransition;
+class DEdit_Widget;
 
 // widgets
 class QPushButton;
@@ -12,6 +13,9 @@ class QLabel;
 class QLineEdit;
 class QDialogButtonBox;
 class CommandButtonDND;
+class QSlider;
+class QToolButton;
+class QSpinBox;
 
 // layouts
 class QHBoxLayout;
@@ -22,7 +26,7 @@ class DEdit_EditTransitionDia : public QDialog
 {
     Q_OBJECT
 public:
-    DEdit_EditTransitionDia(QWidget* parent = 0);
+    DEdit_EditTransitionDia(DEdit_Widget* parent = 0);
     ~DEdit_EditTransitionDia();
     
     void setTransitionToEdit(DEdit_GraphicalTransition* transition);
@@ -31,12 +35,13 @@ public:
     void retranslateUi();
     void reloadIcons();
 public slots:
-    
-    void applyChanges();
+    void ok_clicked();
+    bool applyChanges();
     void setToAllLetters();
     void setToAllUpperLetters();
     void setToAllLowerLetters();
     void setToAllDigits();
+    void resetCurveToNull();
 private:
     // init functions
     void allocateWidgets();
@@ -54,15 +59,23 @@ private:
     CommandButtonDND* btnAllLowerLetters;
     CommandButtonDND* btnAllDigits;
     
+    // symbols
     QLineEdit* txtSymbols;
     QLabel*    lblSymbols;
+    // curve
+    QLabel*    lblCurve;
+    QSlider*   slidCurve;
+    QSpinBox*   spinCurve;
+    QToolButton* btnResetCurve;
     
     // layouts
     QVBoxLayout* layoutParent;
     QGridLayout* layoutCommands;
     QHBoxLayout* layoutSymbols;
+    QHBoxLayout* layoutCurve;
     
     DEdit_GraphicalTransition* m_pTransitionToEdit;
+    DEdit_Widget*              m_pParent;
 };
 
 

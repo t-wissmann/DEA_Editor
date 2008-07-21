@@ -14,6 +14,7 @@ DEdit_GraphicalState::DEdit_GraphicalState(DEA_State* state)
     
     m_bStartState = 0;
     m_bCurrentlyExecutedState = 0;
+    m_eResultIndicator = NoResult;
     isHovered = 0;
     isDragged = 0;
     isSelected = 0;
