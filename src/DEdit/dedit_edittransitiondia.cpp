@@ -89,6 +89,13 @@ void DEdit_EditTransitionDia::createLayouts()
     layoutCurve->addWidget(slidCurve);
     layoutCurve->addWidget(spinCurve);
     layoutCurve->addWidget(btnResetCurve);
+    // new version:
+    // curve can be configured by dragging:
+    lblCurve->setVisible(FALSE);
+    slidCurve->setVisible(FALSE);
+    spinCurve->setVisible(FALSE);
+    btnResetCurve->setVisible(FALSE);
+    
     
     layoutParent = new QVBoxLayout;
     layoutParent->addLayout(layoutSymbols);

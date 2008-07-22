@@ -12,6 +12,10 @@ public:
     ~DEdit_GraphicalState();
     DEA_State* m_pData;
     
+    // for repaint
+    bool m_bChangedSinceRepaint;
+    bool wasChangedSinceRepaint() const;
+    // properties
     int m_nX;
     int m_nY;
     bool m_bStartState;

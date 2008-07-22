@@ -7,6 +7,7 @@ int DEdit_GraphicalState::m_nDiameter = 100;
 
 DEdit_GraphicalState::DEdit_GraphicalState(DEA_State* state)
 {
+    m_bChangedSinceRepaint = FALSE;
     m_pData = state;
     m_pWidgetPainter = NULL;
     m_nX = 0;
@@ -62,5 +63,11 @@ bool DEdit_GraphicalState::isPointContained(QPoint pointToCheck)
 QPoint DEdit_GraphicalState::positionToQPoint() const
 {
     return QPoint(m_nX, m_nY);
+}
+
+
+bool DEdit_GraphicalState::wasChangedSinceRepaint() const
+{
+    return m_bChangedSinceRepaint;
 }
 

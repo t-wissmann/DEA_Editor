@@ -16,6 +16,10 @@ public:
     ~DEdit_GraphicalTransition();
     
     
+    // for repaint
+    bool m_bChangedSinceRepaint;
+    bool wasChangedSinceRepaint() const;
+    // properties
     DEdit_GraphicalState* m_pStart;
     DEdit_GraphicalState* m_pEnd;
     DEA_Transition*  m_pData;

@@ -74,6 +74,10 @@ void Dia_ConfigureDEditWidget::createLayouts()
     layoutParent->addWidget(wdgGridResolution);
     layoutParent->addWidget(boxBottom);
     
+    // new version:
+    // chkAutoEditNewTransitions cant be changed->must always be checked
+    chkAutoEditNewTransitions->setVisible(FALSE);
+    
     setLayout(layoutParent);
 }
 

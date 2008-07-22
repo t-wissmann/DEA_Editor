@@ -13,6 +13,7 @@ int DEdit_GraphicalTransition::m_nWithItselfTransitionRadius = 20;
 
 DEdit_GraphicalTransition::DEdit_GraphicalTransition()
 {
+    m_bChangedSinceRepaint = FALSE;
     m_bHovered = FALSE;
     m_bSelected = FALSE;
     m_pStart = NULL;
@@ -193,3 +194,16 @@ int DEdit_GraphicalTransition::curveByDragPosition(QPoint p1, QPoint p2, QPoint 
 }
 
 
+bool DEdit_GraphicalTransition::wasChangedSinceRepaint() const
+{
+    bool wasChanged = m_bChangedSinceRepaint;
+    if(m_pStart)
+    {
+        wasChanged = (wasChanged || m_pStart->wasChangedSinceRepaint());
+    }
+    if(m_pEnd)
+    {
+        wasChanged = (wasChanged || m_pEnd->wasChangedSinceRepaint());
+    }
+    return wasChanged;
+}

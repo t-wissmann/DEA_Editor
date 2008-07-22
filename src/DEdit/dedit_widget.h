@@ -32,6 +32,7 @@ class QMouseEvent;
 class QKeyEvent;
 class QDragEnterEvent;
 class QDragMoveEvent;
+class QDragLeaveEvent;
 class QDropEvent;
 class QContextMenuEvent;
 
@@ -116,6 +117,7 @@ public slots:
     void moveSelectionDown();
     void setStateSelected(int index);
     void setTransitionSelected(int index);
+    void resetTransitionCurve();
     void setSelectedState_FinalState(bool finalState);
     void setSelectedState_StartState(bool startState);
     void updateStateContextMenu();
@@ -136,6 +138,7 @@ protected:
     // drag and drop..... in this case only drop
     virtual void dragEnterEvent(QDragEnterEvent* event);
     virtual void dragMoveEvent (QDragMoveEvent* event );
+    virtual void dragLeaveEvent (QDragLeaveEvent* event );
     virtual void dropEvent(QDropEvent* event);
     // context menu
     virtual void contextMenuEvent(QContextMenuEvent* event);
@@ -186,6 +189,7 @@ private:
     QMenu*          m_mnuContextMenuTransition;
     QAction*        m_mnaRemoveItem;
     QAction*        m_mnaEditItem;
+    QAction*        m_mnaResetTransitionCurve;
     QAction*        m_mnaSetFinalState;
     QAction*        m_mnaSetStartState;
     

@@ -1,6 +1,7 @@
 
 #include "dedit_mainwindow.h"
 #include <DEdit/dedit_execdeawidget.h>
+#include <DEdit/dedit_propertieswidget.h>
 #include <io/xmlparser.h>
 #include <io/iconcatcher.h>
 #include <io/xmlloader.h>
@@ -75,6 +76,9 @@ void DEdit_MainWindow::allocateWidgets()
     btnMoveDown = new QPushButton;
     btnMoveDown->setVisible(FALSE);
     dockToolButtons = new QDockWidget;
+    // dock properties
+    dockProperties =  new QDockWidget;
+    wdgProperties = new DEdit_PropertiesWidget;
     
     // exec dea
     dockExecDea = new QDockWidget;
@@ -102,6 +106,10 @@ void DEdit_MainWindow::createLayouts()
     wdgFoo->setLayout(layoutToolButtons);
     dockToolButtons->setWidget(wdgFoo);
     addDockWidget(Qt::LeftDockWidgetArea, dockToolButtons);
+    
+    // dock properties
+    dockProperties->setWidget(wdgProperties);
+    addDockWidget(Qt::RightDockWidgetArea, dockProperties);
     
     // dock exec dea
     dockExecDea->setWidget(wdgExecDea);
@@ -140,7 +148,9 @@ void DEdit_MainWindow::createActions()
     mnaShowToolButtonsDock = new QAction(NULL);
     mnaShowToolButtonsDock->setCheckable(TRUE);
     mnaShowToolButtonsDock->setChecked(TRUE);
-    
+    mnaShowProperties = new QAction(NULL);
+    mnaShowProperties->setCheckable(TRUE);
+    mnaShowProperties->setChecked(TRUE);
     mnaShowExecDeaDock = new QAction(NULL);
     mnaShowExecDeaDock->setCheckable(TRUE);
     mnaShowExecDeaDock->setChecked(TRUE);
@@ -164,6 +174,7 @@ void DEdit_MainWindow::createMenuBar()
     
     mnuView = menuBar()->addMenu("view");
     mnuView->addAction(mnaShowToolButtonsDock);
+    mnuView->addAction(mnaShowProperties);
     mnuView->addAction(mnaShowExecDeaDock);
     mnuView->addSeparator();
     mnuView->addAction(mnaShowSourceCode);
@@ -198,6 +209,8 @@ void DEdit_MainWindow::connectSlots()
     connect(dockToolButtons, SIGNAL(visibilityChanged(bool)), mnaShowToolButtonsDock, SLOT(setChecked(bool)));
     connect(mnaShowExecDeaDock, SIGNAL(toggled(bool)), dockExecDea, SLOT(setVisible(bool)));
     connect(dockExecDea, SIGNAL(visibilityChanged(bool)), mnaShowExecDeaDock, SLOT(setChecked(bool)));
+    connect(mnaShowProperties, SIGNAL(toggled(bool)), dockProperties, SLOT(setVisible(bool)));
+    connect(dockProperties, SIGNAL(visibilityChanged(bool)), mnaShowProperties, SLOT(setChecked(bool)));
     // mnuSettings
     connect(mnaShowStatusBar, SIGNAL(toggled(bool)), statusBar(), SLOT(setVisible(bool)));
     connect(mnaConfigureEditor, SIGNAL(triggered()), this, SLOT(showConfigureEditorDialog()));
@@ -215,16 +228,19 @@ void DEdit_MainWindow::initWidgets()
 
 void DEdit_MainWindow::retranslateUi()
 {
-    setWindowTitle(tr("DEA Editor"));
-    // tool buttons
+    setWindowTitle(tr("Dea Editor"));
+    // dock widgets
     dockToolButtons->setWindowTitle(tr("Tool Buttons"));
     dockExecDea->setWindowTitle(tr("Execute Dea"));
+    dockProperties->setWindowTitle(tr("Dea Properties"));
+    // tool buttons
     btnAddState->setText(tr("Add State"));
     btnAddTransition->setText(tr("Add Transition"));
     btnRemoveItem->setText(tr("Remove"));
     btnEditItem->setText(tr("Edit"));
     btnMoveUp->setText(tr("Move up"));
     btnMoveDown->setText(tr("Move down"));
+    
     
     // actions
     // mnuFile
@@ -236,6 +252,7 @@ void DEdit_MainWindow::retranslateUi()
     // mnuView
     mnaShowToolButtonsDock->setText(tr("Show Tool Buttons"));
     mnaShowExecDeaDock->setText(tr("Show \'Execute Dea\'"));
+    mnaShowProperties->setText(tr("Show Properties"));
     mnaShowSourceCode->setText(tr("Show Source Code"));
     // mnuSettings
     mnaShowStatusBar->setText(tr("Show Statusbar"));

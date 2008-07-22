@@ -17,6 +17,7 @@ class QStatusBar;
 class QDockWidget;
 class DEdit_ExecDeaWidget;
 class QScrollArea;
+class DEdit_PropertiesWidget;
 
 // menus
 class QMenuBar;
@@ -69,6 +70,10 @@ private:
     
     // dock widgets
     QDockWidget* dockToolButtons;
+    // dock properties
+    QDockWidget* dockProperties;
+    DEdit_PropertiesWidget* wdgProperties;
+    
     
     //dock run
     QDockWidget* dockExecDea;
@@ -84,6 +89,7 @@ private:
     // mnuView
     QAction*     mnaShowToolButtonsDock;
     QAction*     mnaShowExecDeaDock;
+    QAction*     mnaShowProperties;
     QAction*     mnaShowSourceCode;
     // mnuSettings
     QAction*     mnaShowStatusBar;

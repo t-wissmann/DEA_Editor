@@ -23,6 +23,7 @@
 #include <QMouseEvent>
 #include <QKeyEvent>
 #include <QDragEnterEvent>
+#include <QDragLeaveEvent>
 #include <QDropEvent>
 #include <QDragMoveEvent>
 #include <QContextMenuEvent>
@@ -83,15 +84,16 @@ void DEdit_Widget::createContextMenu()
     m_mnuContextMenuState = new QMenu(this);
     m_mnuContextMenuTransition = new QMenu(this);
     
-    // actions
+    // both
     m_mnaRemoveItem = new QAction(NULL);
     m_mnaEditItem = new QAction(NULL);
-    
+    // transitions
+    m_mnaResetTransitionCurve = new QAction(NULL);
+    // states
     m_mnaSetFinalState = new QAction(NULL);
     m_mnaSetFinalState->setCheckable(TRUE);
     m_mnaSetStartState = new QAction(NULL);
     m_mnaSetStartState->setCheckable(TRUE);
-    
     // for state
     m_mnuContextMenuState->addAction(m_mnaSetStartState);
     m_mnuContextMenuState->addAction(m_mnaSetFinalState);
@@ -99,6 +101,8 @@ void DEdit_Widget::createContextMenu()
     m_mnuContextMenuState->addAction(m_mnaRemoveItem);
     m_mnuContextMenuState->addAction(m_mnaEditItem);
     // for transition
+    m_mnuContextMenuTransition->addAction(m_mnaResetTransitionCurve);
+    m_mnuContextMenuTransition->addSeparator();
     m_mnuContextMenuTransition->addAction(m_mnaRemoveItem);
     m_mnuContextMenuTransition->addAction(m_mnaEditItem);
     
@@ -109,6 +113,7 @@ void DEdit_Widget::createContextMenu()
             SLOT(setSelectedState_StartState(bool)));
     connect(m_mnaSetFinalState, SIGNAL(toggled(bool)), this,
             SLOT(setSelectedState_FinalState(bool)));
+    connect(m_mnaResetTransitionCurve, SIGNAL(triggered()), this, SLOT(resetTransitionCurve()));
     // slot, to update context menu
     connect(this, SIGNAL(selectedStateIndexChanged(int)), this, SLOT(updateStateContextMenu()));
 }
@@ -120,13 +125,14 @@ void DEdit_Widget::retranslateUi()
     m_mnaEditItem->setText(tr("Edit"));
     m_mnaSetFinalState->setText(tr("Final State"));
     m_mnaSetStartState->setText(tr("Start State"));
-    
+    m_mnaResetTransitionCurve->setText(tr("Reset Curve"));
 }
 
 void DEdit_Widget::reloadIcons()
 {
     m_mnaRemoveItem->setIcon(IconCatcher::getIcon("editdelete"));
     m_mnaEditItem->setIcon(IconCatcher::getIcon("edit"));
+    m_mnaResetTransitionCurve->setIcon(IconCatcher::getIcon("undo"));
 }
 
 void DEdit_Widget::setDea(DEA* pDea)
@@ -676,6 +682,29 @@ void DEdit_Widget::dragEnterEvent(QDragEnterEvent* event)
     }
 }
 
+void DEdit_Widget::dragMoveEvent (QDragMoveEvent* event )
+{
+    if(isLocked())
+    {
+        // return if widget was locked
+        return;
+    }
+    m_cDropPreviewPosition = event->pos();
+    if(m_bAboutToDrop)
+    {
+        update();
+    }
+}
+
+void DEdit_Widget::dragLeaveEvent (QDragLeaveEvent* event )
+{
+    if(m_bAboutToDrop)
+    {
+        m_bAboutToDrop = FALSE;
+        update();
+    }
+}
+
 QString DEdit_Widget::dndMimeFormat() const
 {
     return "dea_editor/command_add_state";
@@ -702,20 +731,6 @@ void DEdit_Widget::dropEvent(QDropEvent* event)
 }
 
 
-void DEdit_Widget::dragMoveEvent (QDragMoveEvent* event )
-{
-    if(isLocked())
-    {
-        // return if widget was locked
-        return;
-    }
-    m_cDropPreviewPosition = event->pos();
-    if(m_bAboutToDrop)
-    {
-        update();
-    }
-}
-
 void DEdit_Widget::contextMenuEvent(QContextMenuEvent* event)
 {
     if(isLocked())
@@ -723,10 +738,14 @@ void DEdit_Widget::contextMenuEvent(QContextMenuEvent* event)
         // return if widget was locked
         return;
     }
+    // switch to normal mode
+    setCurrentMode(ModeNormal);
+    
     // only show context menu
     // if an item is selected
     if(m_pSelectedTransition)
     {
+        // disable dragging transition
         m_mnuContextMenuTransition->exec(event->globalPos());
     }
     else if(m_nSelectedStateIndex >= 0)
@@ -1088,7 +1107,14 @@ void DEdit_Widget::removeTransition(DEdit_GraphicalTransition* transition)
 }
 
 
-
+void DEdit_Widget::resetTransitionCurve()
+{
+    if(m_pSelectedTransition)
+    {
+        m_pSelectedTransition->m_nCurve = 0;
+    }
+    update();
+}
 
 QPixmap DEdit_Widget::stateTemplatePixmap() const
 {
