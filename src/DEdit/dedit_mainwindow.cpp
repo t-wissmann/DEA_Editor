@@ -194,7 +194,7 @@ void DEdit_MainWindow::connectSlots()
     connect(btnEditItem, SIGNAL(clicked()), wdgEditor, SLOT(editItem()));
     connect(wdgEditor, SIGNAL(currentModeChanged(DEdit_Widget::EMode)), this,
             SLOT(resetStatusBarText(DEdit_Widget::EMode)));
-    
+    connect(wdgEditor, SIGNAL(deaWasChanged()), wdgProperties, SLOT(refreshFromDea()));
     
     // connections for actions
     // mnuFile
@@ -220,6 +220,7 @@ void DEdit_MainWindow::connectSlots()
 void DEdit_MainWindow::initWidgets()
 {
     wdgEditor->setDea(&m_cDea);
+    wdgProperties->setDea(&m_cDea);
     
     // disable tabs for docks
     setDockOptions(AnimatedDocks);

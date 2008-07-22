@@ -5,6 +5,7 @@ class DEdit_GraphicalState;
 class DEA_Transition;
 #include <QPoint>
 #include <QImage>
+#include <QPixmap>
 #include <QString>
 #include <QRect>
 
@@ -19,11 +20,14 @@ public:
     // for repaint
     bool m_bChangedSinceRepaint;
     bool wasChangedSinceRepaint() const;
+    void setWasChanged();
+    void setToNotChanged();
     // properties
     DEdit_GraphicalState* m_pStart;
     DEdit_GraphicalState* m_pEnd;
     DEA_Transition*  m_pData;
     QImage  m_cAlphaMask;
+    QPixmap m_cPixmap;
     QRect   m_cLabelArea;
     
     // attributes

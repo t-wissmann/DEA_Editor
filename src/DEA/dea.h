@@ -41,6 +41,9 @@ public:
     DEA_Transition* transitionAt(int index);
     
     void putDebugMessage(char* msg);
+    
+    DEA_State**      stateBuf();
+    DEA_Transition** transitionBuf();
 private:
     unsigned int m_uStateCount;
     DEA_State**  m_pStateBuf;

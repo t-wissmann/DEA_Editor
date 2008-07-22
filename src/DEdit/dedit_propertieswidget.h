@@ -8,6 +8,7 @@
 class DEA;
 // widgets
 class QLabel;
+class QFrame;
 class QLineEdit;
 // layouts
 class QHBoxLayout;
@@ -22,25 +23,45 @@ public:
     DEdit_PropertiesWidget(QWidget* parent = 0);
     virtual ~DEdit_PropertiesWidget();
     
-    void setDeaToEdit(DEA* dea);
-    DEA* deaToEdit();
+    void setDea(DEA* dea);
+    DEA* dea();
     
     void retranslateUi();
+    static void initPropertyValueWidgets(QLineEdit* lineedit);
+    static void initPropertyNameWidgets(QLabel* lineedit);
+public slots:
+    void refreshFromDea();
     
 private:
     // init functions
     void allocateWidget();
     void createLayouts();
     void connectSlots();
+    void initWidgets();
     
     // widgets
     QLabel* lblName;
     QLineEdit* txtName;
     QLabel* lblDescription;
     QLineEdit* txtDescription;
+    // properties
+    QFrame*    frmPropeties;
+    QLabel*    lblStates;
+    QLineEdit*    txtStates;
+    QLabel*    lblTransitions;
+    QLineEdit*    txtTransitions;
+    QLabel*    lblAlphabet;
+    QLineEdit*    txtAlphabet;
+    QLabel*    lblStartState;
+    QLineEdit*    txtStartState;
+    QLabel*    lblFinalStates;
+    QLineEdit*    txtFinalStates;
+    
     
     // layouts
     QGridLayout* layoutNameDescription;
+    QGridLayout* layoutProperties;
+    
     QVBoxLayout* layoutParent;
     
     DEA* m_pDea;

@@ -53,6 +53,7 @@ public:
 signals:
     void currentModeChanged(DEdit_Widget::EMode);
     void selectedStateIndexChanged(int index);
+    void deaWasChanged();
 public:
     friend class DEdit_WidgetPainter; // needed to paint all items
     DEdit_Widget();
@@ -152,7 +153,7 @@ private:
     
     // other functions
     void setCurrentMode(EMode mode);
-    
+    void emitDeaWasChanged();
     void createTransition(DEdit_GraphicalState* from, DEdit_GraphicalState* to);
     void removeTransition(DEdit_GraphicalTransition* transition);
     

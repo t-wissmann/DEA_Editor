@@ -27,7 +27,13 @@ public:
     void paintState(QPainter* painter, DEdit_GraphicalState* state);
     void paintStateLabel(QPainter* painter, DEdit_GraphicalState* state);
     
+    void paintTransition(QPainter* painter, DEdit_GraphicalTransition* transition);
+    void repaintTransitionPixmap(DEdit_GraphicalTransition* transition);
+    void paintTransition(QPainter* painter, QLineF line, int curve, bool isTransitionPreview = FALSE);
+    void paintTransitionLabel(QPainter* painter, DEdit_GraphicalTransition* transition);
+    void recomputeTransitionLabelArea(DEdit_GraphicalTransition* transition);
     
+    void setAllItemsToNotChanged();
     
     // create templates
     void recreateAllTemplates();
@@ -42,10 +48,6 @@ public:
     void recreateStartStateIndicator();
     
     static QPoint middlePointOfCurve(QPoint p1, QPoint p2, int curve);
-    void paintTransition(QPainter* painter, DEdit_GraphicalTransition* transition);
-    void paintTransition(QPainter* painter, QLineF line, int curve, bool isTransitionPreview = FALSE);
-    void paintTransitionLabel(QPainter* painter, DEdit_GraphicalTransition* transition);
-    void recomputeTransitionLabelArea(DEdit_GraphicalTransition* transition);
     static QPixmap recreateStateTemplate(QColor color, int diameter, bool invertedGradient = FALSE);
     
     // general paint functions

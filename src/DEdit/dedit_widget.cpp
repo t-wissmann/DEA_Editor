@@ -193,6 +193,7 @@ void DEdit_Widget::addState(QPoint atPosition)
     recomputeMinimumSize(); 
     // now refresh widget
     update();
+    emitDeaWasChanged(); // dea just has been edited
 }
 
 
@@ -243,6 +244,7 @@ void DEdit_Widget::removeState()
     recomputeMinimumSize(); 
     // switch back to normal mode
     setCurrentMode(ModeNormal);
+    emitDeaWasChanged(); // dea just has been edited
     // now refresh widget
     update();
 }
@@ -311,6 +313,7 @@ void DEdit_Widget::mouseMoveEvent(QMouseEvent* event)
                         m_pDraggedTransition->m_pEnd->positionToQPoint(),
                         event->pos());
                 m_pDraggedTransition->m_nCurve = curve;
+                m_pDraggedTransition->setWasChanged();
             }
             hasToRepaint = TRUE;
             break;
@@ -343,10 +346,12 @@ void DEdit_Widget::mouseMoveEvent(QMouseEvent* event)
                     if(m_pHoveredTransition)
                     {
                         m_pHoveredTransition->m_bHovered = FALSE;
+                        m_pHoveredTransition->setWasChanged();
                     }
                     if(transition)
                     {
                         transition->m_bHovered = TRUE;
+                        transition->setWasChanged();
                     }
                     m_pHoveredTransition = transition;
                     hasToRepaint = TRUE;
@@ -389,6 +394,7 @@ bool DEdit_Widget::handleStateDrag(QMouseEvent* event)
         }
         
         m_pDraggedState->move(newX, newY);
+        m_pDraggedState->setWasChanged();
         hasToRepaint = TRUE;
         recomputeMinimumSize();
     }
@@ -460,6 +466,7 @@ void DEdit_Widget::mousePressEvent(QMouseEvent* event)
             // then hovered item has to be dragged
             // activate item
             currentState->isSelected = TRUE;
+            currentState->setWasChanged();
             m_nSelectedStateIndex = i;
             if(m_eMode == ModeNormal)
             {
@@ -502,7 +509,13 @@ void DEdit_Widget::mousePressEvent(QMouseEvent* event)
         i--;
         m_StateList[i].isSelected = FALSE;
     }
+    
+    
     // clear selection
+    if(m_pSelectedTransition)
+    {
+        m_pSelectedTransition->setWasChanged();
+    }
     m_pSelectedTransition = NULL;
     // loop for transitions
     DEdit_GraphicalTransition* currentTransition;
@@ -513,6 +526,7 @@ void DEdit_Widget::mousePressEvent(QMouseEvent* event)
         if(currentTransition->m_bHovered)
         {
             currentTransition->m_bSelected = TRUE;
+            currentTransition->setWasChanged();
             m_pSelectedTransition = currentTransition;
             m_pDraggedTransition = currentTransition;
             setCurrentMode(ModeDragTransition);
@@ -557,6 +571,7 @@ void DEdit_Widget::mouseReleaseEvent(QMouseEvent*)
     if(m_pDraggedTransition)
     {
         // m_pDraggedTransition now isn't dragged anymore
+        m_pDraggedTransition->setWasChanged();
         m_pDraggedTransition = NULL;
         setCurrentMode(ModeNormal);
         // refresh screen
@@ -784,6 +799,7 @@ void DEdit_Widget::setTransitionSelected(int index)
     if(m_pSelectedTransition)
     {
         m_pSelectedTransition->m_bSelected = FALSE;
+        m_pSelectedTransition->setWasChanged();
         m_pSelectedTransition = NULL;
     }
     // and also deselect states
@@ -797,6 +813,7 @@ void DEdit_Widget::setTransitionSelected(int index)
     {
         m_TransitionList[index].m_bSelected = TRUE;
         m_pSelectedTransition = &m_TransitionList[index];
+        m_pSelectedTransition->setWasChanged();
     }
     else
     {
@@ -939,6 +956,10 @@ void DEdit_Widget::setCurrentMode(EMode mode)
 }
 
 
+void DEdit_Widget::emitDeaWasChanged()
+{
+    emit deaWasChanged();
+}
 
 void DEdit_Widget::createTransition(DEdit_GraphicalState* from, DEdit_GraphicalState* to)
 {
@@ -990,6 +1011,7 @@ void DEdit_Widget::createTransition(DEdit_GraphicalState* from, DEdit_GraphicalS
         // edit it
         editSelectedTransition();
     }
+    emitDeaWasChanged(); // dea just has been edited
     update();
 }
 
@@ -1104,6 +1126,8 @@ void DEdit_Widget::removeTransition(DEdit_GraphicalTransition* transition)
     // remove transition from m_pDe
     m_pDea->removeTransition(transition->m_pData);
     m_TransitionList.removeAt(index);
+    emitDeaWasChanged(); // dea just has been edited
+    update();
 }
 
 
@@ -1112,6 +1136,7 @@ void DEdit_Widget::resetTransitionCurve()
     if(m_pSelectedTransition)
     {
         m_pSelectedTransition->m_nCurve = 0;
+        m_pSelectedTransition->setWasChanged();
     }
     update();
 }
@@ -1182,6 +1207,7 @@ void DEdit_Widget::editSelectedState()
     m_diaEditState->exec();
     setSelectedState_StartState(state->m_bStartState);
     updateStateContextMenu();
+    emitDeaWasChanged(); // dea just has been edited
     update();
 }
 
@@ -1219,6 +1245,7 @@ void DEdit_Widget::editSelectedTransition()
         m_pSelectedTransition = NULL;
         m_pHoveredTransition = NULL;
     }
+    emitDeaWasChanged(); // dea just has been edited
     update();
 }
 
@@ -1360,6 +1387,7 @@ bool DEdit_Widget::createDeaFromFile(xmlObject* file)
     // state position has changed
     // so recompute minimum size, so that we can see all states
     recomputeMinimumSize();
+    emitDeaWasChanged(); // dea just has been edited
     update();
     return TRUE;
 }
@@ -1583,6 +1611,7 @@ void DEdit_Widget::clearCompleteDEA()
     // state position has changed
     // so recompute minimum size, so that we can see all states
     recomputeMinimumSize();
+    emitDeaWasChanged(); // dea just has been edited
     update();
 }
 
@@ -1603,6 +1632,7 @@ void DEdit_Widget::setSelectedState_FinalState(bool finalState)
     {
         state->m_pData->setFinalState(finalState);
     }
+    emitDeaWasChanged(); // dea just has been edited
     update();
 }
 
@@ -1638,6 +1668,7 @@ void DEdit_Widget::setSelectedState_StartState(bool startState)
         m_pStartState = NULL;
     }
     
+    emitDeaWasChanged(); // dea just has been edited
     update();
 }
 

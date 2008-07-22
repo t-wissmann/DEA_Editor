@@ -237,6 +237,7 @@ bool DEdit_EditTransitionDia::applyChanges()
     
     m_pTransitionToEdit->setSymbols(symbols);
     m_pTransitionToEdit->m_nCurve = slidCurve->value();
+    m_pTransitionToEdit->setWasChanged();
     if(parentWidget())
     {
         parentWidget()->update();

@@ -544,3 +544,14 @@ DEA_Transition* DEA::transitionAt(int index)
     return m_pTransitionBuf[index];
 }
 
+
+DEA_State** DEA::stateBuf()
+{
+    return m_pStateBuf;
+}
+
+DEA_Transition** DEA::transitionBuf()
+{
+    return m_pTransitionBuf;
+}
+

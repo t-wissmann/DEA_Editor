@@ -15,6 +15,8 @@ public:
     // for repaint
     bool m_bChangedSinceRepaint;
     bool wasChangedSinceRepaint() const;
+    void setWasChanged();
+    void setToNotChanged();
     // properties
     int m_nX;
     int m_nY;

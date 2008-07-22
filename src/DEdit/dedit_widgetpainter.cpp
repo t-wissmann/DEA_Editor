@@ -57,12 +57,9 @@ void DEdit_WidgetPainter::paint()
                 // it will be painted at last
                 continue;
             }
-            recomputeTransitionLabelArea(&(*transitionList)[i]);
             paintTransition(&imagePainter, &(*transitionList)[i]);
         }
         // paint selected transition
-        //imagePainter.setPen(m_cTransitionPenHovered);
-        recomputeTransitionLabelArea(m_pWidget->m_pHoveredTransition);
         paintTransition(&imagePainter, m_pWidget->m_pHoveredTransition);
         
         // paint states
@@ -122,6 +119,27 @@ void DEdit_WidgetPainter::paint()
         widgetpainter.drawPixmap(m_pWidget->rect(), pixmap, m_pWidget->rect());
         widgetpainter.end();
     }
+    setAllItemsToNotChanged();
+}
+
+
+void DEdit_WidgetPainter::setAllItemsToNotChanged()
+{
+    if(!m_pWidget)
+    {
+        DEBUG_MSG("setAllItemsToNotChanged()", "m_pWidget = 0");
+        return;
+    }
+    // all states
+    for(int i = 0; i < m_pWidget->m_StateList.size(); ++i)
+    {
+        m_pWidget->m_StateList[i].setToNotChanged();
+    }
+    // all transitions
+    for(int i = 0; i < m_pWidget->m_TransitionList.size(); ++i)
+    {
+        m_pWidget->m_TransitionList[i].setToNotChanged();
+    }
 }
 
 void DEdit_WidgetPainter::paintState(QPainter* painter, DEdit_GraphicalState* state)
@@ -174,6 +192,8 @@ void DEdit_WidgetPainter::paintState(QPainter* painter, DEdit_GraphicalState* st
     painter->setPen(m_cStateLabelPen);
     paintStateLabel(painter, state);
 }
+
+
 
 
 void DEdit_WidgetPainter::paintStateLabel(QPainter* painter, DEdit_GraphicalState* state)
@@ -238,111 +258,114 @@ QPoint DEdit_WidgetPainter::middlePointOfCurve(QPoint p1, QPoint p2, int curve)
 void DEdit_WidgetPainter::paintTransition
         (QPainter* painter, DEdit_GraphicalTransition* transition)
 {
-    if(!painter || !transition)
-    {
-        return;
-    }
-    if(!transition->hasValidPointers())
+    if(!painter || !transition || !transition->hasValidPointers())
     {
         return;
     }
     
-    // select pen according to the current attributes of transition
-    if(transition->m_bJustExecuted)
-    {
-        painter->setPen(m_cTransitionPenJustExecuted);
+    if(transition->wasChangedSinceRepaint())
+    {// update if something has changed since last paint
+        recomputeTransitionLabelArea(transition);
+        repaintTransitionPixmap(transition);
     }
-    else if(transition->m_bSelected)
-    {
-        painter->setPen(m_cTransitionPenSelected);
-    }
-    else if(transition->m_bHovered)
-    {
-        painter->setPen(m_cTransitionPenHovered);
-    }
-    else
-    {
-        painter->setPen(m_cTransitionPen);
-    }
+    QRect source = transition->m_cPixmap.rect();
+    QRect target = source;
+    target.moveCenter(transition->m_pStart->positionToQPoint());
+    painter->drawPixmap(target, transition->m_cPixmap, source);
     
+    
+    {/// very useful to understand code about alpha mask
+        //painter->drawImage(33, 33, transition->m_cAlphaMask);
+    }
+}
+
+
+void DEdit_WidgetPainter::repaintTransitionPixmap(DEdit_GraphicalTransition* transition)
+{
+    if(!transition || !transition->hasValidPointers())
+    {
+        return;
+    }
+    /// init some variables
     int lineWidth = DEdit_GraphicalTransition::m_nLineWidth;
     // init line
     QLineF line(transition->m_pStart->positionToQPoint(),
                 transition->m_pEnd  ->positionToQPoint());
-    // shorten transition if it connects to different states
-    /*if(line.length() != 0) 
+    /// compute size of pixmaps
+    int pixmapWidth = abs(line.dx())*2+lineWidth*3 + transition->m_cLabelArea.width();
+    int pixmapHeight = abs(line.dy())*2+lineWidth*3 + transition->m_cLabelArea.height();
+    // add height and width for curve
+    pixmapWidth  += abs(line.dy())/1000.0*fabs(transition->m_nCurve);
+    pixmapHeight += abs(line.dx())/1000.0*fabs(transition->m_nCurve);
+    if(line.length() == 0)
     {
-        line.setLength(line.length() - DEdit_GraphicalState::m_nDiameter/2);
-    }*/
+        pixmapWidth = DEdit_GraphicalState::m_nDiameter
+                + DEdit_GraphicalTransition::m_nWithItselfTransitionRadius * 2 +
+                DEdit_GraphicalTransition::m_nLineWidth;
+        pixmapWidth *= 2;
+        pixmapHeight = pixmapWidth;
+        pixmapWidth += transition->m_cLabelArea.width()/2;
+    }
+    /// compute offset
+    int offsetX = pixmapWidth/2;
+    int offsetY = pixmapHeight/2;
+    /// now move the line by offset
+    line = QLineF(offsetX, offsetY, offsetX+line.dx(),
+                  offsetY+line.dy());
+    // now resize pixmap
+    transition->m_cPixmap = QPixmap(pixmapWidth, pixmapHeight);
+    transition->m_cPixmap.fill(QColor(0, 0, 0, 0));
+    /// init painter
+    QPainter painter(&transition->m_cPixmap);
+    painter.setRenderHint(QPainter::Antialiasing);
+    // select pen according to the current attributes of transition
+    if(transition->m_bJustExecuted){
+        painter.setPen(m_cTransitionPenJustExecuted);
+    }else if(transition->m_bSelected){
+        painter.setPen(m_cTransitionPenSelected);
+    }else if(transition->m_bHovered){
+        painter.setPen(m_cTransitionPenHovered);
+    }else{
+        painter.setPen(m_cTransitionPen);
+    }
+    
     // paint line and label background to painter
-    paintTransition(painter, line, transition->m_nCurve);
+    paintTransition(&painter, line, transition->m_nCurve);
+    // reset Label Area
     QRect lblArea = transition->m_cLabelArea;
-    if(lblArea.isValid())
-    {
-        painter->setBrush(painter->pen().brush());
-        painter->drawRect(lblArea);
+    lblArea.moveTo(QPoint(offsetX, offsetY)
+            + lblArea.topLeft() - transition->m_pStart->positionToQPoint());
+    transition->m_cLabelArea = lblArea;
+    if(lblArea.isValid()){
+        painter.setBrush(painter.pen().brush());
+        painter.drawRect(lblArea);
     }
     
     // paint label
-    painter->setPen(m_cTransitionLabelPen);
-    painter->setFont(m_cTransitionLabelFont);
-    paintTransitionLabel(painter, transition);
+    painter.setPen(m_cTransitionLabelPen);
+    painter.setFont(m_cTransitionLabelFont);
+    paintTransitionLabel(&painter, transition);
     
     
     // paint to alpha mask
-    int alphaMaskWidth = abs(line.dx())*2+lineWidth*3;
-    int alphaMaskHeight = abs(line.dy())*2+lineWidth*3;
-    // add height and width for curve
-    alphaMaskWidth  += abs(line.dy())/1000.0*fabs(transition->m_nCurve);
-    alphaMaskHeight += abs(line.dx())/1000.0*fabs(transition->m_nCurve);
-    
-    // ensure, that label is within alpha mask
-    if(alphaMaskWidth < transition->m_cLabelArea.width())
-    {
-        alphaMaskWidth = transition->m_cLabelArea.width();
-    }
-    if(alphaMaskHeight < transition->m_cLabelArea.height())
-    {
-        alphaMaskHeight = transition->m_cLabelArea.height();
-    }
-    
-    if(line.length() == 0)
-    {
-        alphaMaskWidth = DEdit_GraphicalState::m_nDiameter + DEdit_GraphicalTransition::m_nWithItselfTransitionRadius * 2 +
-                DEdit_GraphicalTransition::m_nLineWidth;
-        alphaMaskWidth *= 2;
-        alphaMaskHeight = alphaMaskWidth;
-    }
-    QImage alphaMask(alphaMaskWidth, alphaMaskHeight,
+    QImage alphaMask(pixmapWidth, pixmapHeight,
                      QImage::Format_Mono);
     QPainter alphaPainter(&alphaMask);
     QPen alphaPen(m_cTransitionPen);
     alphaPen.setColor(QColor(255, 255, 255));
     alphaPainter.setPen(alphaPen);
-    alphaPainter.fillRect(QRect(0, 0, alphaMask.width(), alphaMask.height()),
-                         QBrush(QColor(0, 0, 0)));
-    int offsetX = alphaMask.width()/2;
-    int offsetY = alphaMask.height()/2;
-    
+    alphaPainter.fillRect(QRect(0, 0, pixmapWidth, pixmapHeight),
+                          QBrush(QColor(0, 0, 0)));
     
     // paint line and label background to alpha
-    int dx = offsetX - line.x1();
-    int dy = offsetY -line.y1();
-    alphaPainter.drawRect(transition->m_cLabelArea.adjusted(dx, dy, dx, dy));
-    line = QLineF(offsetX, offsetY, offsetX+line.dx(),
-                  offsetY+line.dy());
+    alphaPainter.drawRect(lblArea);
     alphaPainter.setBrush(Qt::NoBrush);
     paintTransition(&alphaPainter, line, transition->m_nCurve);
     
     alphaPainter.end();
-    {
-        /// very useful to understand code above
-        //painter->drawImage(33, 33, alphaMask);
-    }
     transition->m_cAlphaMask = alphaMask;
     
 }
-
 
 void DEdit_WidgetPainter::paintTransitionLabel
         (QPainter* painter, DEdit_GraphicalTransition* transition)

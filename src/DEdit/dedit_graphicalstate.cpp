@@ -7,7 +7,7 @@ int DEdit_GraphicalState::m_nDiameter = 100;
 
 DEdit_GraphicalState::DEdit_GraphicalState(DEA_State* state)
 {
-    m_bChangedSinceRepaint = FALSE;
+    m_bChangedSinceRepaint = TRUE; // at beginning, all states has to be repainted
     m_pData = state;
     m_pWidgetPainter = NULL;
     m_nX = 0;
@@ -69,5 +69,15 @@ QPoint DEdit_GraphicalState::positionToQPoint() const
 bool DEdit_GraphicalState::wasChangedSinceRepaint() const
 {
     return m_bChangedSinceRepaint;
+}
+
+void DEdit_GraphicalState::setWasChanged()
+{
+    m_bChangedSinceRepaint = TRUE;
+}
+
+void DEdit_GraphicalState::setToNotChanged()
+{
+    m_bChangedSinceRepaint = FALSE;
 }
 

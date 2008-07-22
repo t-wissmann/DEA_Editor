@@ -260,6 +260,7 @@ void DEdit_ExecDeaWidget::stop()
     {
         // deselect old transition
         m_pLastTransition->m_bJustExecuted = FALSE;
+        m_pLastTransition->setWasChanged();
     }
     if(m_pCurrentState)
     {
@@ -359,12 +360,14 @@ void DEdit_ExecDeaWidget::executeToNextState()
     if(m_pLastTransition)
     {
         m_pLastTransition->m_bJustExecuted = FALSE;
+        m_pLastTransition->setWasChanged();
     }
     m_pLastTransition = m_pDeaWidget->graphicalTransitionForData(transition);
     // select new transition
     if(m_pLastTransition)
     {
         m_pLastTransition->m_bJustExecuted = TRUE;
+        m_pLastTransition->setWasChanged();
     }
     
     // deselect old currentState
