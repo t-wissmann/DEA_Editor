@@ -145,7 +145,7 @@ void DEdit_PropertiesWidget::initPropertyNameWidgets(QLabel* widget)
     widget->setFrameShadow(QFrame::Sunken);
     widget->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
     QFont font = widget->font();
-    font.setPointSize(10);
+    font.setPointSize(13);
     widget->setFont(font);
 }
 
@@ -204,23 +204,28 @@ void DEdit_PropertiesWidget::refreshFromDea()
     txtStartState->setCursorPosition(0);
     QString allStates = "";
     QString finalStates = "";
+    DEA_State* currentState;
     DEA_State** stateBuf = m_pDea->stateBuf();
     if(stateBuf)
     {
         for(unsigned int i = 0; i < m_pDea->stateCount(); ++i)
         {
-            if(stateBuf[i])
+            currentState = stateBuf[i];
+            if(currentState)
             {
                 if(!allStates.isEmpty())
                 {
                     allStates += ", ";
                 }
-                allStates += stateBuf[i]->name();
-                if(!finalStates.isEmpty())
+                allStates += currentState->name();
+                if(currentState->isFinalState())
                 {
-                    finalStates += ", ";
+                    if(!finalStates.isEmpty())
+                    {
+                        finalStates += ", ";
+                    }
+                    finalStates += currentState->name();
                 }
-                finalStates += stateBuf[i]->name();
             }
         }
     }
