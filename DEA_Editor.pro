@@ -11,6 +11,9 @@ DEPENDPATH += . src src/DEdit
 CONFIG += qt  #warn_on #Debugging-Informationen und Warnungen werden ausgegeben
 INCLUDEPATH += . src
 
+TRANSLATIONS = translations/dea_editor_english.ts \
+               translations/dea_editor_german.ts
+
 # Input
 HEADERS += \ # DEA
            src/DEA/dea.h \
@@ -27,6 +30,7 @@ HEADERS += \ # DEA
            \ # general dialogs
            src/dialogs/dia_deasourceviewer.h \
            src/dialogs/dia_configurededitwidget.h \
+           src/dialogs/dia_about.h \
            \ # dialogs for editor
            src/DEdit/dedit_editstatedia.h \
            src/DEdit/dedit_edittransitiondia.h \
@@ -54,6 +58,7 @@ SOURCES += src/main.cpp \
            \ # general dialogs
            src/dialogs/dia_deasourceviewer.cpp \
            src/dialogs/dia_configurededitwidget.cpp \
+           src/dialogs/dia_about.cpp \
            \ # dialogs for editor
            src/DEdit/dedit_editstatedia.cpp \
            src/DEdit/dedit_edittransitiondia.cpp \

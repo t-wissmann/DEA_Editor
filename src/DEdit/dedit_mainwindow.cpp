@@ -9,6 +9,7 @@
 // dialogs
 #include <dialogs/dia_deasourceviewer.h>
 #include <dialogs/dia_configurededitwidget.h>
+#include <dialogs/dia_about.h>
 #include <QMessageBox>
 #include <QFileDialog>
 
@@ -22,6 +23,7 @@
 #include <QScrollArea>
 
 // other qt-classes
+#include <QApplication>
 #include <QAction>
 #include <QMenu>
 #include <QPixmap>
@@ -60,6 +62,7 @@ void DEdit_MainWindow::initMembers()
     // init dialogs
     m_diaSourceViewer = NULL;
     m_diaConfigureDEditWidget = NULL;
+    m_diaAbout = NULL;
 }
 
 void DEdit_MainWindow::allocateWidgets()
@@ -159,6 +162,9 @@ void DEdit_MainWindow::createActions()
     mnaShowStatusBar->setCheckable(TRUE);
     mnaShowStatusBar->setChecked(TRUE);
     mnaConfigureEditor = new QAction(NULL);
+    // mnuHelp
+    mnaAbout = new QAction(NULL);
+    mnaAboutQt = new QAction(NULL);
 }
 
 void DEdit_MainWindow::createMenuBar()
@@ -182,6 +188,10 @@ void DEdit_MainWindow::createMenuBar()
     mnuSettings = menuBar()->addMenu("settings");
     mnuSettings->addAction(mnaShowStatusBar);
     mnuSettings->addAction(mnaConfigureEditor);
+    
+    mnuHelp = menuBar()->addMenu("help");
+    mnuHelp->addAction(mnaAbout);
+    mnuHelp->addAction(mnaAboutQt);
 }
 
 void DEdit_MainWindow::connectSlots()
@@ -214,7 +224,9 @@ void DEdit_MainWindow::connectSlots()
     // mnuSettings
     connect(mnaShowStatusBar, SIGNAL(toggled(bool)), statusBar(), SLOT(setVisible(bool)));
     connect(mnaConfigureEditor, SIGNAL(triggered()), this, SLOT(showConfigureEditorDialog()));
-    
+    // mnuHelp
+    connect(mnaAbout, SIGNAL(triggered()), this, SLOT(showAboutDialog()));
+    connect(mnaAboutQt, SIGNAL(triggered()), qApp, SLOT(aboutQt()));
 }
 
 void DEdit_MainWindow::initWidgets()
@@ -258,14 +270,19 @@ void DEdit_MainWindow::retranslateUi()
     // mnuSettings
     mnaShowStatusBar->setText(tr("Show Statusbar"));
     mnaConfigureEditor->setText(tr("Configure Editor"));
+    // mnuHelp
+    mnaAbout->setText(tr("About Dea Editor"));
+    mnaAboutQt->setText(tr("About Qt"));
     // menus
     mnuView->setTitle(tr("&View"));
     mnuFile->setTitle(tr("&File"));
     mnuSettings->setTitle(tr("&Settings"));
+    mnuHelp->setTitle(tr("&Help"));
 }
 
 void DEdit_MainWindow::reloadIcons()
 {
+    setWindowIcon(IconCatcher::getIcon("dea_editor", 48));
     // actions
     mnaNewFile->setIcon(IconCatcher::getIcon("filenew"));
     mnaOpen->setIcon(IconCatcher::getIcon("fileopen"));
@@ -273,6 +290,7 @@ void DEdit_MainWindow::reloadIcons()
     mnaSaveAs->setIcon(IconCatcher::getIcon("filesaveas"));
     mnaQuit->setIcon(IconCatcher::getIcon("exit"));
     mnaConfigureEditor->setIcon(IconCatcher::getIcon("configure"));
+    mnaAbout->setIcon(IconCatcher::getIcon("dea_editor", 48));
     // tool buttons
     btnAddState->setIcon(IconCatcher::getIcon("add"));
     btnAddTransition->setIcon(IconCatcher::getIcon("add"));
@@ -461,5 +479,15 @@ QString DEdit_MainWindow::loadFromFile(QString filename) // returns errormsg
         statusBar()->showMessage(tr("File %filename successfully loaded").replace("%filename", filename), 3000);
     }
     return szResult;
+}
+
+
+void DEdit_MainWindow::showAboutDialog()
+{
+    if(!m_diaAbout)
+    {
+        m_diaAbout = new Dia_About(this);
+    }
+    m_diaAbout->show();
 }
 

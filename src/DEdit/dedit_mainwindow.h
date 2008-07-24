@@ -8,6 +8,7 @@
 // dialogs
 class Dia_DeaSourceViewer;
 class Dia_ConfigureDEditWidget;
+class Dia_About;
 
 // widgets
 #include<DEdit/dedit_widget.h>
@@ -38,7 +39,6 @@ public:
     void retranslateUi();
     void reloadIcons();
     
-    
     QString loadFromFile(QString filename); // returns errormsg
     QString saveToFile(QString filename); // returns errormsg
 public slots:
@@ -49,6 +49,7 @@ public slots:
     void showConfigureEditorDialog();
     void saveFile();
     void saveFileAs();
+    void showAboutDialog();
 private:
     void initMembers();
     void allocateWidgets();
@@ -94,10 +95,14 @@ private:
     // mnuSettings
     QAction*     mnaShowStatusBar;
     QAction*     mnaConfigureEditor;
+    // mnuHelp
+    QAction*     mnaAboutQt;
+    QAction*     mnaAbout;
     // menus in menubar
     QMenu*       mnuFile;
     QMenu*       mnuView;
     QMenu*       mnuSettings;
+    QMenu*       mnuHelp;
     
     // layouts
     QVBoxLayout* layoutToolButtons;
@@ -107,6 +112,7 @@ private:
     // dialogs
     Dia_DeaSourceViewer*      m_diaSourceViewer;
     Dia_ConfigureDEditWidget* m_diaConfigureDEditWidget;
+    Dia_About*                m_diaAbout;
     
     // members
     QString m_szFilename;
