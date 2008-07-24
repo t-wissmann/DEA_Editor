@@ -78,7 +78,7 @@ void DEdit_WidgetPainter::paint()
             // paint line of new transition
             int stateRadius = DEdit_GraphicalState::m_nDiameter/2;
             imagePainter.setPen(m_cTransitionPen);
-            imagePainter.setBrush(m_cTransitionPen.brush());
+            imagePainter.setBrush(Qt::NoBrush);
             QLineF newLine (m_pWidget->m_cNewTransitionLine);
             
             // if another item is hovered
@@ -299,12 +299,11 @@ void DEdit_WidgetPainter::repaintTransitionPixmap(DEdit_GraphicalTransition* tra
     pixmapHeight += abs(line.dx())/1000.0*fabs(transition->m_nCurve);
     if(line.length() == 0)
     {
-        pixmapWidth = DEdit_GraphicalState::m_nDiameter
-                + DEdit_GraphicalTransition::m_nWithItselfTransitionRadius * 2 +
-                DEdit_GraphicalTransition::m_nLineWidth;
+        pixmapWidth = DEdit_GraphicalTransition::m_nLineWidth;
+        pixmapWidth += DEdit_GraphicalTransition::labelRadius();
+        pixmapWidth += transition->m_cLabelArea.width()/2;
         pixmapWidth *= 2;
         pixmapHeight = pixmapWidth;
-        pixmapWidth += transition->m_cLabelArea.width()/2;
     }
     /// compute offset
     int offsetX = pixmapWidth/2;
@@ -412,26 +411,21 @@ void DEdit_WidgetPainter::recomputeTransitionLabelArea
         }
         else
         {
-            int radius = DEdit_GraphicalState::m_nDiameter/2 + 
-                    DEdit_GraphicalTransition::m_nWithItselfTransitionRadius;
+            double labelRadius = DEdit_GraphicalTransition::labelRadius();
+            // angle in 0.1°
+            int angle = 450 + transition->m_nCurve; // start at 45°
+            double angle_rad = ((double)angle)/1800 * M_PI;
             
-            /*
-            calculation of HALF_SQRT_OF_2plus1
-            HALF_SQRT_OF_2plus1 = 1 + sqrt(2) / 2;
-            1 : move to center of big circle
-            sqrt(2)/2 : move to line of circle ( sqrt(2)/2 = sin(45°))
-            */
-#define HALF_SQRT_OF_2plus1 1.70710
-            int delta = (HALF_SQRT_OF_2plus1 * radius);
-            result.moveCenter(lblPos + QPoint(delta, -delta));
-#undef HALF_SQRT_OF_2plus1 // undef, because only needed for int delta
+            int dx = (int)(labelRadius * cos(angle_rad));
+            int dy = (int)(labelRadius * sin(angle_rad));
+            result.moveCenter(lblPos + QPoint(dx, -dy));
         }
     }
     transition->m_cLabelArea = result;
 }
 
 void DEdit_WidgetPainter::paintTransition(QPainter* painter, QLineF line,
-                                    int curve, bool isTransitionPreview)
+                            int curve, bool isTransitionPreview)
 {
     int penwidth = m_cTransitionPen.width();
     double arrowlength = 15;
@@ -479,15 +473,27 @@ void DEdit_WidgetPainter::paintTransition(QPainter* painter, QLineF line,
     {// else a state is connected with itself
         int radius = DEdit_GraphicalState::m_nDiameter/2 + 
                 DEdit_GraphicalTransition::m_nWithItselfTransitionRadius;
-        QRect rect(line.x1(), line.y1(), radius*2, -radius*2);
+        QPainterPath path;
+        path.moveTo(line.p1());
+        double angle_rad = ((double)curve)/1800 * M_PI;
+        double cos_angle = cos(angle_rad);
+        double sin_angle = sin(angle_rad);
+        double circle_center_radius = sqrt(2) * radius;
+        // rect for circle
+        QRectF rect(0, 0, radius*2, -radius*2);
+        QPointF center(line.x1()+cos(angle_rad+M_PI_4)*circle_center_radius,
+                       line.y1()-sin(angle_rad+M_PI_4)*circle_center_radius);
+        rect.moveCenter(center.toPoint());
         // from state center to -90° of big circle
-        painter->drawLine(line.x1(), line.y1(), line.x1()+radius, line.y1());
+        path.lineTo(line.x1()+radius*cos_angle, line.y1()-radius*sin_angle);
         // draw big dircle from -90° to +180°
-        painter->drawArc(rect, -90*16, 270*16);
+        path.arcTo(rect, ((qreal)curve)/-10+90,(qreal)-270);
         // from +180° to top of state
-        painter->drawLine(line.x1(), line.y1()-radius,
-                          line.x1(), line.y1()-DEdit_GraphicalState::m_nDiameter/2);
-        arrowPos = QPoint(line.x1(), line.y1()-DEdit_GraphicalState::m_nDiameter/2);
+        arrowPos = QPoint(line.x1()-DEdit_GraphicalState::m_nDiameter/2*sin_angle,
+                          line.y1()-DEdit_GraphicalState::m_nDiameter/2*cos_angle);
+        path.lineTo(arrowPos.x(), arrowPos.y());
+        painter->drawPath(path);
+        arrowAngle = 90 + ((double)curve/10);
     }
     //painter->drawText(100, 100, QString("Arrow angle: ") + QString::number(arrowAngle));
     // compute from degrees to rad

@@ -20,6 +20,7 @@ DEdit_GraphicalTransition::DEdit_GraphicalTransition()
     m_pEnd = NULL;
     m_bJustExecuted = FALSE;
     m_nCurve = 0;
+    m_nDragRotationOffset = 0;
 }
 
 
@@ -33,6 +34,7 @@ DEdit_GraphicalTransition::DEdit_GraphicalTransition(DEdit_GraphicalState* start
     m_pStart = start;
     m_pEnd = end;
     m_nCurve = 0;
+    m_nDragRotationOffset = 0;
 }
 
 DEdit_GraphicalTransition::~DEdit_GraphicalTransition()
@@ -87,6 +89,10 @@ bool DEdit_GraphicalTransition::isConnectedWith(DEdit_GraphicalState* state) con
     return (m_pStart == state) || (m_pEnd == state);
 }
 
+bool DEdit_GraphicalTransition::startEqualsEnd() const
+{
+    return m_pStart == m_pEnd;
+}
 
 
 QString DEdit_GraphicalTransition::graphicalLabel() const
@@ -156,11 +162,51 @@ QString DEdit_GraphicalTransition::symbols()
     return m_pData->inputSymbols();
 }
 
+
+int DEdit_GraphicalTransition::curveByDragPosition(QPoint dragPos)
+{
+    if(!m_pStart || !m_pEnd)
+    {
+        return 0;
+    }
+    return curveByDragPosition(m_pStart->positionToQPoint(),
+                               m_pEnd->positionToQPoint(),
+                                       dragPos);
+}
+
 int DEdit_GraphicalTransition::curveByDragPosition(QPoint p1, QPoint p2, QPoint dragPos)
 {
     if(QLineF(p1, p2).length() == 0)
     {
-        return 0;
+        // compute angle
+        double dx = dragPos.x() - p1.x();
+        double dy = dragPos.y() - p1.y();
+        double angle;
+        if(dx == 0)
+        {
+            if(dy == 0)
+            {
+                return 0;
+            }
+            if(dy < 0)
+            {
+                angle = M_PI_2; // 90 °
+            }
+            else
+            {
+                angle = M_PI_2 * 3; // 270 °
+            }
+        }
+        else
+        {
+            angle = atan(-dy / dx);
+            if(dx < 0)
+            {
+                angle += M_PI;
+            }
+        }
+        int curve = angle / M_PI * 1800 - 450;
+        return curve;
     }
     else
     {
@@ -216,4 +262,14 @@ bool DEdit_GraphicalTransition::wasChangedSinceRepaint() const
         wasChanged = (wasChanged || m_pEnd->wasChangedSinceRepaint());
     }
     return wasChanged;
+}
+
+double DEdit_GraphicalTransition::labelRadius()
+{
+    // radius of big circle of transitions from a state to itself
+    double radius = DEdit_GraphicalState::m_nDiameter/2 + 
+            DEdit_GraphicalTransition::m_nWithItselfTransitionRadius;
+    
+    // 2.414213562373095049  = (sqrt(2) + 1)
+    return radius * 2.4142135;
 }

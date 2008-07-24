@@ -308,11 +308,10 @@ void DEdit_Widget::mouseMoveEvent(QMouseEvent* event)
                && m_pDraggedTransition->m_pStart
                && m_pDraggedTransition->m_pEnd)
             {
-                int curve = DEdit_GraphicalTransition::curveByDragPosition(
-                        m_pDraggedTransition->m_pStart->positionToQPoint(),
-                        m_pDraggedTransition->m_pEnd->positionToQPoint(),
-                        event->pos());
-                m_pDraggedTransition->m_nCurve = curve;
+                int curve = m_pDraggedTransition->curveByDragPosition(event->pos());
+                m_pDraggedTransition->m_nCurve = curve
+                        - m_pDraggedTransition->m_nDragRotationOffset;
+                //qDebug("curve = %d;  offset = %d", curve, m_pDraggedTransition->m_nDragRotationOffset);
                 m_pDraggedTransition->setWasChanged();
             }
             hasToRepaint = TRUE;
@@ -529,6 +528,19 @@ void DEdit_Widget::mousePressEvent(QMouseEvent* event)
             currentTransition->setWasChanged();
             m_pSelectedTransition = currentTransition;
             m_pDraggedTransition = currentTransition;
+            if(currentTransition->startEqualsEnd())
+            {
+                // if transition is a transtion from a state to the same state
+                // we first have to compute the offset of the angle
+                // similar to DEdit_GraphicalState::m_nDragOffsetX
+                currentTransition->m_nDragRotationOffset =
+                    currentTransition->curveByDragPosition(event->pos()) - 
+                        currentTransition->m_nCurve;
+            }else
+            {
+                // set offset to 0 if transition connects to different states
+                currentTransition->m_nDragRotationOffset = 0;
+            }
             setCurrentMode(ModeDragTransition);
         }
         else
