@@ -340,6 +340,13 @@ void DEdit_Widget::mouseMoveEvent(QMouseEvent* event)
             // only in normal mode
             {
                 DEdit_GraphicalTransition* transition = transitionAt(event->pos());
+                if(m_pHoveredState)
+                {
+                    // if an state already is hovered
+                    // (state has higher hover priority)
+                    // then don't hover any transition
+                    transition = NULL;
+                }
                 if(transition != m_pHoveredTransition)
                 {
                     if(m_pHoveredTransition)

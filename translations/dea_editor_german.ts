@@ -130,99 +130,134 @@
 <context>
     <name>DEdit_ExecDeaWidget</name>
     <message>
-        <location filename="../src/DEdit/dedit_execdeawidget.cpp" line="148"/>
+        <location filename="../src/DEdit/dedit_execdeawidget.cpp" line="170"/>
         <source>Start</source>
         <translation>Starten</translation>
     </message>
     <message>
-        <location filename="../src/DEdit/dedit_execdeawidget.cpp" line="149"/>
+        <location filename="../src/DEdit/dedit_execdeawidget.cpp" line="171"/>
         <source>Stop</source>
         <translation>Stoppen</translation>
     </message>
     <message>
-        <location filename="../src/DEdit/dedit_execdeawidget.cpp" line="150"/>
+        <location filename="../src/DEdit/dedit_execdeawidget.cpp" line="172"/>
         <source>Pause</source>
         <translation>Pause</translation>
     </message>
     <message>
-        <location filename="../src/DEdit/dedit_execdeawidget.cpp" line="151"/>
+        <location filename="../src/DEdit/dedit_execdeawidget.cpp" line="173"/>
         <source>Single Step</source>
         <translation>Einzelschritt</translation>
     </message>
     <message>
-        <location filename="../src/DEdit/dedit_execdeawidget.cpp" line="152"/>
+        <location filename="../src/DEdit/dedit_execdeawidget.cpp" line="174"/>
         <source>Lock Editor</source>
         <translation>Editor sperren</translation>
     </message>
     <message>
-        <location filename="../src/DEdit/dedit_execdeawidget.cpp" line="153"/>
+        <location filename="../src/DEdit/dedit_execdeawidget.cpp" line="175"/>
         <source>Text to recognize:</source>
         <translation>Zu erkennendes Wort:</translation>
     </message>
     <message>
-        <location filename="../src/DEdit/dedit_execdeawidget.cpp" line="154"/>
+        <location filename="../src/DEdit/dedit_execdeawidget.cpp" line="176"/>
         <source>Clear Field</source>
         <translation>Feld leeren</translation>
     </message>
     <message>
-        <location filename="../src/DEdit/dedit_execdeawidget.cpp" line="155"/>
+        <location filename="../src/DEdit/dedit_execdeawidget.cpp" line="177"/>
         <source>Show log</source>
         <translation>Log zeigen</translation>
     </message>
     <message>
-        <location filename="../src/DEdit/dedit_execdeawidget.cpp" line="156"/>
+        <location filename="../src/DEdit/dedit_execdeawidget.cpp" line="178"/>
         <source>Clear log</source>
         <translation>Log leeren</translation>
     </message>
     <message>
-        <location filename="../src/DEdit/dedit_execdeawidget.cpp" line="157"/>
+        <location filename="../src/DEdit/dedit_execdeawidget.cpp" line="179"/>
         <source>Result:</source>
         <translation>Ergebnis:</translation>
     </message>
     <message>
-        <location filename="../src/DEdit/dedit_execdeawidget.cpp" line="229"/>
+        <location filename="../src/DEdit/dedit_execdeawidget.cpp" line="257"/>
         <source>Starting DEA...</source>
         <translation>DEA starten...</translation>
     </message>
     <message>
-        <location filename="../src/DEdit/dedit_execdeawidget.cpp" line="243"/>
+        <location filename="../src/DEdit/dedit_execdeawidget.cpp" line="271"/>
         <source>Error when starting: No start state defined!</source>
         <translation>Fehler beim starten: Kein Startzustand definiert!</translation>
     </message>
     <message>
-        <location filename="../src/DEdit/dedit_execdeawidget.cpp" line="274"/>
+        <location filename="../src/DEdit/dedit_execdeawidget.cpp" line="308"/>
         <source>Stopped DEA</source>
         <translation>DEA gestoppt</translation>
     </message>
     <message>
-        <location filename="../src/DEdit/dedit_execdeawidget.cpp" line="301"/>
+        <location filename="../src/DEdit/dedit_execdeawidget.cpp" line="335"/>
         <source>End of string has been reached and current state &apos;%statename&apos; is a final state.</source>
         <translation>Ende des Wortes wurde erreicht und aktueller Zustand &apos;%statename&apos; ist ein Finalzustand.</translation>
     </message>
     <message>
-        <location filename="../src/DEdit/dedit_execdeawidget.cpp" line="302"/>
+        <location filename="../src/DEdit/dedit_execdeawidget.cpp" line="336"/>
         <source>&apos;%inputstring&apos; ACCEPTED</source>
         <translation>&apos;%inputstring&apos; AKZEPTIERT</translation>
     </message>
     <message>
-        <location filename="../src/DEdit/dedit_execdeawidget.cpp" line="310"/>
+        <location filename="../src/DEdit/dedit_execdeawidget.cpp" line="344"/>
         <source>End of string has been reached but current state &apos;%statename&apos; is NOT a final state.</source>
         <translation>Ende des Wortes wurde erreicht, aber aktueller Zustand &apos;%statename&apos; ist KEIN Finalzustand.</translation>
     </message>
     <message>
-        <location filename="../src/DEdit/dedit_execdeawidget.cpp" line="331"/>
+        <location filename="../src/DEdit/dedit_execdeawidget.cpp" line="365"/>
         <source>&apos;%inputstring&apos; DENIED</source>
         <translation>&apos;%inputstring&apos; ABGELEHNT</translation>
     </message>
     <message>
-        <location filename="../src/DEdit/dedit_execdeawidget.cpp" line="329"/>
+        <location filename="../src/DEdit/dedit_execdeawidget.cpp" line="363"/>
         <source>No Transition found for &apos;%symbol&apos; at state &apos;%statename&apos;</source>
         <translation>Kein Übergang für &apos;%symbol&apos; vom Zustand &apos;%statename&apos; aus</translation>
     </message>
     <message>
-        <location filename="../src/DEdit/dedit_execdeawidget.cpp" line="342"/>
+        <location filename="../src/DEdit/dedit_execdeawidget.cpp" line="376"/>
         <source>Found transition for &apos;%symbol&apos; from &apos;%stateFrom&apos; to &apos;%stateTo&apos;</source>
         <translation>Übergang für &apos;%symbol&apos; von &apos;%stateFrom&apos; nach &apos;%stateTo&apos; gefunden</translation>
+    </message>
+    <message>
+        <location filename="../src/DEdit/dedit_execdeawidget.cpp" line="181"/>
+        <source> ms</source>
+        <translation> ms</translation>
+    </message>
+    <message>
+        <location filename="../src/DEdit/dedit_execdeawidget.cpp" line="182"/>
+        <source>immediately</source>
+        <translation>sofort</translation>
+    </message>
+    <message>
+        <location filename="../src/DEdit/dedit_execdeawidget.cpp" line="183"/>
+        <source>Timer controlled</source>
+        <translation>Zeitgesteuert</translation>
+    </message>
+    <message>
+        <location filename="../src/DEdit/dedit_execdeawidget.cpp" line="184"/>
+        <source>Interval between two states: </source>
+        <translation>Dauer für einen Übergang: </translation>
+    </message>
+    <message>
+        <location filename="../src/DEdit/dedit_execdeawidget.cpp" line="439"/>
+        <source>ACCEPTED</source>
+        <translation>AKZEPTIERT</translation>
+    </message>
+    <message>
+        <location filename="../src/DEdit/dedit_execdeawidget.cpp" line="443"/>
+        <source>DENIED</source>
+        <translation>ABGELEHNT</translation>
+    </message>
+    <message>
+        <location filename="../src/DEdit/dedit_execdeawidget.cpp" line="447"/>
+        <source>RUNNING</source>
+        <translation>LÄUFT</translation>
     </message>
 </context>
 <context>
@@ -363,92 +398,92 @@
         <translation>&amp;Hilfe</translation>
     </message>
     <message>
-        <location filename="../src/DEdit/dedit_mainwindow.cpp" line="310"/>
+        <location filename="../src/DEdit/dedit_mainwindow.cpp" line="311"/>
         <source>Drag State to wanted position</source>
         <translation>Ziehen Sie den Zustand zur gewünschten Position</translation>
     </message>
     <message>
-        <location filename="../src/DEdit/dedit_mainwindow.cpp" line="314"/>
+        <location filename="../src/DEdit/dedit_mainwindow.cpp" line="315"/>
         <source>Drag Transition to wanted curve</source>
         <translation>Ziehen Sie den Übergang bis zur gewünschten Kurve</translation>
     </message>
     <message>
-        <location filename="../src/DEdit/dedit_mainwindow.cpp" line="318"/>
+        <location filename="../src/DEdit/dedit_mainwindow.cpp" line="319"/>
         <source>Click on the first state, and keep the mouse button pressed</source>
         <translation>Klicken sie auf den ersten Zustand und halten sie die Maustaste gedrückt</translation>
     </message>
     <message>
-        <location filename="../src/DEdit/dedit_mainwindow.cpp" line="322"/>
+        <location filename="../src/DEdit/dedit_mainwindow.cpp" line="323"/>
         <source>Now, drag transition to second state and release the mouse button</source>
         <translation>Ziehen sie jetzt den Überganz zum zweiten Zustand und lassen sie dort die Maustaste los</translation>
     </message>
     <message>
-        <location filename="../src/DEdit/dedit_mainwindow.cpp" line="326"/>
+        <location filename="../src/DEdit/dedit_mainwindow.cpp" line="327"/>
         <source>DEA is running, so it is currently not possible to modify the DEA</source>
         <translation>DEA läuft, deshalb ist es im Moment nicht möglich, den DEA zu verändern</translation>
     </message>
     <message>
-        <location filename="../src/DEdit/dedit_mainwindow.cpp" line="395"/>
+        <location filename="../src/DEdit/dedit_mainwindow.cpp" line="396"/>
         <source>Error when saving file</source>
         <translation>Fehler beim speichern der Datei</translation>
     </message>
     <message>
-        <location filename="../src/DEdit/dedit_mainwindow.cpp" line="379"/>
+        <location filename="../src/DEdit/dedit_mainwindow.cpp" line="380"/>
         <source>Save File</source>
         <translation>Datei Speichern</translation>
     </message>
     <message>
-        <location filename="../src/DEdit/dedit_mainwindow.cpp" line="440"/>
+        <location filename="../src/DEdit/dedit_mainwindow.cpp" line="441"/>
         <source>DEA Files (*.xml)</source>
         <translation>DEA-Dateien (*.xml)</translation>
     </message>
     <message>
-        <location filename="../src/DEdit/dedit_mainwindow.cpp" line="413"/>
+        <location filename="../src/DEdit/dedit_mainwindow.cpp" line="414"/>
         <source>Error when writing to &apos;%filename&apos;</source>
         <translation>Fehler beim speichern nach &apos;%filename&apos;</translation>
     </message>
     <message>
-        <location filename="../src/DEdit/dedit_mainwindow.cpp" line="414"/>
+        <location filename="../src/DEdit/dedit_mainwindow.cpp" line="415"/>
         <source>You propably don&apos;t have the necessery Write-Rights there.</source>
         <translation>Wahrscheinlcih haben sie dort nicht die nötigen Schreibrechte.</translation>
     </message>
     <message>
-        <location filename="../src/DEdit/dedit_mainwindow.cpp" line="418"/>
+        <location filename="../src/DEdit/dedit_mainwindow.cpp" line="419"/>
         <source>File %filename successfully written</source>
         <translation>Datei %filename erfolgreich gespeichert</translation>
     </message>
     <message>
-        <location filename="../src/DEdit/dedit_mainwindow.cpp" line="439"/>
+        <location filename="../src/DEdit/dedit_mainwindow.cpp" line="440"/>
         <source>Open File</source>
         <translation>Datei öffnen</translation>
     </message>
     <message>
-        <location filename="../src/DEdit/dedit_mainwindow.cpp" line="448"/>
+        <location filename="../src/DEdit/dedit_mainwindow.cpp" line="449"/>
         <source>Error when opening file</source>
         <translation>Fehler beim öffnen der Datei</translation>
     </message>
     <message>
-        <location filename="../src/DEdit/dedit_mainwindow.cpp" line="466"/>
+        <location filename="../src/DEdit/dedit_mainwindow.cpp" line="467"/>
         <source>Error when loading &apos;%filename&apos;</source>
         <translation>Fehler beim laden von &apos;%filename&apos;</translation>
     </message>
     <message>
-        <location filename="../src/DEdit/dedit_mainwindow.cpp" line="468"/>
+        <location filename="../src/DEdit/dedit_mainwindow.cpp" line="469"/>
         <source>Propably you donnot have the necessary Read-Rights or the file doesnot exist.</source>
         <translation>Wahrscheinlich besitzen sie dort nicht die nötigen Leserechte oder die Datei existiert nicht.</translation>
     </message>
     <message>
-        <location filename="../src/DEdit/dedit_mainwindow.cpp" line="472"/>
+        <location filename="../src/DEdit/dedit_mainwindow.cpp" line="473"/>
         <source>Error when parsing &apos;%filename&apos;</source>
         <translation>Fehler beim lesen von &apos;%filename&apos;</translation>
     </message>
     <message>
-        <location filename="../src/DEdit/dedit_mainwindow.cpp" line="473"/>
+        <location filename="../src/DEdit/dedit_mainwindow.cpp" line="474"/>
         <source>Syntax error:</source>
         <translation>Syntax fehler:</translation>
     </message>
     <message>
-        <location filename="../src/DEdit/dedit_mainwindow.cpp" line="478"/>
+        <location filename="../src/DEdit/dedit_mainwindow.cpp" line="479"/>
         <source>File %filename successfully loaded</source>
         <translation>Datei %filename erfolgreich geladen</translation>
     </message>
@@ -519,17 +554,17 @@
         <translation>Kurve zurücksetzen</translation>
     </message>
     <message>
-        <location filename="../src/DEdit/dedit_widget.cpp" line="987"/>
+        <location filename="../src/DEdit/dedit_widget.cpp" line="999"/>
         <source>A Transition from &apos;%start&apos; to &apos;%end&apos; already exists.</source>
         <translation>Es existiert bereits ein Übergang von &apos;%start&apos; nach &apos;%end&apos;.</translation>
     </message>
     <message>
-        <location filename="../src/DEdit/dedit_widget.cpp" line="1355"/>
+        <location filename="../src/DEdit/dedit_widget.cpp" line="1367"/>
         <source>Editor currently is locked, please unlock first</source>
         <translation>Editor im Moment gesperrt, bitte entsperren Sie diesen zuerst</translation>
     </message>
     <message>
-        <location filename="../src/DEdit/dedit_widget.cpp" line="1691"/>
+        <location filename="../src/DEdit/dedit_widget.cpp" line="1703"/>
         <source>DEA Editor</source>
         <translation>DEA Editor</translation>
     </message>
@@ -636,7 +671,7 @@
 <context>
     <name>QObject</name>
     <message>
-        <location filename="../src/DEdit/dedit_widgetpainter.cpp" line="582"/>
+        <location filename="../src/DEdit/dedit_widgetpainter.cpp" line="588"/>
         <source>Start</source>
         <translation>Start</translation>
     </message>

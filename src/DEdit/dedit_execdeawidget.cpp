@@ -8,12 +8,15 @@
 #include <DEA/dea_state.h>
 #include <DEA/dea_transition.h>
 
+#include <QTimer>
 // widgtes
 #include <QPushButton>
 #include <QLineEdit>
 #include <QLabel>
 #include <QTextEdit>
 #include <QToolButton>
+#include <QCheckBox>
+#include <QSpinBox>
 
 // layouts
 #include <QHBoxLayout>
@@ -38,6 +41,10 @@ DEdit_ExecDeaWidget::DEdit_ExecDeaWidget(QWidget* parent)
     createLayouts();
     connectSlots();
     resetWidgetProperties();
+    // init timer
+    m_tmrExecNextState = new QTimer(this);
+    m_tmrExecNextState->setInterval(1000);
+    connect(m_tmrExecNextState, SIGNAL(timeout()), this, SLOT(tmrExecState_timout())); 
     
     retranslateUi();
     reloadIcons();
@@ -69,6 +76,13 @@ void DEdit_ExecDeaWidget::allocateWidgets()
     btnShowHideOutput->setChecked(FALSE);
     btnClearOutput = new QPushButton;
     btnClearOutput->setVisible(FALSE);
+    // timer
+    chkTimerControlled = new QCheckBox;
+    lblTimerInterval = new QLabel;
+    spinTimerInterval = new QSpinBox;
+    spinTimerInterval->setRange(0, 10000);
+    spinTimerInterval->setValue(1000);
+    spinTimerInterval->setSingleStep(100);
     // input string
     lblInputString = new QLabel;
     txtInputString = new QLineEdit;
@@ -116,10 +130,17 @@ void DEdit_ExecDeaWidget::createLayouts()
     layoutOutputToolButtons->addWidget(btnClearOutput);
     layoutOutputToolButtons->addStretch();
     
+    layoutTimer = new QHBoxLayout;
+    layoutTimer->setMargin(0);
+    layoutTimer->addWidget(chkTimerControlled);
+    layoutTimer->addWidget(lblTimerInterval);
+    layoutTimer->addWidget(spinTimerInterval);
+    layoutTimer->addStretch();
     
     layoutParent = new QVBoxLayout;
     layoutParent->setMargin(2);
     layoutParent->addLayout(layoutStartStop);
+    layoutParent->addLayout(layoutTimer);
     layoutParent->addLayout(layoutInputAndResult);
     layoutParent->addWidget(txtOutput);
     layoutParent->addLayout(layoutOutputToolButtons);
@@ -135,13 +156,15 @@ void DEdit_ExecDeaWidget::connectSlots()
     connect(btnPause, SIGNAL(clicked()), this, SLOT(pause()));
     connect(btnSingleStep, SIGNAL(clicked()), this, SLOT(executeToNextState()));
     connect(btnLocked, SIGNAL(toggled(bool)), this, SLOT(setEditorLocked(bool)));
+    // for timer
+    connect(chkTimerControlled, SIGNAL(toggled(bool)), this, SLOT(activateTimer(bool)));
+    connect(spinTimerInterval, SIGNAL(valueChanged(int)), this, SLOT(setTimerInterval(int)));
     // for output / console
     connect(btnShowHideOutput, SIGNAL(toggled(bool)), txtOutput, SLOT(setVisible(bool)));
     connect(btnShowHideOutput, SIGNAL(toggled(bool)), btnClearOutput, SLOT(setVisible(bool)));
     connect(btnClearOutput, SIGNAL(clicked()), txtOutput, SLOT(clear()));
     connect(btnClearInputString, SIGNAL(clicked()), txtInputString, SLOT(clear()));
 }
-
 
 void DEdit_ExecDeaWidget::retranslateUi()
 {
@@ -155,6 +178,12 @@ void DEdit_ExecDeaWidget::retranslateUi()
     btnShowHideOutput->setText(tr("Show log"));
     btnClearOutput->setText(tr("Clear log"));
     lblResultLabel->setText(tr("Result:"));
+    // timer
+    spinTimerInterval->setSuffix(tr(" ms"));
+    spinTimerInterval->setSpecialValueText(tr("immediately"));
+    chkTimerControlled->setText(tr("Timer controlled"));
+    lblTimerInterval->setText(tr("Interval between two states: "));
+    
 }
 
 void DEdit_ExecDeaWidget::reloadIcons()
@@ -249,6 +278,12 @@ void DEdit_ExecDeaWidget::start()
     m_pCurrentState->m_bCurrentlyExecutedState = TRUE;
     updateResultLabel();
     m_pDeaWidget->update();
+    // execute to end if wanted
+    if(chkTimerControlled->isChecked()
+       && spinTimerInterval->value() == 0)
+    {
+        execToNextBreakPoint();
+    }
 }
 
 void DEdit_ExecDeaWidget::stop()
@@ -402,15 +437,15 @@ void DEdit_ExecDeaWidget::updateResultLabel()
     QString currentResult = "<b><font color=\"";
     if(!m_bRunning && !m_bErrorOccured)
     {
-        currentResult += "#4E9A06\">ACCEPTED";
+        currentResult += "#4E9A06\">" + tr("ACCEPTED");
     }
     else if(m_bErrorOccured)
     {
-        currentResult += "#CC0000\">DENIED";
+        currentResult += "#CC0000\">" + tr("DENIED");
     }
     else
     {
-        currentResult += "#EDD400\">RUNNING";
+        currentResult += "#EDD400\">" + tr("RUNNING");
     }
     currentResult += "</font></b>";
     lblCurrentResult->setText(currentResult);
@@ -439,5 +474,67 @@ void DEdit_ExecDeaWidget::removeAllResultIndicators()
     if(m_pCurrentState)
     {
         m_pCurrentState->m_eResultIndicator = DEdit_GraphicalState::NoResult;
+    }
+}
+
+
+void DEdit_ExecDeaWidget::execToNextBreakPoint()
+{
+    while(m_bRunning)
+    {
+        executeToNextState();
+    }
+}
+
+void DEdit_ExecDeaWidget::tmrExecState_timout()
+{
+    if(m_bRunning)
+    {
+        executeToNextState();
+    }
+}
+
+
+void DEdit_ExecDeaWidget::activateTimer(bool on)
+{
+    if(m_tmrExecNextState->isActive() == on)
+    {
+        // return if nothing would bechanged
+        return;
+    }
+    if(m_tmrExecNextState->isActive())
+    {
+        m_tmrExecNextState->stop();
+    }
+    if(on && spinTimerInterval->value() != 0)
+    {
+        m_tmrExecNextState->start();
+    }
+    if(chkTimerControlled->isChecked()
+       && spinTimerInterval->value() == 0)
+    {
+        execToNextBreakPoint();
+    }
+}
+
+void DEdit_ExecDeaWidget::setTimerInterval(int interval)
+{
+    if(interval == 0)
+    {
+        m_tmrExecNextState->stop();
+    }
+    else
+    {
+        m_tmrExecNextState->setInterval(interval);
+        if(!m_tmrExecNextState->isActive()
+            && chkTimerControlled->isChecked())
+        {
+            m_tmrExecNextState->start();
+        }
+    }
+    if(chkTimerControlled->isChecked()
+       && spinTimerInterval->value() == 0)
+    {
+        execToNextBreakPoint();
     }
 }

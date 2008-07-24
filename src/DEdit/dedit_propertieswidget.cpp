@@ -72,14 +72,14 @@ void DEdit_PropertiesWidget::createLayouts()
     layoutProperties->setSpacing(1);
     layoutProperties->addWidget(lblStates,      row,    0);
     layoutProperties->addWidget(txtStates,      row++,  1);
-    layoutProperties->addWidget(lblTransitions, row,    0);
-    layoutProperties->addWidget(txtTransitions, row++,  1);
     layoutProperties->addWidget(lblAlphabet,    row,    0);
     layoutProperties->addWidget(txtAlphabet,    row++,  1);
-    layoutProperties->addWidget(lblFinalStates, row,    0);
-    layoutProperties->addWidget(txtFinalStates, row++,  1);
+    layoutProperties->addWidget(lblTransitions, row,    0);
+    layoutProperties->addWidget(txtTransitions, row++,  1);
     layoutProperties->addWidget(lblStartState,  row,    0);
     layoutProperties->addWidget(txtStartState,  row++,  1);
+    layoutProperties->addWidget(lblFinalStates, row,    0);
+    layoutProperties->addWidget(txtFinalStates, row++,  1);
     frmPropeties->setLayout(layoutProperties);
     
     layoutParent = new QVBoxLayout;

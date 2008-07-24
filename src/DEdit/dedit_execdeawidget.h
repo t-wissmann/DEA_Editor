@@ -14,11 +14,14 @@ class QLabel;
 class QPushButton;
 class QToolButton;
 class QTextEdit;
-
+class QCheckBox;
+class QSpinBox;
 // layouts
 class QHBoxLayout;
 class QVBoxLayout;
 class QGridLayout;
+// other qt classes
+class QTimer;
 
 class DEdit_ExecDeaWidget : public QWidget
 {
@@ -43,6 +46,10 @@ public slots:
     void executeToNextState();
     void updateResultLabel();
     void setEditorLocked(bool locked);
+    void tmrExecState_timout();
+    void activateTimer(bool on);
+    void setTimerInterval(int interval);
+    void execToNextBreakPoint();
 private:
     // init functions
     void allocateWidgets();
@@ -60,6 +67,10 @@ private:
     QPushButton* btnSingleStep;
     QPushButton* btnStop;
     QPushButton* btnLocked;
+    // timer
+    QCheckBox*   chkTimerControlled;
+    QLabel*      lblTimerInterval;
+    QSpinBox*    spinTimerInterval;
     // inputstring
     QLabel*      lblInputString;
     QLineEdit*   txtInputString;
@@ -77,6 +88,7 @@ private:
     // layouts
     QVBoxLayout* layoutParent;
     QHBoxLayout* layoutStartStop;
+    QHBoxLayout* layoutTimer;
     QGridLayout* layoutInputAndResult;
     QHBoxLayout* layoutOutputToolButtons;
     
@@ -96,6 +108,7 @@ private:
     bool          m_bRunning;
     bool          m_bPaused;
     DEdit_Widget* m_pDeaWidget;
+    QTimer*       m_tmrExecNextState;
 };
 
 
