@@ -638,7 +638,7 @@ void DEdit_Widget::mouseDoubleClickEvent(QMouseEvent*)
 
 void DEdit_Widget::recomputeMinimumSize()
 {
-    int margin = 10;
+    int margin = DEdit_GraphicalState::m_nDiameter/2-4;
     int maxX = DEdit_GraphicalState::m_nDiameter;
     int maxY = DEdit_GraphicalState::m_nDiameter;
     for(int i = 0; i < m_StateList.size(); ++i)
@@ -1749,4 +1749,16 @@ bool DEdit_Widget::autoEditNewTransitions() const
     return m_bAutoEditNewTransitions;
 }
 
+DEdit_Appearance* DEdit_Widget::appearance()
+{
+    return &(m_cWidgetPainter.m_cAppearance);
+}
+
+void DEdit_Widget::recreateAllGuiTemplates()
+{
+    m_cWidgetPainter.recreateAllTemplates();
+    update();
+}
 /// END SOME VISUAL OPTIONS
+
+

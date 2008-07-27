@@ -26,7 +26,9 @@ HEADERS += \ # DEA
            src/io/iconcatcher.h \
            \ # widgets
            src/widgets/commandbuttondnd.h \ 
-           src/widgets/colorbutton.h \ 
+           src/widgets/colorbutton.h \
+           src/widgets/appearanceeditwidget.h \ 
+           src/widgets/colortrippleedit.h  \
            \ # general dialogs
            src/dialogs/dia_deasourceviewer.h \
            src/dialogs/dia_configurededitwidget.h \
@@ -38,6 +40,7 @@ HEADERS += \ # DEA
            src/DEdit/dedit_mainwindow.h \
            src/DEdit/dedit_widget.h \
            src/DEdit/dedit_widgetpainter.h \
+           src/DEdit/dedit_appearance.h \
            src/DEdit/dedit_graphicalstate.h \
            src/DEdit/dedit_graphicaltransition.h \
            src/DEdit/dedit_execdeawidget.h \
@@ -55,6 +58,8 @@ SOURCES += src/main.cpp \
            \ # widgets
            src/widgets/commandbuttondnd.cpp \ 
            src/widgets/colorbutton.cpp \ 
+           src/widgets/appearanceeditwidget.cpp \ 
+           src/widgets/colortrippleedit.cpp  \
            \ # general dialogs
            src/dialogs/dia_deasourceviewer.cpp \
            src/dialogs/dia_configurededitwidget.cpp \
@@ -66,6 +71,7 @@ SOURCES += src/main.cpp \
            src/DEdit/dedit_mainwindow.cpp \
            src/DEdit/dedit_widget.cpp \
            src/DEdit/dedit_widgetpainter.cpp \
+           src/DEdit/dedit_appearance.cpp \
            src/DEdit/dedit_graphicalstate.cpp \
            src/DEdit/dedit_graphicaltransition.cpp \
            src/DEdit/dedit_execdeawidget.cpp \

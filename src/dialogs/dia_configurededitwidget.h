@@ -4,6 +4,7 @@
 #include <QDialog>
 
 class DEdit_Widget;
+class AppearanceEditWidget;
 
 // widgets
 class QLabel;
@@ -49,7 +50,7 @@ private:
     QLabel*      lblGridResolution;
     QSpinBox*    spinGridResolution;
     QWidget*     wdgGridResolution;
-    
+    AppearanceEditWidget* wdgAppearance;
     
     
     // layouts

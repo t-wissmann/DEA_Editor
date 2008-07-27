@@ -11,6 +11,7 @@
 #include <QPushButton>
 #include <QDialogButtonBox>
 #include <widgets/colorbutton.h>
+#include <widgets/appearanceeditwidget.h>
 
 // layouts
 #include <QHBoxLayout>
@@ -56,6 +57,8 @@ void Dia_ConfigureDEditWidget::allocateWidgets()
     wdgGridResolution = new QWidget;
     wdgGridResolution->setEnabled(FALSE);
     
+    wdgAppearance = new AppearanceEditWidget;
+    
 }
 
 void Dia_ConfigureDEditWidget::createLayouts()
@@ -72,6 +75,7 @@ void Dia_ConfigureDEditWidget::createLayouts()
     layoutParent->addWidget(chkAutoEditNewTransitions);
     layoutParent->addWidget(chkAlignToGrid);
     layoutParent->addWidget(wdgGridResolution);
+    layoutParent->addWidget(wdgAppearance);
     layoutParent->addWidget(boxBottom);
     
     // new version:
@@ -134,6 +138,9 @@ void Dia_ConfigureDEditWidget::setWidgetToEdit(DEdit_Widget* widget)
     {
         spinGridResolution->setValue(gridResolution);
     }
+    
+    //apperance
+    wdgAppearance->setAppearanceToEdit(widget->appearance());
 }
 
 DEdit_Widget* Dia_ConfigureDEditWidget::widgetToEdit()
@@ -159,6 +166,11 @@ void Dia_ConfigureDEditWidget::applyChanges()
         gridResolution = spinGridResolution->value();
     }
     m_pWidgetToEdit->setGridResolution(gridResolution);
+    
+    // apply changes to appearance
+    wdgAppearance->applyChanges();
+    // important: recreate all templates so that the new colors have effect
+    m_pWidgetToEdit->recreateAllGuiTemplates();
     
 }
 

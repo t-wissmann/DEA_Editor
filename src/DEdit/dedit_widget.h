@@ -96,7 +96,7 @@ public:
     void reloadIcons();
     
     
-    // some options
+    // some visual options
     void setGridResolution(int resolution);
     int gridResolution() const;
     void setAutoEditNewStates(bool on);
@@ -104,6 +104,8 @@ public:
     void setAutoEditNewTransitions(bool on);
     bool autoEditNewTransitions() const;
     bool isLocked() const;
+    DEdit_Appearance* appearance();
+    void recreateAllGuiTemplates();
 public slots:
     void addState();
     void addState(QPoint atPosition);

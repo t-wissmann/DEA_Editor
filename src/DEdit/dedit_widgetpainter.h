@@ -5,6 +5,7 @@
 
 class DEdit_Widget;
 #include <DEdit/dedit_graphicalstate.h>
+#include <DEdit/dedit_appearance.h>
 class DEdit_GraphicalTransition;
 // painter
 class QPainter;
@@ -37,17 +38,14 @@ public:
     
     // create templates
     void recreateAllTemplates();
-    void recreateStateNormalTemplate();
+    void recreateAllStateTemplates();
     void recreateStateHoveredTemplate();
-    void recreateStateDraggedTemplate();
-    void recreateStateSelectedTemplate();
-    void recreateStateCurrentlyExecutedTemplate();
-    void recreateStateResultTemplates();
     void recreateTransitionPens();
     void recreateStatePens();
     void recreateStartStateIndicator();
     
     static QPoint middlePointOfCurve(QPoint p1, QPoint p2, int curve);
+    static QPixmap recreateStateTemplate(DEdit_ColorTripple colors, int diameter, bool invertedGradient = FALSE);
     static QPixmap recreateStateTemplate(QColor color, int diameter, bool invertedGradient = FALSE);
     
     // general paint functions
@@ -56,15 +54,15 @@ public:
 private:
     // members
     DEdit_Widget* m_pWidget;
-    
+    DEdit_Appearance m_cAppearance;
     // state template pixmaps
     QPixmap  m_cStateNormalTemplate;
     QPixmap  m_cStateHoveredTemplate;
+    QPixmap  m_cStateSelectedTemplate;
     QPixmap  m_cStateDraggedTemplate;
     QPixmap  m_cStateCurrentlyExecutedTemplate;
     QPixmap  m_cStateResultDeniedTemplate;
     QPixmap  m_cStateResultAcceptedTemplate;
-    QPixmap  m_cStateSelectedTemplate;
     QPixmap  m_cStartStateIndicator;
     QImage   m_cStartStateIndicatorAlphaMask;
     QPoint   m_cStartStateIndicatorPosition; // relativ positon to center

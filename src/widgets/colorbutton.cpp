@@ -70,7 +70,13 @@ void ColorButton::paintEvent(QPaintEvent* event)
     QPainter painter(this);
     // white background
     bgBrush = palette().base();
-    if(isDown())
+    if(!isEnabled())
+    {
+        QColor col = bgBrush.color();
+        col.setAlpha(125);
+        bgBrush.setColor(col);
+    }
+    else if(isDown())
     {
         bgBrush.setColor(bgBrush.color().darker(120));
     }
@@ -92,21 +98,25 @@ void ColorButton::paintEvent(QPaintEvent* event)
     QColor colWithAlpha = m_cColor;
     colWithAlpha.setAlpha(255); // set alpha to 100%, so that button is shown solid
     rect.adjust(2, 2, -1, -1);
-    bgBrush.setColor(colWithAlpha);
     
     painter.setPen(Qt::NoPen);
-    if(isDown())
+    if(!isEnabled())
     {
-        bgBrush.setColor(bgBrush.color().darker(120));
+        // if is disabled
+        colWithAlpha.setAlpha(125);
+    }
+    else if(isDown())
+    {
+        colWithAlpha = colWithAlpha.darker(120);
     }
     else if(underMouse())
     {
-        bgBrush.setColor(bgBrush.color().lighter(120));
+        colWithAlpha = colWithAlpha.lighter(120);
     }
+    
+    bgBrush.setColor(colWithAlpha);
     painter.setBrush(bgBrush);
     painter.drawRect(rect);
-    
-                     
 }
 
 
@@ -168,13 +178,15 @@ void ColorButton::mouseMoveEvent(QMouseEvent* event)
             drag->setMimeData(mimeData);
             drag->setPixmap(colorrect);
             drag->start(Qt::MoveAction);
+            // after drag:
+            //remove focus
+            clearFocus();
         }
     }
     else
     {
         m_cDragStartPosition = QPoint(-33, -33);
     }
-    QPushButton::mouseMoveEvent(event);
 }
 
 

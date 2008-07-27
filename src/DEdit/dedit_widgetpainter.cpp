@@ -20,9 +20,10 @@
 DEdit_WidgetPainter::DEdit_WidgetPainter(DEdit_Widget* widget)
 {
     m_pWidget = widget;
+    // recreate default color theme
+    DEdit_Appearance::createTangoDefault(&m_cAppearance);
+    // recreate templates
     recreateAllTemplates();
-    
-    
 }
 
 DEdit_WidgetPainter::~DEdit_WidgetPainter()
@@ -457,7 +458,7 @@ void DEdit_WidgetPainter::paintTransition(QPainter* painter, QLineF line,
         double dy = (-1)*(arrowEnd.y() - arrowPos.y());
         if(dx == 0)
         {
-            arrowAngle = ((dy > 0) ? -90 : +90);
+            arrowAngle = ((dy > 0) ? +90 : -90);
         }
         else
         {
@@ -519,12 +520,7 @@ void DEdit_WidgetPainter::recreateAllTemplates()
 {
     // states
     recreateStatePens();
-    recreateStateNormalTemplate();
-    recreateStateHoveredTemplate();
-    recreateStateDraggedTemplate();
-    recreateStateSelectedTemplate();
-    recreateStateCurrentlyExecutedTemplate();
-    recreateStateResultTemplates();
+    recreateAllStateTemplates();
     
     // transitions
     recreateTransitionPens();
@@ -539,46 +535,31 @@ void DEdit_WidgetPainter::recreateAllTemplates()
 void DEdit_WidgetPainter::recreateStatePens()
 {
     m_cStateLabelPen.setWidth(3);
-    m_cStateLabelPen.setColor(QColor(238, 238, 238));
+    m_cStateLabelPen.setColor(m_cAppearance.m_cStateLabelColor);
     m_cStateLabelFont.setBold(TRUE);
 }
 
-void DEdit_WidgetPainter::recreateStateNormalTemplate()
+
+
+void DEdit_WidgetPainter::recreateAllStateTemplates()
 {
-    m_cStateNormalTemplate = recreateStateTemplate(
-            QColor("#3465A4"), DEdit_GraphicalState::m_nDiameter);
+    int diameter = DEdit_GraphicalState::m_nDiameter;
+    m_cStateNormalTemplate = recreateStateTemplate(m_cAppearance.m_cStateNormal, diameter);
+    recreateStateHoveredTemplate();
+    m_cStateSelectedTemplate = recreateStateTemplate(m_cAppearance.m_cStateSelected, diameter, TRUE);
+    m_cStateDraggedTemplate = m_cStateSelectedTemplate;
+    m_cStateCurrentlyExecutedTemplate = recreateStateTemplate(m_cAppearance.m_cStateExecuted, diameter, TRUE);
+    m_cStateResultDeniedTemplate = recreateStateTemplate(m_cAppearance.m_cStateResultDenied, diameter, TRUE);
+    m_cStateResultAcceptedTemplate = recreateStateTemplate(m_cAppearance.m_cStateResultAccepted, diameter, TRUE);
 }
+
 void DEdit_WidgetPainter::recreateStateHoveredTemplate()
 {
     m_cStateHoveredTemplate = recreateStateTemplate(
             QColor(255,255,255,33), DEdit_GraphicalState::m_nDiameter);
 }
 
-void DEdit_WidgetPainter::recreateStateDraggedTemplate()
-{
-    m_cStateDraggedTemplate = recreateStateTemplate(
-            QColor("#75507B"), DEdit_GraphicalState::m_nDiameter, TRUE);
-}
 
-void DEdit_WidgetPainter::recreateStateSelectedTemplate(){
-    m_cStateSelectedTemplate = recreateStateTemplate(
-            QColor("#75507B"), DEdit_GraphicalState::m_nDiameter, TRUE);
-}
-
-void DEdit_WidgetPainter::recreateStateCurrentlyExecutedTemplate()
-{
-    m_cStateCurrentlyExecutedTemplate = recreateStateTemplate(
-            QColor("#EDD400"), DEdit_GraphicalState::m_nDiameter, TRUE);
-}
-
-
-void DEdit_WidgetPainter::recreateStateResultTemplates()
-{
-    m_cStateResultDeniedTemplate = recreateStateTemplate(
-            QColor("#EF2929"), DEdit_GraphicalState::m_nDiameter, TRUE);
-    m_cStateResultAcceptedTemplate = recreateStateTemplate(
-            QColor("#73D216"), DEdit_GraphicalState::m_nDiameter, TRUE);
-}
 
 void DEdit_WidgetPainter::recreateStartStateIndicator()
 {
@@ -680,11 +661,12 @@ void DEdit_WidgetPainter::recreateTransitionPens()
 }
 
 
-QPixmap DEdit_WidgetPainter::recreateStateTemplate(QColor color, int diameter, bool invertedGradient)
+
+QPixmap DEdit_WidgetPainter::recreateStateTemplate(DEdit_ColorTripple colors, int diameter, bool invertedGradient)
 {
     int pix_width = diameter * 1.1; // *1.1 : need space for shadow
     int circle_radius = diameter / 2;
-    bool shadows = color.alpha() > 125; // for low alpha: shadow is ugly and must be disabled ;D
+    bool shadows = colors.m_cColor[0].alpha() > 125; // for low alpha: shadow is ugly and must be disabled ;D
     // init pixmap
     QPixmap resultPixmap(pix_width, pix_width);
     resultPixmap.fill(QColor(0, 0, 0, 0)); // clear completely
@@ -692,14 +674,18 @@ QPixmap DEdit_WidgetPainter::recreateStateTemplate(QColor color, int diameter, b
     // init painter
     QPainter pixPainter(&resultPixmap);
     pixPainter.setRenderHint(QPainter::Antialiasing, TRUE);
-    // init colors
-    QColor innerborder = color.lighter(170);
-    QColor outerborder = color.darker(170);
     // start paint
     int half_pix_width = pix_width/2; // half of the width
     drawTangoCircle(&pixPainter, half_pix_width, half_pix_width, circle_radius,
-                     color, innerborder, outerborder, shadows, invertedGradient);
+                     colors.m_cColor[0], colors.m_cColor[1], colors.m_cColor[2], shadows, invertedGradient);
     return resultPixmap;
+}
+
+QPixmap DEdit_WidgetPainter::recreateStateTemplate(QColor color, int diameter, bool invertedGradient)
+{
+    DEdit_ColorTripple colortripple;
+    colortripple.createStateFromBasicColor(color);
+    return recreateStateTemplate(colortripple, diameter, invertedGradient);
 }
 
 
