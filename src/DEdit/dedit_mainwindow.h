@@ -20,6 +20,9 @@ class DEdit_ExecDeaWidget;
 class QScrollArea;
 class DEdit_PropertiesWidget;
 
+class QDragEnterEvent;
+class QDropEvent;
+
 // menus
 class QMenuBar;
 class QMenu;
@@ -50,6 +53,11 @@ public slots:
     void saveFile();
     void saveFileAs();
     void showAboutDialog();
+    
+protected:
+    virtual void dragEnterEvent(QDragEnterEvent* event);
+    virtual void dropEvent(QDropEvent* event);
+    
 private:
     void initMembers();
     void allocateWidgets();

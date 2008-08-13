@@ -21,6 +21,7 @@ DEdit_GraphicalTransition::DEdit_GraphicalTransition()
     m_bJustExecuted = FALSE;
     m_nCurve = 0;
     m_nDragRotationOffset = 0;
+    m_fExecutionProgress = -1.0;
 }
 
 
@@ -35,6 +36,7 @@ DEdit_GraphicalTransition::DEdit_GraphicalTransition(DEdit_GraphicalState* start
     m_pEnd = end;
     m_nCurve = 0;
     m_nDragRotationOffset = 0;
+    m_fExecutionProgress = -1.0;
 }
 
 DEdit_GraphicalTransition::~DEdit_GraphicalTransition()
@@ -272,4 +274,22 @@ double DEdit_GraphicalTransition::labelRadius()
     
     // 2.414213562373095049  = (sqrt(2) + 1)
     return radius * 2.4142135;
+}
+
+
+void DEdit_GraphicalTransition::setExecutionProgress(double progress)
+{
+    if(progress > 1.0)
+    {
+        progress = 1.0;
+    }
+    if(progress < 0.0)
+    {
+        progress = -1.0;
+    }
+    if(progress != m_fExecutionProgress)
+    {
+        m_fExecutionProgress = progress;
+        setWasChanged();
+    }
 }

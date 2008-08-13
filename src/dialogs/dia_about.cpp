@@ -99,7 +99,7 @@ void Dia_About::connectSlots()
 
 void Dia_About::retranslateUi()
 {
-    setWindowTitle("About Dea Editor");
+    setWindowTitle(tr("About Dea Editor"));
     lblHeader->setText(tr("Dea Editor"));
     lblVersion->setText(tr("compiled on: %date").replace("%date", __DATE__));
     QString about = "<p>";

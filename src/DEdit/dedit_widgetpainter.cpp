@@ -39,11 +39,13 @@ void DEdit_WidgetPainter::paint()
         DEBUG_MSG("paint()", "m_pWidget = 0");
         return;
     }
+    /*
     QPixmap pixmap(m_pWidget->rect().width(), m_pWidget->rect().height());
-    pixmap.fill(QColor(0, 0, 0, 0));
+    pixmap.fill(QColor(0, 0, 0, 0));*/
     // paint to image
     {
-        QPainter imagePainter(&pixmap);
+        //QPainter imagePainter(&pixmap);
+        QPainter imagePainter(m_pWidget);
         imagePainter.setRenderHint(QPainter::Antialiasing);
         
         // paint transitions
@@ -90,7 +92,7 @@ void DEdit_WidgetPainter::paint()
                 newLine.setLength(newLine.length() - stateRadius);
             }
             imagePainter.setPen(m_cTransitionPen);
-            paintTransition(&imagePainter, newLine, 0, TRUE);
+            paintTransition(&imagePainter, newLine, 0, -1.0, TRUE);
         }
         if(m_pWidget->m_bAboutToDrop) // if there is an state, that will be dropped so
         {
@@ -113,13 +115,14 @@ void DEdit_WidgetPainter::paint()
         imagePainter.end();
     }
     
-    
+    /*
     // paint to widget
     {
         QPainter widgetpainter(m_pWidget);
         widgetpainter.drawPixmap(m_pWidget->rect(), pixmap, m_pWidget->rect());
         widgetpainter.end();
     }
+    */
     setAllItemsToNotChanged();
 }
 
@@ -306,6 +309,13 @@ void DEdit_WidgetPainter::repaintTransitionPixmap(DEdit_GraphicalTransition* tra
         pixmapWidth *= 2;
         pixmapHeight = pixmapWidth;
     }
+    // for execution dot
+    if(transition->m_bJustExecuted)
+    {
+        pixmapWidth += DEdit_GraphicalState::m_nDiameter/2;
+        pixmapHeight += DEdit_GraphicalState::m_nDiameter/2;
+    }
+    
     /// compute offset
     int offsetX = pixmapWidth/2;
     int offsetY = pixmapHeight/2;
@@ -330,7 +340,7 @@ void DEdit_WidgetPainter::repaintTransitionPixmap(DEdit_GraphicalTransition* tra
     }
     
     // paint line and label background to painter
-    paintTransition(&painter, line, transition->m_nCurve);
+    paintTransition(&painter, line, transition->m_nCurve, transition->m_fExecutionProgress, FALSE);
     // reset Label Area
     QRect lblArea = transition->m_cLabelArea;
     lblArea.moveTo(QPoint(offsetX, offsetY)
@@ -360,7 +370,7 @@ void DEdit_WidgetPainter::repaintTransitionPixmap(DEdit_GraphicalTransition* tra
     // paint line and label background to alpha
     alphaPainter.drawRect(lblArea);
     alphaPainter.setBrush(Qt::NoBrush);
-    paintTransition(&alphaPainter, line, transition->m_nCurve);
+    paintTransition(&alphaPainter, line, transition->m_nCurve, transition->m_fExecutionProgress, FALSE);
     
     alphaPainter.end();
     transition->m_cAlphaMask = alphaMask;
@@ -426,7 +436,7 @@ void DEdit_WidgetPainter::recomputeTransitionLabelArea
 }
 
 void DEdit_WidgetPainter::paintTransition(QPainter* painter, QLineF line,
-                            int curve, bool isTransitionPreview)
+                int curve, double execPosition, bool isTransitionPreview)
 {
     int penwidth = m_cTransitionPen.width();
     double arrowlength = 15;
@@ -434,17 +444,15 @@ void DEdit_WidgetPainter::paintTransition(QPainter* painter, QLineF line,
     QPointF arrowPos = line.p2(); // arrowposition
     qreal arrowAngle = +90;
     painter->drawEllipse(line.x1()-penwidth, line.y1()-penwidth,
-                penwidth*2, penwidth*2);
+                         penwidth*2, penwidth*2);
+    QPainterPath path; // path
     if(line.length() != 0)
     {
         // simply paint line,
         // if length != 0
         QPoint middle = middlePointOfCurve(line.p1().toPoint(), line.p2().toPoint(), curve);
-        QPainterPath path;
         path.moveTo(line.p1());
         path.quadTo(middle, line.p2());
-        painter->setBrush(Qt::NoBrush);
-        painter->drawPath(path);
         QPointF arrowEnd = line.p1();
         if(!isTransitionPreview)
         {
@@ -474,7 +482,6 @@ void DEdit_WidgetPainter::paintTransition(QPainter* painter, QLineF line,
     {// else a state is connected with itself
         int radius = DEdit_GraphicalState::m_nDiameter/2 + 
                 DEdit_GraphicalTransition::m_nWithItselfTransitionRadius;
-        QPainterPath path;
         path.moveTo(line.p1());
         double angle_rad = ((double)curve)/1800 * M_PI;
         double cos_angle = cos(angle_rad);
@@ -492,10 +499,30 @@ void DEdit_WidgetPainter::paintTransition(QPainter* painter, QLineF line,
         // from +180° to top of state
         arrowPos = QPoint(line.x1()-DEdit_GraphicalState::m_nDiameter/2*sin_angle,
                           line.y1()-DEdit_GraphicalState::m_nDiameter/2*cos_angle);
-        path.lineTo(arrowPos.x(), arrowPos.y());
-        painter->drawPath(path);
+        if(isTransitionPreview)
+        {
+            path.lineTo(arrowPos.x(), arrowPos.y());
+        }
+        else
+        {
+            path.lineTo(line.p1());
+        }
         arrowAngle = 90 + ((double)curve/10);
     }
+    // draw calculated path
+    painter->setBrush(Qt::NoBrush);
+    painter->drawPath(path);
+    if(execPosition >= 0.0 && execPosition <= 1.0)
+    {
+        int diameter = DEdit_GraphicalState::m_nDiameter/3;
+        QRect dotRect(0, 0, diameter, diameter);
+        dotRect.moveCenter(path.pointAtPercent(execPosition).toPoint());
+        
+        painter->setBrush(painter->pen().brush());
+        painter->drawEllipse(dotRect);
+    }
+    
+    
     //painter->drawText(100, 100, QString("Arrow angle: ") + QString::number(arrowAngle));
     // compute from degrees to rad
     arrowAngle *= M_PI / 180;

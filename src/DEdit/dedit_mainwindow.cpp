@@ -30,6 +30,10 @@
 #include <QDir>
 #include <QFileInfo>
 #include <QSizePolicy>
+#include <QDragEnterEvent>
+#include <QDropEvent>
+#include <QList>
+#include <QUrl>
 
 // layouts
 #include <QHBoxLayout>
@@ -44,9 +48,10 @@ DEdit_MainWindow::DEdit_MainWindow()
     createMenuBar();
     connectSlots();
     initWidgets();
-    
     retranslateUi();
     reloadIcons();
+    // activate drag'n'drop
+    setAcceptDrops(TRUE);
     
     resize(800, 600);
 }
@@ -353,9 +358,11 @@ void DEdit_MainWindow::showConfigureEditorDialog()
     if(!m_diaConfigureDEditWidget)
     {
         m_diaConfigureDEditWidget = new Dia_ConfigureDEditWidget(this);
-        m_diaConfigureDEditWidget->setWidgetToEdit(wdgEditor);
+        // close this dialog, if main window gets closed
+        m_diaConfigureDEditWidget->setAttribute(Qt::WA_QuitOnClose, FALSE);
     }
-    m_diaConfigureDEditWidget ->exec();
+    m_diaConfigureDEditWidget->setWidgetToEdit(wdgEditor);
+    m_diaConfigureDEditWidget->show();
 }
 
 
@@ -489,5 +496,47 @@ void DEdit_MainWindow::showAboutDialog()
         m_diaAbout = new Dia_About(this);
     }
     m_diaAbout->show();
+}
+
+
+void DEdit_MainWindow::dragEnterEvent(QDragEnterEvent* event)
+{
+    if(event->mimeData()->hasFormat("text/uri-list"))
+    {
+        QList<QUrl> urls = event->mimeData()->urls();
+        if(urls.isEmpty())
+        {
+            return;
+        }
+        QString filename = urls.first().toLocalFile();
+        if(filename.endsWith(".xml"))
+        {
+            event->acceptProposedAction();
+        }
+    }
+}
+
+void DEdit_MainWindow::dropEvent(QDropEvent* event)
+{
+    QList<QUrl> urls = event->mimeData()->urls();
+    if(urls.isEmpty())
+    {
+        return;
+    }
+    QString filename = urls.first().toLocalFile();
+    if(filename.isEmpty())
+    {
+        return;
+    }
+    QString result = loadFromFile(filename);
+    if(!result.isEmpty())
+    {
+        QMessageBox::critical(this, tr("Error when opening file"), result);
+    }
+    else
+    {// if opening was successfull
+        // then we have a new filename
+        m_szFilename = filename;
+    }
 }
 

@@ -30,7 +30,7 @@ public:
     
     void paintTransition(QPainter* painter, DEdit_GraphicalTransition* transition);
     void repaintTransitionPixmap(DEdit_GraphicalTransition* transition);
-    void paintTransition(QPainter* painter, QLineF line, int curve, bool isTransitionPreview = FALSE);
+    void paintTransition(QPainter* painter, QLineF line, int curve, double execPosition, bool isTransitionPreview = FALSE);
     void paintTransitionLabel(QPainter* painter, DEdit_GraphicalTransition* transition);
     void recomputeTransitionLabelArea(DEdit_GraphicalTransition* transition);
     

@@ -36,6 +36,8 @@ public:
     bool m_bJustExecuted;
     int  m_nCurve;
     int  m_nDragRotationOffset; // rotation offset, when dragging a transition, when start = end
+    double m_fExecutionProgress;
+    void   setExecutionProgress(double progress);
     
     int curveByDragPosition(QPoint dragPos);
     static int curveByDragPosition(QPoint p1, QPoint p2, QPoint dragPos);

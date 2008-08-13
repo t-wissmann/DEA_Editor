@@ -36,6 +36,8 @@ DEdit_ExecDeaWidget::DEdit_ExecDeaWidget(QWidget* parent)
     m_bErrorOccured = FALSE;
     m_nCurrentPosition = 0;
     m_pCurrentState = NULL;
+    m_nTransitionAnimationTime = 1000;
+    m_pLastTransition = NULL;
     // init gui
     allocateWidgets();
     createLayouts();
@@ -164,6 +166,13 @@ void DEdit_ExecDeaWidget::connectSlots()
     connect(btnShowHideOutput, SIGNAL(toggled(bool)), btnClearOutput, SLOT(setVisible(bool)));
     connect(btnClearOutput, SIGNAL(clicked()), txtOutput, SLOT(clear()));
     connect(btnClearInputString, SIGNAL(clicked()), txtInputString, SLOT(clear()));
+    
+    
+    // for dev
+    QTimer* tmr = new QTimer(this);
+    connect(tmr, SIGNAL(timeout()), this, SLOT(resetExecutionProgressDot()));
+    tmr->setInterval(40);
+    tmr->start();
 }
 
 void DEdit_ExecDeaWidget::retranslateUi()
@@ -259,13 +268,15 @@ void DEdit_ExecDeaWidget::start()
     m_bRunning = TRUE;
     m_bPaused = FALSE;
     m_bErrorOccured = FALSE;
-    m_pLastTransition = NULL;
+    resetLastTransition(m_pLastTransition);
     resetWidgetProperties();
     
     m_szStringToCheck = txtInputString->text();
     m_szAcceptedSymbols = "";
     m_nCurrentPosition = 0;
-    m_pCurrentState = m_pDeaWidget->graphicalStartState();
+    
+    // select currentState
+    resetCurrentState(m_pDeaWidget->graphicalStartState()); // set m_pCurrentState to start
     if(!m_pCurrentState)
     {
         m_bErrorOccured = TRUE;
@@ -274,8 +285,6 @@ void DEdit_ExecDeaWidget::start()
         updateResultLabel();
         return;
     }
-    // select currentState
-    m_pCurrentState->m_bCurrentlyExecutedState = TRUE;
     updateResultLabel();
     m_pDeaWidget->update();
     // execute to end if wanted
@@ -291,17 +300,13 @@ void DEdit_ExecDeaWidget::stop()
     m_bRunning = FALSE;
     m_bPaused = FALSE;
     
-    if(m_pLastTransition)
-    {
-        // deselect old transition
-        m_pLastTransition->m_bJustExecuted = FALSE;
-        m_pLastTransition->setWasChanged();
-    }
+    resetLastTransition(NULL);
     if(m_pCurrentState)
     {
-        // deselect currentState
         m_pCurrentState->m_bCurrentlyExecutedState = FALSE;
     }
+    
+    
     if(m_pDeaWidget)
     {
         m_pDeaWidget->update();
@@ -327,6 +332,7 @@ void DEdit_ExecDeaWidget::executeToNextState()
         updateResultLabel();
         return;
     }
+    
     DEA_State* state = m_pCurrentState->m_pData;
     if(m_nCurrentPosition >= m_szStringToCheck.size())
     {
@@ -374,49 +380,81 @@ void DEdit_ExecDeaWidget::executeToNextState()
     // if transition for current symbol was found
     DEA_State*      newState = transition->end();
     // print some info
-    QString transitionInfo = tr("Found transition for \'%symbol\' from \'%stateFrom\' to \'%stateTo\'");
-    transitionInfo.replace("%symbol", QString(currentSymbol));
-    transitionInfo.replace("%stateFrom", state->name());
-    transitionInfo.replace("%stateTo", newState->name());
-    putMessage(transitionInfo);
+    printTransitionFound(currentSymbol, state, newState);
+    
     if(!newState)
     {
         putMessage("Internal pointer error...");
         return;
     }
     DEdit_GraphicalState* newCurrentState = m_pDeaWidget->findStateByName(newState->name());
-    
     if(!newCurrentState)
     {
         putMessage("Internal pointer error...");
         return;
     }
-    // deselect old transition
-    if(m_pLastTransition)
-    {
-        m_pLastTransition->m_bJustExecuted = FALSE;
-        m_pLastTransition->setWasChanged();
-    }
-    m_pLastTransition = m_pDeaWidget->graphicalTransitionForData(transition);
-    // select new transition
-    if(m_pLastTransition)
-    {
-        m_pLastTransition->m_bJustExecuted = TRUE;
-        m_pLastTransition->setWasChanged();
-    }
-    
-    // deselect old currentState
-    m_pCurrentState->m_bCurrentlyExecutedState = FALSE;
-    // select new currentState
-    newCurrentState->m_bCurrentlyExecutedState = TRUE;
-    // set newCurrentState to m_pCurrentState
-    m_pCurrentState = newCurrentState;
+    resetCurrentState(newCurrentState);
+    resetLastTransition(m_pDeaWidget->graphicalTransitionForData(transition));
     m_szAcceptedSymbols += currentSymbol;
     // go to next symbol
     ++m_nCurrentPosition;
     
     updateResultLabel();
     m_pDeaWidget->update();
+}
+
+
+void DEdit_ExecDeaWidget::printTransitionFound(char symbol, DEA_State* from, DEA_State* to)
+{
+    if(!from || !to)
+    {
+        return;
+    }
+    QString transitionInfo = tr("Found transition for \'%symbol\' from \'%stateFrom\' to \'%stateTo\'");
+    transitionInfo.replace("%symbol", QString(symbol));
+    transitionInfo.replace("%stateFrom", from->name());
+    transitionInfo.replace("%stateTo", to->name());
+    putMessage(transitionInfo);
+}
+
+void DEdit_ExecDeaWidget::resetLastTransition(DEdit_GraphicalTransition* transition)
+{
+    
+    // deselect old transition
+    if(m_pLastTransition)
+    {
+        m_pLastTransition->m_bJustExecuted = FALSE;
+        m_pLastTransition->setExecutionProgress(-1.0);
+        m_pLastTransition->setWasChanged();
+    }
+    // reset last transition
+    m_pLastTransition = transition;
+    // select new transition
+    if(m_pLastTransition)
+    {
+        m_pLastTransition->m_bJustExecuted = TRUE;
+        m_pLastTransition->setExecutionProgress(0.0);
+        m_pLastTransition->setWasChanged();
+    }
+    // reset execution progress
+    m_cStateChangedTimestamp.start();
+}
+
+void DEdit_ExecDeaWidget::resetCurrentState(DEdit_GraphicalState* state)
+{
+    
+    // deselect old currentState
+    if(m_pCurrentState)
+    {
+        m_pCurrentState->m_bCurrentlyExecutedState = FALSE;
+    }
+    // select new currentState
+    if(state)
+    {
+        state->m_bCurrentlyExecutedState = TRUE;
+    }
+    // set newCurrentState to m_pCurrentState
+    m_pCurrentState = state;
 }
 
 
@@ -522,9 +560,11 @@ void DEdit_ExecDeaWidget::setTimerInterval(int interval)
     if(interval == 0)
     {
         m_tmrExecNextState->stop();
+        m_nTransitionAnimationTime = 1000;
     }
     else
     {
+        m_nTransitionAnimationTime = interval;
         m_tmrExecNextState->setInterval(interval);
         if(!m_tmrExecNextState->isActive()
             && chkTimerControlled->isChecked())
@@ -538,3 +578,18 @@ void DEdit_ExecDeaWidget::setTimerInterval(int interval)
         execToNextBreakPoint();
     }
 }
+
+
+
+void DEdit_ExecDeaWidget::resetExecutionProgressDot()
+{
+    if(!m_pDeaWidget || !m_pLastTransition)
+    {
+        return;
+    }
+    double progress = m_cStateChangedTimestamp.elapsed();
+    progress /= (double)m_nTransitionAnimationTime;
+    m_pLastTransition->setExecutionProgress(progress);
+    m_pDeaWidget->update();
+}
+

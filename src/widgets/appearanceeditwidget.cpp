@@ -69,7 +69,6 @@ void AppearanceEditWidget::retranslateUi()
     wdgStateResultDenied->setText(tr("Denied:"));
     wdgStateResultAccepted->setText(tr("Accepted:"));
     chkAdvancedColors->setText(tr("Custom Border"));
-    
 }
 
 void AppearanceEditWidget::setAppearanceToEdit(DEdit_Appearance* app)
@@ -84,14 +83,13 @@ void AppearanceEditWidget::setAppearanceToEdit(DEdit_Appearance* app)
     wdgStateExecuted->setColorTripple(&app->m_cStateExecuted);
     wdgStateResultDenied->setColorTripple(&app->m_cStateResultDenied);
     wdgStateResultAccepted->setColorTripple(&app->m_cStateResultAccepted);
+    chkAdvancedColors->setChecked(TRUE);
 }
 
 DEdit_Appearance* AppearanceEditWidget::appearanceToEdit()
 {
     return m_pAppearance;
 }
-
-
 
 void AppearanceEditWidget::applyChanges()
 {

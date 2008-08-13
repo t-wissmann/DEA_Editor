@@ -5,6 +5,7 @@
 #include <QWidget>
 #include <QIcon>
 
+class DEA_State;
 class DEdit_GraphicalState;
 class DEdit_GraphicalTransition;
 // widgets
@@ -22,6 +23,7 @@ class QVBoxLayout;
 class QGridLayout;
 // other qt classes
 class QTimer;
+#include<QTime>
 
 class DEdit_ExecDeaWidget : public QWidget
 {
@@ -50,6 +52,7 @@ public slots:
     void activateTimer(bool on);
     void setTimerInterval(int interval);
     void execToNextBreakPoint();
+    void resetExecutionProgressDot();
 private:
     // init functions
     void allocateWidgets();
@@ -59,6 +62,12 @@ private:
     // private setter
     void resetWidgetProperties();
     void removeAllResultIndicators();
+    void resetLastTransition(DEdit_GraphicalTransition* transition);
+    void resetCurrentState(DEdit_GraphicalState* state);
+    
+    void printTransitionFound(char symbol, DEA_State* from, DEA_State* to);
+    
+    
     
     // widgets
     // toolbuttons
@@ -99,12 +108,14 @@ private:
     QString       m_szAcceptedSymbols;
     bool          m_bErrorOccured;
     DEdit_GraphicalTransition* m_pLastTransition;
+    QTime         m_cStateChangedTimestamp;
     
     // icons
     QIcon         m_cIconEditorLocked;
     QIcon         m_cIconEditorUnlocked;
     
     // members
+    int           m_nTransitionAnimationTime; // in ms
     bool          m_bRunning;
     bool          m_bPaused;
     DEdit_Widget* m_pDeaWidget;
