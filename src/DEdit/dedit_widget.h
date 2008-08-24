@@ -108,6 +108,7 @@ public:
     void recreateAllGuiTemplates();
 public slots:
     void addState();
+    void addStateAtContextMenuPosition();
     void addState(QPoint atPosition);
     void addTransition();
     void removeState();
@@ -188,13 +189,18 @@ private:
     QString         m_szLastSyntaxError; // needed for createDeaFromFile()
     
     // context menu
+    QPoint          m_cContextMenuPosition;
     QMenu*          m_mnuContextMenuState;
     QMenu*          m_mnuContextMenuTransition;
+    QMenu*          m_mnuContextMenuEmptySpace;
+    QAction*        m_mnaAddState;
+    QAction*        m_mnaAddTransition;
     QAction*        m_mnaRemoveItem;
     QAction*        m_mnaEditItem;
     QAction*        m_mnaResetTransitionCurve;
     QAction*        m_mnaSetFinalState;
     QAction*        m_mnaSetStartState;
+    
     
     // dialogs
     DEdit_EditStateDia* m_diaEditState;

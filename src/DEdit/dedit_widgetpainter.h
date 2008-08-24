@@ -35,6 +35,7 @@ public:
     void recomputeTransitionLabelArea(DEdit_GraphicalTransition* transition);
     
     void setAllItemsToNotChanged();
+    void setAllItemsToWasChanged();
     
     // create templates
     void recreateAllTemplates();

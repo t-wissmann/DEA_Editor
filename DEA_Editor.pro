@@ -8,7 +8,7 @@ TEMPLATE = app
 DESTDIR = bin/
 TARGET = 
 DEPENDPATH += . src src/DEdit
-CONFIG += qt  #warn_on #Debugging-Informationen und Warnungen werden ausgegeben
+CONFIG += qt warn_off  #warn_on #Debugging-Informationen und Warnungen werden ausgegeben
 INCLUDEPATH += . src
 
 TRANSLATIONS = translations/dea_editor_english.ts \

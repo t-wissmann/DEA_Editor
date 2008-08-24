@@ -13,10 +13,17 @@ class QSpinBox;
 class QPushButton;
 class QDialogButtonBox;
 class ColorButton;
+class QListWidget;
+class QGroupBox;
+class QStackedWidget;
+class QSplitter;
+class QSlider;
+class QSplitter;
 
 // layouts
 class QHBoxLayout;
 class QVBoxLayout;
+class QGridLayout;
 
 class Dia_ConfigureDEditWidget : public QDialog
 {
@@ -33,6 +40,8 @@ public:
     
 public slots:
     void applyChanges();
+    void setCurrentCategoryName(QString name);
+    void restoreDefaults();
 private:
     void allocateWidgets();
     void createLayouts();
@@ -42,20 +51,39 @@ private:
     QPushButton* btnOk;
     QPushButton* btnCancel;
     QPushButton* btnApply;
+    QPushButton* btnRestoreDefaults;
     QDialogButtonBox* boxBottom;
+    // list on the left
+    QListWidget* lstCategory;
+    QGroupBox*   grpCategory;
+    
     // options
+    // behavior
     QCheckBox*   chkAutoEditNewStates;
     QCheckBox*   chkAutoEditNewTransitions;
     QCheckBox*   chkAlignToGrid;
     QLabel*      lblGridResolution;
     QSpinBox*    spinGridResolution;
-    QWidget*     wdgGridResolution;
+    // appearance
     AppearanceEditWidget* wdgAppearance;
+    // proportions
+    QLabel*      lblStateDiameter;
+    QSlider*     slidStateDiameter;
+    QSpinBox*    spinStateDiameter;
+    QLabel*      lblTransitionLineWidth;
+    QSlider*     slidTransitionLineWidth;
+    QSpinBox*    spinTransitionLineWidth;
+    
     
     
     // layouts
-    QVBoxLayout* layoutParent;
-    QHBoxLayout* layoutGridResolution;
+    QVBoxLayout* layoutBehavior;
+    QGridLayout* layoutProportions;
+    
+    QStackedWidget* stackCategory;
+    QSplitter*      splitterCentral;
+    QVBoxLayout*    layoutParent;
+    QHBoxLayout*    layoutGridResolution;
     
     
     DEdit_Widget* m_pWidgetToEdit;

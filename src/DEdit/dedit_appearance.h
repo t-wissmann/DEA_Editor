@@ -11,6 +11,7 @@ public:
     ~DEdit_ColorTripple() {};
     
     QColor m_cColor[3];
+    // for states:
     // 0 = fill color
     // 1 = inner border
     // 2 = outer border
@@ -35,6 +36,13 @@ public:
     DEdit_ColorTripple m_cStateResultDenied;
     DEdit_ColorTripple m_cStateResultAccepted;
     QColor             m_cStateLabelColor;
+    
+    
+    QColor          m_cTransitionNormal;
+    QColor          m_cTransitionHovered;
+    QColor          m_cTransitionSelected;
+    QColor          m_cTransitionExecuted;
+    QColor          m_cTransitionLabelColor;
     
     static void createTangoDefault(DEdit_Appearance* app);
     

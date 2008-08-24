@@ -83,7 +83,7 @@ void DEdit_Widget::createContextMenu()
     // menus
     m_mnuContextMenuState = new QMenu(this);
     m_mnuContextMenuTransition = new QMenu(this);
-    
+    m_mnuContextMenuEmptySpace = new QMenu(this);
     // both
     m_mnaRemoveItem = new QAction(NULL);
     m_mnaEditItem = new QAction(NULL);
@@ -105,6 +105,12 @@ void DEdit_Widget::createContextMenu()
     m_mnuContextMenuTransition->addSeparator();
     m_mnuContextMenuTransition->addAction(m_mnaRemoveItem);
     m_mnuContextMenuTransition->addAction(m_mnaEditItem);
+    // for empty space
+    m_mnaAddState = new QAction(NULL);
+    m_mnaAddTransition = new QAction(NULL);
+    m_mnuContextMenuEmptySpace->addAction(m_mnaAddState);
+    m_mnuContextMenuEmptySpace->addAction(m_mnaAddTransition);
+    
     
     // connect slots
     connect(m_mnaRemoveItem, SIGNAL(triggered()), this, SLOT(removeSelectedItem()));
@@ -114,6 +120,10 @@ void DEdit_Widget::createContextMenu()
     connect(m_mnaSetFinalState, SIGNAL(toggled(bool)), this,
             SLOT(setSelectedState_FinalState(bool)));
     connect(m_mnaResetTransitionCurve, SIGNAL(triggered()), this, SLOT(resetTransitionCurve()));
+    connect(m_mnaAddState, SIGNAL(triggered()), this, SLOT(addStateAtContextMenuPosition()));
+    connect(m_mnaAddTransition, SIGNAL(triggered()), this, SLOT(addTransition()));
+    
+    
     // slot, to update context menu
     connect(this, SIGNAL(selectedStateIndexChanged(int)), this, SLOT(updateStateContextMenu()));
 }
@@ -126,10 +136,15 @@ void DEdit_Widget::retranslateUi()
     m_mnaSetFinalState->setText(tr("Final State"));
     m_mnaSetStartState->setText(tr("Start State"));
     m_mnaResetTransitionCurve->setText(tr("Reset Curve"));
+    
+    m_mnaAddState->setText(tr("New State"));
+    m_mnaAddTransition->setText(tr("New Transition"));
 }
 
 void DEdit_Widget::reloadIcons()
 {
+    m_mnaAddState->setIcon(IconCatcher::getIcon("add"));
+    m_mnaAddTransition->setIcon(IconCatcher::getIcon("add"));
     m_mnaRemoveItem->setIcon(IconCatcher::getIcon("editdelete"));
     m_mnaEditItem->setIcon(IconCatcher::getIcon("edit"));
     m_mnaResetTransitionCurve->setIcon(IconCatcher::getIcon("undo"));
@@ -156,6 +171,12 @@ void DEdit_Widget::addState()
     addState(QPoint(width()/2, height()/2));
 }
 
+
+void DEdit_Widget::addStateAtContextMenuPosition()
+{
+    // add state at the position of the last context menu
+    addState(m_cContextMenuPosition);
+}
 
 void DEdit_Widget::addState(QPoint atPosition)
 {
@@ -775,6 +796,9 @@ void DEdit_Widget::contextMenuEvent(QContextMenuEvent* event)
     // switch to normal mode
     setCurrentMode(ModeNormal);
     
+    // backup context menu position for add state
+    m_cContextMenuPosition = event->pos();
+    
     // only show context menu
     // if an item is selected
     if(m_pSelectedTransition)
@@ -785,6 +809,10 @@ void DEdit_Widget::contextMenuEvent(QContextMenuEvent* event)
     else if(m_nSelectedStateIndex >= 0)
     {
         m_mnuContextMenuState->exec(event->globalPos());
+    }
+    else
+    {
+        m_mnuContextMenuEmptySpace->exec(event->globalPos());
     }
 }
 
@@ -1757,6 +1785,8 @@ DEdit_Appearance* DEdit_Widget::appearance()
 void DEdit_Widget::recreateAllGuiTemplates()
 {
     m_cWidgetPainter.recreateAllTemplates();
+    // request repaint for all states and transitions
+    m_cWidgetPainter.setAllItemsToWasChanged();
     update();
 }
 /// END SOME VISUAL OPTIONS

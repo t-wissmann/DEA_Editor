@@ -146,6 +146,27 @@ void DEdit_WidgetPainter::setAllItemsToNotChanged()
     }
 }
 
+
+void DEdit_WidgetPainter::setAllItemsToWasChanged()
+{
+    if(!m_pWidget)
+    {
+        DEBUG_MSG("setAllItemsToWasChanged()", "m_pWidget = 0");
+        return;
+    }
+    // all states
+    for(int i = 0; i < m_pWidget->m_StateList.size(); ++i)
+    {
+        m_pWidget->m_StateList[i].setWasChanged();
+    }
+    // all transitions
+    for(int i = 0; i < m_pWidget->m_TransitionList.size(); ++i)
+    {
+        m_pWidget->m_TransitionList[i].setWasChanged();
+    }
+}
+
+
 void DEdit_WidgetPainter::paintState(QPainter* painter, DEdit_GraphicalState* state)
 {
     if(!painter  || !state){
@@ -657,33 +678,33 @@ void DEdit_WidgetPainter::recreateStartStateIndicator()
 
 void DEdit_WidgetPainter::recreateTransitionPens()
 {
-    // black
+    // black = normal
     m_cTransitionPen.setCapStyle(Qt::RoundCap);
     m_cTransitionPen.setJoinStyle(Qt::RoundJoin);
     m_cTransitionPen.setWidth(DEdit_GraphicalTransition::m_nLineWidth);
     m_cTransitionPen.setCapStyle(Qt::RoundCap);
-    m_cTransitionPen.setColor(QColor(0, 0, 0));
-    // light red
+    m_cTransitionPen.setColor(m_cAppearance.m_cTransitionNormal);
+    // light red = hovered
     m_cTransitionPenHovered.setCapStyle(Qt::RoundCap);
     m_cTransitionPenHovered.setJoinStyle(Qt::RoundJoin);
     m_cTransitionPenHovered.setWidth(DEdit_GraphicalTransition::m_nLineWidth);
     m_cTransitionPenHovered.setCapStyle(Qt::RoundCap);
-    m_cTransitionPenHovered.setColor(QColor(204, 0, 0));
-    // dark red
+    m_cTransitionPenHovered.setColor(m_cAppearance.m_cTransitionHovered);
+    // dark red = selected
     m_cTransitionPenSelected.setCapStyle(Qt::RoundCap);
     m_cTransitionPenSelected.setJoinStyle(Qt::RoundJoin);
     m_cTransitionPenSelected.setWidth(DEdit_GraphicalTransition::m_nLineWidth);
     m_cTransitionPenSelected.setCapStyle(Qt::RoundCap);
-    m_cTransitionPenSelected.setColor(QColor(239, 41, 41));
-    // green
+    m_cTransitionPenSelected.setColor(m_cAppearance.m_cTransitionSelected);
+    // executed
     m_cTransitionPenJustExecuted.setCapStyle(Qt::RoundCap);
     m_cTransitionPenJustExecuted.setJoinStyle(Qt::RoundJoin);
     m_cTransitionPenJustExecuted.setWidth(DEdit_GraphicalTransition::m_nLineWidth);
     m_cTransitionPenJustExecuted.setCapStyle(Qt::RoundCap);
-    m_cTransitionPenJustExecuted.setColor(QColor("#EDD400"));
+    m_cTransitionPenJustExecuted.setColor(m_cAppearance.m_cTransitionExecuted);
     
     // for label
-    m_cTransitionLabelPen.setColor(QColor(238, 238, 238));
+    m_cTransitionLabelPen.setColor(m_cAppearance.m_cTransitionLabelColor);
     m_cTransitionLabelFont.setBold(TRUE);
 }
 
