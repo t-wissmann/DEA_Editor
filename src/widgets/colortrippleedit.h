@@ -23,6 +23,7 @@ public:
     
     void setColorTripple(DEdit_ColorTripple* colors);
     DEdit_ColorTripple* colorTripple();
+    void initColorsFromColorTripple(DEdit_ColorTripple* colors);
 public slots:
     void setAdvancedColorsEnabled(bool enabled);
 private:

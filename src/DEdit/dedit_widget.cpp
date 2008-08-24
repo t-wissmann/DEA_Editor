@@ -729,11 +729,11 @@ void DEdit_Widget::dragEnterEvent(QDragEnterEvent* event)
     if(event->mimeData()->hasFormat(dndMimeFormat()))
     {
         event->acceptProposedAction();
-#ifdef Q_WS_WIN
+//#ifdef Q_WS_WIN
         // only needed for drag'n'drop pixmap
         // replacement
         m_bAboutToDrop = TRUE;
-#endif
+//#endif
     }
 }
 
@@ -1284,13 +1284,14 @@ void DEdit_Widget::editSelectedTransition()
     m_diaEditTransition->exec();
     
     // if edit failed -> no symbol entered
-    if(m_TransitionList.last().symbols().isEmpty())
+    if(m_pSelectedTransition->symbols().isEmpty())
     {
         // then remove again
-        removeTransition(&m_TransitionList.last());
+        removeTransition(m_pSelectedTransition);
         // reset selection
         m_pSelectedTransition = NULL;
         m_pHoveredTransition = NULL;
+        m_pDraggedTransition = NULL;
     }
     emitDeaWasChanged(); // dea just has been edited
     update();

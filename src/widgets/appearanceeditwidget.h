@@ -26,9 +26,12 @@ public:
     
     void setAppearanceToEdit(DEdit_Appearance* app);
     DEdit_Appearance* appearanceToEdit();
+    void initColorsFromAppearance(DEdit_Appearance* app);
     
     void applyChanges();
     void retranslateUi();
+    void restoreDefaults();
+    
 private:
     void allocateWidgets();
     void createLayouts();

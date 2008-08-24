@@ -46,7 +46,7 @@ private:
     void allocateWidgets();
     void createLayouts();
     void connectSlots();
-    
+        
     // widgets
     QPushButton* btnOk;
     QPushButton* btnCancel;

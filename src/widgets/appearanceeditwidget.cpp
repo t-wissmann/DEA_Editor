@@ -139,7 +139,8 @@ void AppearanceEditWidget::retranslateUi()
 void AppearanceEditWidget::setAppearanceToEdit(DEdit_Appearance* app)
 {
     m_pAppearance = app;
-    if(!m_pAppearance)
+    initColorsFromAppearance(m_pAppearance);
+    if(!app)
     {
         return;
     }
@@ -149,6 +150,22 @@ void AppearanceEditWidget::setAppearanceToEdit(DEdit_Appearance* app)
     wdgStateExecuted->setColorTripple(&app->m_cStateExecuted);
     wdgStateResultDenied->setColorTripple(&app->m_cStateResultDenied);
     wdgStateResultAccepted->setColorTripple(&app->m_cStateResultAccepted);
+}
+
+
+void AppearanceEditWidget::initColorsFromAppearance(DEdit_Appearance* app)
+{
+    if(!app)
+    {
+        return;
+    }
+    
+    // states
+    wdgStateNormal->initColorsFromColorTripple(&app->m_cStateNormal);
+    wdgStateSelected->initColorsFromColorTripple(&app->m_cStateSelected);
+    wdgStateExecuted->initColorsFromColorTripple(&app->m_cStateExecuted);
+    wdgStateResultDenied->initColorsFromColorTripple(&app->m_cStateResultDenied);
+    wdgStateResultAccepted->initColorsFromColorTripple(&app->m_cStateResultAccepted);
     btnStateLabelColor->setColor(app->m_cStateLabelColor);
     chkAdvancedColors->setChecked(TRUE);
     
@@ -184,5 +201,14 @@ void AppearanceEditWidget::applyChanges()
     m_pAppearance->m_cTransitionSelected = btnTransitionSelected->color();
     m_pAppearance->m_cTransitionExecuted = btnTransitionExecuted->color();
     m_pAppearance->m_cTransitionLabelColor = btnTransitionLabelColor->color();
+}
+
+
+void AppearanceEditWidget::restoreDefaults()
+{
+    DEdit_Appearance defaultAppearance;
+    DEdit_Appearance::createTangoDefault(&defaultAppearance);
+    
+    initColorsFromAppearance(&defaultAppearance);
 }
 

@@ -42,9 +42,11 @@ Dia_ConfigureDEditWidget::Dia_ConfigureDEditWidget(QWidget* parent)
     
     retranslateUi();
     reloadIcons();
+    // init widgets
     lstCategory->setCurrentRow(0);
     splitterCentral->setSizes(QList<int>() << 180 << (splitterCentral->width() - 180));
-    //resize(minimumSize());
+    chkAlignToGrid->setChecked(TRUE); // force that signal is emitted
+    chkAlignToGrid->setChecked(FALSE);
 }
 
 Dia_ConfigureDEditWidget::~Dia_ConfigureDEditWidget()
@@ -161,6 +163,7 @@ void Dia_ConfigureDEditWidget::connectSlots()
 {
     connect(btnCancel, SIGNAL(clicked()), this, SLOT(reject()));
     connect(btnOk, SIGNAL(clicked()), this, SLOT(accept()));
+    connect(btnRestoreDefaults, SIGNAL(clicked()), this, SLOT(restoreDefaults()));
     connect(this, SIGNAL(accepted()), this, SLOT(applyChanges()));
     connect(btnApply, SIGNAL(clicked()), this, SLOT(applyChanges()));
     connect(chkAlignToGrid, SIGNAL(toggled(bool)), lblGridResolution, SLOT(setEnabled(bool)));
@@ -171,6 +174,7 @@ void Dia_ConfigureDEditWidget::connectSlots()
     connect(spinStateDiameter, SIGNAL(valueChanged(int)), slidStateDiameter, SLOT(setValue(int)));
     connect(slidTransitionLineWidth, SIGNAL(valueChanged(int)), spinTransitionLineWidth, SLOT(setValue(int)));
     connect(spinTransitionLineWidth, SIGNAL(valueChanged(int)), slidTransitionLineWidth, SLOT(setValue(int)));
+    
     
 }
 
@@ -299,8 +303,20 @@ void Dia_ConfigureDEditWidget::setCurrentCategoryName(QString name)
 
 void Dia_ConfigureDEditWidget::restoreDefaults()
 {
+    
+    chkAutoEditNewStates->setChecked(FALSE);
+    chkAutoEditNewTransitions->setChecked(TRUE);
+    
+    chkAlignToGrid->setChecked(FALSE);
+    spinGridResolution->setValue(20);
+    
     spinStateDiameter->setValue(100);
     spinTransitionLineWidth->setValue(5);
+    
+    wdgAppearance->restoreDefaults();
 }
+
+
+
 
 

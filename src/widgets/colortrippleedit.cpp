@@ -52,7 +52,17 @@ void ColorTrippleEdit::setAdvancedColorsEnabled(bool enabled)
 void ColorTrippleEdit::setColorTripple(DEdit_ColorTripple* colors)
 {
     m_pColors = colors;
+    initColorsFromColorTripple(m_pColors);
     if(!m_pColors)
+    {
+        return;
+    }
+}
+
+
+void ColorTrippleEdit::initColorsFromColorTripple(DEdit_ColorTripple* colors)
+{
+    if(!colors)
     {
         return;
     }

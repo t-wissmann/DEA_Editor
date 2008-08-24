@@ -22,6 +22,7 @@ class DEdit_PropertiesWidget;
 
 class QDragEnterEvent;
 class QDropEvent;
+class QKeyEvent;
 
 // menus
 class QMenuBar;
@@ -57,6 +58,7 @@ public slots:
 protected:
     virtual void dragEnterEvent(QDragEnterEvent* event);
     virtual void dropEvent(QDropEvent* event);
+    virtual void keyPressEvent(QKeyEvent* event);
     
 private:
     void initMembers();
@@ -102,6 +104,7 @@ private:
     QAction*     mnaShowSourceCode;
     // mnuSettings
     QAction*     mnaShowStatusBar;
+    QAction*     mnaShowMenuBar;
     QAction*     mnaConfigureEditor;
     // mnuHelp
     QAction*     mnaAboutQt;

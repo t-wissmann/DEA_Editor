@@ -34,6 +34,7 @@
 #include <QDropEvent>
 #include <QList>
 #include <QUrl>
+#include <QKeyEvent>
 
 // layouts
 #include <QHBoxLayout>
@@ -166,6 +167,9 @@ void DEdit_MainWindow::createActions()
     mnaShowStatusBar = new QAction(NULL);
     mnaShowStatusBar->setCheckable(TRUE);
     mnaShowStatusBar->setChecked(TRUE);
+    mnaShowMenuBar = new QAction(NULL);
+    mnaShowMenuBar->setCheckable(TRUE);
+    mnaShowMenuBar->setChecked(TRUE);
     mnaConfigureEditor = new QAction(NULL);
     // mnuHelp
     mnaAbout = new QAction(NULL);
@@ -191,6 +195,7 @@ void DEdit_MainWindow::createMenuBar()
     mnuView->addAction(mnaShowSourceCode);
     
     mnuSettings = menuBar()->addMenu("settings");
+    mnuSettings->addAction(mnaShowMenuBar);
     mnuSettings->addAction(mnaShowStatusBar);
     mnuSettings->addAction(mnaConfigureEditor);
     
@@ -228,6 +233,7 @@ void DEdit_MainWindow::connectSlots()
     connect(dockProperties, SIGNAL(visibilityChanged(bool)), mnaShowProperties, SLOT(setChecked(bool)));
     // mnuSettings
     connect(mnaShowStatusBar, SIGNAL(toggled(bool)), statusBar(), SLOT(setVisible(bool)));
+    connect(mnaShowMenuBar, SIGNAL(toggled(bool)), menuBar(), SLOT(setVisible(bool)));
     connect(mnaConfigureEditor, SIGNAL(triggered()), this, SLOT(showConfigureEditorDialog()));
     // mnuHelp
     connect(mnaAbout, SIGNAL(triggered()), this, SLOT(showAboutDialog()));
@@ -273,6 +279,8 @@ void DEdit_MainWindow::retranslateUi()
     mnaShowProperties->setText(tr("Show Properties"));
     mnaShowSourceCode->setText(tr("Show Source Code"));
     // mnuSettings
+    mnaShowMenuBar->setText(tr("Show Menubar"));
+    mnaShowMenuBar->setShortcut(tr("Ctrl+M"));
     mnaShowStatusBar->setText(tr("Show Statusbar"));
     mnaConfigureEditor->setText(tr("Configure Editor"));
     // mnuHelp
@@ -303,6 +311,20 @@ void DEdit_MainWindow::reloadIcons()
     btnEditItem->setIcon(IconCatcher::getIcon("edit"));
     btnMoveUp->setIcon(IconCatcher::getIcon("up"));
     btnMoveDown->setIcon(IconCatcher::getIcon("down"));
+}
+
+
+void DEdit_MainWindow::keyPressEvent(QKeyEvent* event)
+{
+    if((event->key() == Qt::Key_M) && (event->modifiers() & Qt::ControlModifier) )
+    {
+        mnaShowMenuBar->setChecked(!mnaShowMenuBar->isChecked());
+        event->accept();
+    }
+    else
+    {
+        QMainWindow::keyPressEvent(event);
+    }
 }
 
 
