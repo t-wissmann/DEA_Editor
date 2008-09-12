@@ -4,7 +4,7 @@
 #include <QMainWindow>
 
 #include <DEA/dea.h>
-
+#include <multilanguage/translateableobject.h>
 // dialogs
 class Dia_DeaSourceViewer;
 class Dia_ConfigureDEditWidget;
@@ -19,10 +19,13 @@ class QDockWidget;
 class DEdit_ExecDeaWidget;
 class QScrollArea;
 class DEdit_PropertiesWidget;
+class QToolBar;
 
+// events
 class QDragEnterEvent;
 class QDropEvent;
 class QKeyEvent;
+class QCloseEvent;
 
 // menus
 class QMenuBar;
@@ -34,8 +37,12 @@ class QHBoxLayout;
 class QVBoxLayout;
 
 
-class DEdit_MainWindow : public QMainWindow{
-    Q_OBJECT;
+class DEdit_MainWindow
+    : public QMainWindow,
+      public TranslateableObject
+{
+    friend class ConfigIO;
+    Q_OBJECT
 public:
     DEdit_MainWindow();
     virtual ~DEdit_MainWindow();
@@ -45,6 +52,13 @@ public:
     
     QString loadFromFile(QString filename); // returns errormsg
     QString saveToFile(QString filename); // returns errormsg
+    
+    
+    void saveConfig();
+    void loadConfig();
+    
+    bool userReallyWantsToCloseFile();
+    
 public slots:
     void newFile();
     void openFile();
@@ -54,20 +68,26 @@ public slots:
     void saveFile();
     void saveFileAs();
     void showAboutDialog();
-    
+    void undo();
+    void redo();
+    void reinitEditMenu();
+    void resetWindowTitle();
 protected:
     virtual void dragEnterEvent(QDragEnterEvent* event);
     virtual void dropEvent(QDropEvent* event);
     virtual void keyPressEvent(QKeyEvent* event);
+    virtual void closeEvent(QCloseEvent* event);
     
 private:
     void initMembers();
     void allocateWidgets();
     void createLayouts();
     void createActions();
+    void createToolBars();
     void createMenuBar();
     void connectSlots();
     void initWidgets();
+    void parseArguments();
     
     // widgets
     DEdit_Widget* wdgEditor;
@@ -85,10 +105,11 @@ private:
     QDockWidget* dockProperties;
     DEdit_PropertiesWidget* wdgProperties;
     
-    
     //dock run
     QDockWidget* dockExecDea;
     DEdit_ExecDeaWidget* wdgExecDea;
+    // toolbars
+    QToolBar*    tlbMainToolBar;
     
     // actions
     // mnuFile
@@ -97,12 +118,16 @@ private:
     QAction*     mnaSave;
     QAction*     mnaSaveAs;
     QAction*     mnaQuit;
+    // mnuEdit
+    QAction*     mnaUndo;
+    QAction*     mnaRedo;
     // mnuView
     QAction*     mnaShowToolButtonsDock;
     QAction*     mnaShowExecDeaDock;
     QAction*     mnaShowProperties;
     QAction*     mnaShowSourceCode;
     // mnuSettings
+    QAction*     mnaShowToolBar;
     QAction*     mnaShowStatusBar;
     QAction*     mnaShowMenuBar;
     QAction*     mnaConfigureEditor;
@@ -111,6 +136,7 @@ private:
     QAction*     mnaAbout;
     // menus in menubar
     QMenu*       mnuFile;
+    QMenu*       mnuEdit;
     QMenu*       mnuView;
     QMenu*       mnuSettings;
     QMenu*       mnuHelp;

@@ -42,6 +42,7 @@ public slots:
     void applyChanges();
     void setCurrentCategoryName(QString name);
     void restoreDefaults();
+    void historyClear();
 private:
     void allocateWidgets();
     void createLayouts();
@@ -73,12 +74,21 @@ private:
     QLabel*      lblTransitionLineWidth;
     QSlider*     slidTransitionLineWidth;
     QSpinBox*    spinTransitionLineWidth;
+    // history
+    QHBoxLayout* layoutHistorySize;
+    QLabel*      lblHistorySize;
+    QSlider*     slidHistorySize;
+    QSpinBox*    spinHistorySize;
+    QPushButton* btnHistoryClear;
+    
+    
     
     
     
     // layouts
     QVBoxLayout* layoutBehavior;
     QGridLayout* layoutProportions;
+    QVBoxLayout* layoutHistory;
     
     QStackedWidget* stackCategory;
     QSplitter*      splitterCentral;

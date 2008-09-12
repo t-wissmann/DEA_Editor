@@ -88,15 +88,42 @@ void Dia_ConfigureDEditWidget::allocateWidgets()
     slidTransitionLineWidth->setRange(1, 40);
     spinTransitionLineWidth->setRange(1, 40);
     
+    // history
+    lblHistorySize = new QLabel;
+    slidHistorySize = new QSlider(Qt::Horizontal);
+    spinHistorySize = new QSpinBox;
+    spinHistorySize->setRange(0, 40);
+    slidHistorySize->setRange(0, 40);
+    btnHistoryClear = new QPushButton;
+    
+    
     // listbox
     lstCategory = new QListWidget;
-    lstCategory->addItem("behavior");
-    lstCategory->addItem("colors");
-    lstCategory->addItem("proportions");
-    lstCategory->setIconSize(QSize(180, 100));
     //lstCategory->setViewMode(QListView::IconMode);
+    lstCategory->setIconSize(QSize(200, 84));
     lstCategory->setMovement(QListView::Static);
-    lstCategory->setFlow(QListView::TopToBottom);
+    lstCategory->setMinimumWidth(140);
+    lstCategory->setMaximumWidth(140);
+    lstCategory->setSpacing(0);
+    lstCategory->setAlternatingRowColors(TRUE);
+    
+    QListWidgetItem *currentItem = new QListWidgetItem(lstCategory);
+    currentItem->setText("behavior");
+    currentItem->setTextAlignment(Qt::AlignLeft | Qt::AlignVCenter);
+    currentItem->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
+    currentItem = new QListWidgetItem(lstCategory);
+    currentItem->setText("colors");
+    currentItem->setTextAlignment(Qt::AlignLeft | Qt::AlignVCenter);
+    currentItem->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
+    currentItem = new QListWidgetItem(lstCategory);
+    currentItem->setText("sizes");
+    currentItem->setTextAlignment(Qt::AlignLeft | Qt::AlignVCenter);
+    currentItem->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
+    currentItem = new QListWidgetItem(lstCategory);
+    currentItem->setText("history");
+    currentItem->setTextAlignment(Qt::AlignLeft | Qt::AlignVCenter);
+    currentItem->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
+    
     grpCategory = new QGroupBox;
     grpCategory->setFlat(TRUE);
 }
@@ -131,11 +158,27 @@ void Dia_ConfigureDEditWidget::createLayouts()
     QWidget* wdgProportions = new QWidget;
     wdgProportions->setLayout(layoutProportions);
     
+    // history
+    layoutHistorySize = new QHBoxLayout;
+    layoutHistorySize->setMargin(0);
+    layoutHistorySize->addWidget(lblHistorySize);
+    layoutHistorySize->addWidget(slidHistorySize);
+    layoutHistorySize->addWidget(spinHistorySize);
+    
+    layoutHistory = new QVBoxLayout;
+    layoutHistory->addLayout(layoutHistorySize);
+    layoutHistory->addWidget(btnHistoryClear);
+    
+    QWidget* wdgHistory = new QWidget;
+    wdgHistory->setLayout(layoutHistory);
+    
+    
     //
     stackCategory = new QStackedWidget;
     stackCategory->addWidget(wdgBehavior);
     stackCategory->addWidget(wdgAppearance);
     stackCategory->addWidget(wdgProportions);
+    stackCategory->addWidget(wdgHistory);
     
     
     QHBoxLayout* layoutStack = new QHBoxLayout; // create extra layout
@@ -174,7 +217,9 @@ void Dia_ConfigureDEditWidget::connectSlots()
     connect(spinStateDiameter, SIGNAL(valueChanged(int)), slidStateDiameter, SLOT(setValue(int)));
     connect(slidTransitionLineWidth, SIGNAL(valueChanged(int)), spinTransitionLineWidth, SLOT(setValue(int)));
     connect(spinTransitionLineWidth, SIGNAL(valueChanged(int)), slidTransitionLineWidth, SLOT(setValue(int)));
-    
+    connect(slidHistorySize, SIGNAL(valueChanged(int)), spinHistorySize, SLOT(setValue(int)));
+    connect(spinHistorySize, SIGNAL(valueChanged(int)), slidHistorySize, SLOT(setValue(int)));
+    connect(btnHistoryClear, SIGNAL(clicked()), this, SLOT(historyClear()));
     
 }
 
@@ -201,6 +246,10 @@ void Dia_ConfigureDEditWidget::retranslateUi()
     lblTransitionLineWidth->setText(tr("Transition line width:"));
     spinTransitionLineWidth->setSuffix(" " + tr("px"));
     
+    // history
+    lblHistorySize->setText(tr("History size:"));
+    btnHistoryClear->setText(tr("Clear History"));
+    
     // categories
     QListWidgetItem* item;
     item = lstCategory->item(0);
@@ -208,7 +257,9 @@ void Dia_ConfigureDEditWidget::retranslateUi()
     item = lstCategory->item(1);
     if(item) item->setText(tr("Colors"));
     item = lstCategory->item(2);
-    if(item) item->setText(tr("Proportions"));
+    if(item) item->setText(tr("Sizes"));
+    item = lstCategory->item(3);
+    if(item) item->setText(tr("History"));
     
 }
 
@@ -222,11 +273,13 @@ void Dia_ConfigureDEditWidget::reloadIcons()
     // categories
     QListWidgetItem* item;
     item = lstCategory->item(0);
-    if(item) item->setIcon(IconCatcher::getIcon("configure", 64));
+    if(item) item->setIcon(IconCatcher::getIcon("systemsettings", 48));
     item = lstCategory->item(1);
-    if(item) item->setIcon(IconCatcher::getIcon("colors", 64));
+    if(item) item->setIcon(IconCatcher::getIcon("colors", 48));
     item = lstCategory->item(2);
-    if(item) item->setIcon(IconCatcher::getIcon("applications-accessories", 64));
+    if(item) item->setIcon(IconCatcher::getIcon("applications-accessories", 48));
+    item = lstCategory->item(3);
+    if(item) item->setIcon(IconCatcher::getIcon("history", 48));
 }
 
 
@@ -256,6 +309,10 @@ void Dia_ConfigureDEditWidget::setWidgetToEdit(DEdit_Widget* widget)
     // proportions
     spinStateDiameter->setValue(DEdit_GraphicalState::m_nDiameter - 4); // minus 4 for shadows
     spinTransitionLineWidth->setValue(DEdit_GraphicalTransition::m_nLineWidth);
+    
+    // history
+    spinHistorySize->setValue(m_pWidgetToEdit->maxHistorySize());
+    
 }
 
 DEdit_Widget* Dia_ConfigureDEditWidget::widgetToEdit()
@@ -288,6 +345,9 @@ void Dia_ConfigureDEditWidget::applyChanges()
     DEdit_GraphicalState::m_nDiameter = 4 + spinStateDiameter->value();// plus 4 for shadows
     DEdit_GraphicalTransition::m_nLineWidth = spinTransitionLineWidth->value();
     
+    // apply changes to history
+    m_pWidgetToEdit->setMaxHistorySize(spinHistorySize->value());
+    
     // important: recreate all templates so that the new colors have effect
     m_pWidgetToEdit->recreateAllGuiTemplates();
     
@@ -313,10 +373,22 @@ void Dia_ConfigureDEditWidget::restoreDefaults()
     spinStateDiameter->setValue(100);
     spinTransitionLineWidth->setValue(5);
     
+    
+    spinHistorySize->setValue(5);
+    
     wdgAppearance->restoreDefaults();
 }
 
 
+
+void Dia_ConfigureDEditWidget::historyClear()
+{
+    if(!m_pWidgetToEdit)
+    {
+        return;
+    }
+    m_pWidgetToEdit->clearHistory();
+}
 
 
 

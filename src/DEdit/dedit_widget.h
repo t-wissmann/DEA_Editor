@@ -9,12 +9,15 @@
 #include "dedit_widgetpainter.h"
 #include <QLine>
 #include <QPixmap>
+
+
 // core
 class DEA;
 class DEA_State;
 class DEA_Transition;
 #include "dedit_graphicalstate.h"
 #include "dedit_graphicaltransition.h"
+#include "dedit_history.h"
 
 class xmlObject;
 
@@ -49,11 +52,31 @@ public:
         ModeAddTransitionSelectTo,
         ModeLocked
     };
-
+    
+    enum EDeaChangeType {
+        ChangeTypeStateAdded                = 0x00000001,
+        ChangeTypeStateRemoved              = 0x00000002,
+        ChangeTypeStateEdited               = 0x00000004,
+        ChangeTypeStateMoved                = 0x00000008, // TODO
+        ChangeTypeTransitionAdded           = 0x00000010,
+        ChangeTypeTransitionEdited          = 0x00000020,
+        ChangeTypeTransitionRemoved         = 0x00000040,
+        ChangeTypeTransitionCurveChanged    = 0x00000080  // TODO
+    };
+    static const int m_nDefaultHistorySaveReasonFlags =
+            ChangeTypeStateAdded |
+            ChangeTypeStateRemoved |
+            ChangeTypeStateEdited |
+            ChangeTypeStateMoved |
+            ChangeTypeTransitionAdded |
+            ChangeTypeTransitionEdited |
+            ChangeTypeTransitionRemoved |
+            ChangeTypeTransitionCurveChanged;
 signals:
     void currentModeChanged(DEdit_Widget::EMode);
     void selectedStateIndexChanged(int index);
     void deaWasChanged();
+    void historyChanged();
 public:
     friend class DEdit_WidgetPainter; // needed to paint all items
     DEdit_Widget();
@@ -106,6 +129,12 @@ public:
     bool isLocked() const;
     DEdit_Appearance* appearance();
     void recreateAllGuiTemplates();
+    bool isDeaWasChanged();
+    // for history
+    bool isUndoPossible();
+    bool isRedoPossible();
+    void setMaxHistorySize(int size);
+    int  maxHistorySize() const;
 public slots:
     void addState();
     void addStateAtContextMenuPosition();
@@ -129,6 +158,11 @@ public slots:
     void setLocked(bool locked);
     void recomputeMinimumSize();
     void putErrorMessage(QString msg);
+    void setDeaWasChanged(bool wasChanged = TRUE);
+    // for history
+    void undo();
+    void redo();
+    void clearHistory();
 protected:
     virtual void paintEvent(QPaintEvent* event);
     // mouse
@@ -160,9 +194,14 @@ private:
     void createTransition(DEdit_GraphicalState* from, DEdit_GraphicalState* to);
     void removeTransition(DEdit_GraphicalTransition* transition);
     
+    void sendHistoryChangeRequest(EDeaChangeType eType);
+    
     DEA*    m_pDea;
+    bool    m_bDeaWasChanged;
     EMode   m_eMode;
     DEdit_WidgetPainter m_cWidgetPainter;
+    DEdit_History       m_cHistory;
+    int                 m_nHistorySaveReasonFlags; // reasons to create a new history item, i.e. to call m_cWidgetPainter.saveCurrentHistory();
     // states
     QList<DEdit_GraphicalState> m_StateList;
     DEdit_GraphicalState*       m_pDraggedState;

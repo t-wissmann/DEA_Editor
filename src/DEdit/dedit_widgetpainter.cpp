@@ -180,6 +180,12 @@ void DEdit_WidgetPainter::paintState(QPainter* painter, DEdit_GraphicalState* st
     QRectF target(state->m_nX-width/2, state->m_nY-width/2, width, width);
     
     
+    if(state->m_bStartState)
+    {
+        QRect startStateIndicatorTarget(m_cStartStateIndicator.rect());
+        startStateIndicatorTarget.moveTo(state->positionToQPoint()+m_cStartStateIndicatorPosition);
+        painter->drawPixmap(startStateIndicatorTarget, m_cStartStateIndicator, m_cStartStateIndicator.rect());
+    }
     
     
     if(state->m_eResultIndicator == DEdit_GraphicalState::ResultDenied)
@@ -242,15 +248,6 @@ void DEdit_WidgetPainter::paintStateLabel(QPainter* painter, DEdit_GraphicalStat
                                 radius*2, radius*2);
         // now illustrate attributes
         painter->drawEllipse(finalStateIndicator);
-    }
-    if(state->m_bStartState)
-    {
-        QRect source(0, 0,
-                     m_cStartStateIndicator.width(),
-                     m_cStartStateIndicator.height());
-        QRect target(source);
-        target.moveTo(state->positionToQPoint()+m_cStartStateIndicatorPosition);
-        painter->drawPixmap(target, m_cStartStateIndicator, source);
     }
     
 }

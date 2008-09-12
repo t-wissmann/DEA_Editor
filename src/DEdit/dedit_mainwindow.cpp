@@ -5,6 +5,7 @@
 #include <io/xmlparser.h>
 #include <io/iconcatcher.h>
 #include <io/xmlloader.h>
+#include <io/configio.h>
 
 // dialogs
 #include <dialogs/dia_deasourceviewer.h>
@@ -21,6 +22,7 @@
 #include <QMenuBar>
 #include <QDockWidget>
 #include <QScrollArea>
+#include <QToolBar>
 
 // other qt-classes
 #include <QApplication>
@@ -41,20 +43,30 @@
 #include <QVBoxLayout>
 
 DEdit_MainWindow::DEdit_MainWindow()
+    : QMainWindow()
 {
+    
+    // enable vertical tabbar for docks
+    setDockOptions(AnimatedDocks | AllowNestedDocks | AllowTabbedDocks | VerticalTabs);
     initMembers();
     allocateWidgets();
     createLayouts();
     createActions();
+    createToolBars();
     createMenuBar();
     connectSlots();
     initWidgets();
     retranslateUi();
     reloadIcons();
+    parseArguments();
     // activate drag'n'drop
     setAcceptDrops(TRUE);
     
     resize(800, 600);
+    
+    // now load configuration
+    loadConfig();
+    
 }
 
 DEdit_MainWindow::~DEdit_MainWindow()
@@ -84,15 +96,6 @@ void DEdit_MainWindow::allocateWidgets()
     btnMoveUp->setVisible(FALSE);
     btnMoveDown = new QPushButton;
     btnMoveDown->setVisible(FALSE);
-    dockToolButtons = new QDockWidget;
-    // dock properties
-    dockProperties =  new QDockWidget;
-    wdgProperties = new DEdit_PropertiesWidget;
-    
-    // exec dea
-    dockExecDea = new QDockWidget;
-    wdgExecDea = new DEdit_ExecDeaWidget;
-    wdgExecDea->setDeaWidget(wdgEditor);
     
     
     // create statusbar
@@ -101,7 +104,9 @@ void DEdit_MainWindow::allocateWidgets()
 
 void DEdit_MainWindow::createLayouts()
 {
+    
     // dock tool buttons
+    dockToolButtons = new QDockWidget;
     layoutToolButtons = new QVBoxLayout;
     layoutToolButtons->setMargin(4);
     layoutToolButtons->addWidget(btnAddState);
@@ -117,10 +122,14 @@ void DEdit_MainWindow::createLayouts()
     addDockWidget(Qt::LeftDockWidgetArea, dockToolButtons);
     
     // dock properties
+    dockProperties =  new QDockWidget;
+    wdgProperties = new DEdit_PropertiesWidget;
     dockProperties->setWidget(wdgProperties);
     addDockWidget(Qt::RightDockWidgetArea, dockProperties);
     
     // dock exec dea
+    dockExecDea = new QDockWidget;
+    wdgExecDea = new DEdit_ExecDeaWidget;
     dockExecDea->setWidget(wdgExecDea);
     addDockWidget(Qt::BottomDockWidgetArea, dockExecDea);
     // scroll area
@@ -128,6 +137,7 @@ void DEdit_MainWindow::createLayouts()
     scrollCentral->setWidget(wdgEditor);
     scrollCentral->setWidgetResizable(TRUE);
     scrollCentral->setFrameStyle(QFrame::NoFrame);
+    scrollCentral->setLineWidth(0);
     QPalette pal = scrollCentral->palette();
     QColor bgColor = pal.color(QPalette::Window);
     bgColor.setAlpha(0);
@@ -146,36 +156,48 @@ void DEdit_MainWindow::createLayouts()
 
 void DEdit_MainWindow::createActions()
 {
+    QWidget* pActionParent = this;
     // mnuFile
-    mnaNewFile = new QAction(NULL);
-    mnaOpen = new QAction(NULL);
-    mnaSave = new QAction(NULL);
-    mnaSaveAs = new QAction(NULL);
-    mnaQuit = new QAction(NULL);
+    mnaNewFile = new QAction(pActionParent);
+    mnaOpen = new QAction(pActionParent);
+    mnaSave = new QAction(pActionParent);
+    mnaSaveAs = new QAction(pActionParent);
+    mnaQuit = new QAction(pActionParent);
+    // mnuEdit
+    mnaUndo = new QAction(pActionParent);
+    mnaRedo = new QAction(pActionParent);
     // mnuView
-    mnaShowSourceCode = new QAction(NULL);
-    mnaShowToolButtonsDock = new QAction(NULL);
-    mnaShowToolButtonsDock->setCheckable(TRUE);
-    mnaShowToolButtonsDock->setChecked(TRUE);
-    mnaShowProperties = new QAction(NULL);
-    mnaShowProperties->setCheckable(TRUE);
-    mnaShowProperties->setChecked(TRUE);
-    mnaShowExecDeaDock = new QAction(NULL);
-    mnaShowExecDeaDock->setCheckable(TRUE);
-    mnaShowExecDeaDock->setChecked(TRUE);
+    mnaShowSourceCode = new QAction(pActionParent);
+    mnaShowToolButtonsDock = dockToolButtons->toggleViewAction();
+    mnaShowProperties = dockProperties->toggleViewAction();
+    mnaShowExecDeaDock = dockExecDea->toggleViewAction();
     // mnuSettings
-    mnaShowStatusBar = new QAction(NULL);
+    mnaShowToolBar = NULL; // will be set in createToolBars();
+    mnaShowStatusBar = new QAction(pActionParent);
     mnaShowStatusBar->setCheckable(TRUE);
     mnaShowStatusBar->setChecked(TRUE);
-    mnaShowMenuBar = new QAction(NULL);
+    mnaShowMenuBar = new QAction(pActionParent);
     mnaShowMenuBar->setCheckable(TRUE);
     mnaShowMenuBar->setChecked(TRUE);
-    mnaConfigureEditor = new QAction(NULL);
+    mnaConfigureEditor = new QAction(pActionParent);
     // mnuHelp
-    mnaAbout = new QAction(NULL);
-    mnaAboutQt = new QAction(NULL);
+    mnaAbout = new QAction(pActionParent);
+    mnaAboutQt = new QAction(pActionParent);
 }
 
+void DEdit_MainWindow::createToolBars()
+{
+    tlbMainToolBar = addToolBar("main toolbar");
+    tlbMainToolBar->addAction(mnaNewFile);
+    tlbMainToolBar->addAction(mnaOpen);
+    tlbMainToolBar->addAction(mnaSave);
+    tlbMainToolBar->addAction(mnaSaveAs);
+    tlbMainToolBar->addSeparator();
+    tlbMainToolBar->addAction(mnaUndo);
+    tlbMainToolBar->addAction(mnaRedo);
+    
+    mnaShowToolBar = tlbMainToolBar->toggleViewAction();
+}
 void DEdit_MainWindow::createMenuBar()
 {
     mnuFile = menuBar()->addMenu("file");
@@ -187,6 +209,10 @@ void DEdit_MainWindow::createMenuBar()
     mnuFile->addSeparator();
     mnuFile->addAction(mnaQuit);
     
+    mnuEdit = menuBar()->addMenu("edit");
+    mnuEdit->addAction(mnaUndo);
+    mnuEdit->addAction(mnaRedo);
+    
     mnuView = menuBar()->addMenu("view");
     mnuView->addAction(mnaShowToolButtonsDock);
     mnuView->addAction(mnaShowProperties);
@@ -195,14 +221,17 @@ void DEdit_MainWindow::createMenuBar()
     mnuView->addAction(mnaShowSourceCode);
     
     mnuSettings = menuBar()->addMenu("settings");
+    mnuSettings->addAction(mnaShowToolBar);
     mnuSettings->addAction(mnaShowMenuBar);
     mnuSettings->addAction(mnaShowStatusBar);
+    mnuSettings->addSeparator();
     mnuSettings->addAction(mnaConfigureEditor);
     
     mnuHelp = menuBar()->addMenu("help");
     mnuHelp->addAction(mnaAbout);
     mnuHelp->addAction(mnaAboutQt);
 }
+
 
 void DEdit_MainWindow::connectSlots()
 {
@@ -215,6 +244,7 @@ void DEdit_MainWindow::connectSlots()
     connect(wdgEditor, SIGNAL(currentModeChanged(DEdit_Widget::EMode)), this,
             SLOT(resetStatusBarText(DEdit_Widget::EMode)));
     connect(wdgEditor, SIGNAL(deaWasChanged()), wdgProperties, SLOT(refreshFromDea()));
+    connect(wdgEditor, SIGNAL(historyChanged()), this, SLOT(reinitEditMenu()));
     
     // connections for actions
     // mnuFile
@@ -223,15 +253,13 @@ void DEdit_MainWindow::connectSlots()
     connect(mnaSave, SIGNAL(triggered()), this, SLOT(saveFile()));
     connect(mnaSaveAs, SIGNAL(triggered()), this, SLOT(saveFileAs()));
     connect(mnaQuit, SIGNAL(triggered()), this, SLOT(close()));
+    // mnaEdit
+    connect(mnaUndo, SIGNAL(triggered()), this, SLOT(undo()));
+    connect(mnaRedo, SIGNAL(triggered()), this, SLOT(redo()));
     // mnuView
     connect(mnaShowSourceCode, SIGNAL(triggered()), this, SLOT(showSourceCode()));
-    connect(mnaShowToolButtonsDock, SIGNAL(toggled(bool)), dockToolButtons, SLOT(setVisible(bool)));
-    connect(dockToolButtons, SIGNAL(visibilityChanged(bool)), mnaShowToolButtonsDock, SLOT(setChecked(bool)));
-    connect(mnaShowExecDeaDock, SIGNAL(toggled(bool)), dockExecDea, SLOT(setVisible(bool)));
-    connect(dockExecDea, SIGNAL(visibilityChanged(bool)), mnaShowExecDeaDock, SLOT(setChecked(bool)));
-    connect(mnaShowProperties, SIGNAL(toggled(bool)), dockProperties, SLOT(setVisible(bool)));
-    connect(dockProperties, SIGNAL(visibilityChanged(bool)), mnaShowProperties, SLOT(setChecked(bool)));
     // mnuSettings
+    // mnaShowToolBar was already connected in createToolBars()
     connect(mnaShowStatusBar, SIGNAL(toggled(bool)), statusBar(), SLOT(setVisible(bool)));
     connect(mnaShowMenuBar, SIGNAL(toggled(bool)), menuBar(), SLOT(setVisible(bool)));
     connect(mnaConfigureEditor, SIGNAL(triggered()), this, SLOT(showConfigureEditorDialog()));
@@ -244,19 +272,31 @@ void DEdit_MainWindow::initWidgets()
 {
     wdgEditor->setDea(&m_cDea);
     wdgProperties->setDea(&m_cDea);
+    wdgExecDea->setDeaWidget(wdgEditor);
     
-    // disable tabs for docks
-    setDockOptions(AnimatedDocks);
+    // set object names
+    dockToolButtons->setObjectName("DockToolButtons");
+    dockProperties->setObjectName("DockProperties");
+    dockExecDea->setObjectName("DockExecDea");
+    tlbMainToolBar->setObjectName("ToolBarMain");
     
+    
+    // init undo / redo
+    reinitEditMenu();
 }
 
 void DEdit_MainWindow::retranslateUi()
 {
-    setWindowTitle(tr("Dea Editor"));
+    resetWindowTitle();
     // dock widgets
+    
     dockToolButtons->setWindowTitle(tr("Tool Buttons"));
     dockExecDea->setWindowTitle(tr("Execute Dea"));
     dockProperties->setWindowTitle(tr("Dea Properties"));
+    
+    // tool bars
+    tlbMainToolBar->setWindowTitle(tr("Main Tool Bar"));
+    
     // tool buttons
     btnAddState->setText(tr("Add State"));
     btnAddTransition->setText(tr("Add Transition"));
@@ -273,12 +313,19 @@ void DEdit_MainWindow::retranslateUi()
     mnaSave->setText(tr("Save"));
     mnaSaveAs->setText(tr("Save as ..."));
     mnaQuit->setText(tr("Quit"));
+    mnaQuit->setShortcut(tr("Ctrl+Q"));
+    // mnuEdit
+    mnaUndo->setText(tr("Undo"));
+    mnaUndo->setShortcut(tr("Ctrl+Z"));
+    mnaRedo->setText(tr("Redo"));
+    mnaRedo->setShortcut(tr("Ctrl+Shift+Z"));
     // mnuView
     mnaShowToolButtonsDock->setText(tr("Show Tool Buttons"));
     mnaShowExecDeaDock->setText(tr("Show \'Execute Dea\'"));
     mnaShowProperties->setText(tr("Show Properties"));
     mnaShowSourceCode->setText(tr("Show Source Code"));
     // mnuSettings
+    mnaShowToolBar->setText(tr("Show Toolbar"));
     mnaShowMenuBar->setText(tr("Show Menubar"));
     mnaShowMenuBar->setShortcut(tr("Ctrl+M"));
     mnaShowStatusBar->setText(tr("Show Statusbar"));
@@ -287,8 +334,9 @@ void DEdit_MainWindow::retranslateUi()
     mnaAbout->setText(tr("About Dea Editor"));
     mnaAboutQt->setText(tr("About Qt"));
     // menus
-    mnuView->setTitle(tr("&View"));
     mnuFile->setTitle(tr("&File"));
+    mnuEdit->setTitle(tr("&Edit"));
+    mnuView->setTitle(tr("&View"));
     mnuSettings->setTitle(tr("&Settings"));
     mnuHelp->setTitle(tr("&Help"));
 }
@@ -302,6 +350,9 @@ void DEdit_MainWindow::reloadIcons()
     mnaSave->setIcon(IconCatcher::getIcon("filesave"));
     mnaSaveAs->setIcon(IconCatcher::getIcon("filesaveas"));
     mnaQuit->setIcon(IconCatcher::getIcon("exit"));
+    mnaUndo->setIcon(IconCatcher::getIcon("undo"));
+    mnaRedo->setIcon(IconCatcher::getIcon("redo"));
+    
     mnaConfigureEditor->setIcon(IconCatcher::getIcon("configure"));
     mnaAbout->setIcon(IconCatcher::getIcon("dea_editor", 48));
     // tool buttons
@@ -313,6 +364,33 @@ void DEdit_MainWindow::reloadIcons()
     btnMoveDown->setIcon(IconCatcher::getIcon("down"));
 }
 
+
+void DEdit_MainWindow::parseArguments()
+{
+    QStringList args = QApplication::arguments();
+    QString fileToLoad = "";
+    for(int i = 0; i < args.size(); ++i)
+    {
+        if(args[i].endsWith(".xml"))
+        {
+            fileToLoad = args[i];
+        }
+    }
+    if(!fileToLoad.isEmpty())
+    {
+        QString result = loadFromFile(fileToLoad);
+        if(!result.isEmpty())
+        {
+            QMessageBox::critical(this, tr("Error when saving file"), result);
+        }
+        else
+        {   // if opening was successfull
+            // then we have a new filename
+            m_szFilename = fileToLoad;
+            resetWindowTitle();
+        }
+    }
+}
 
 void DEdit_MainWindow::keyPressEvent(QKeyEvent* event)
 {
@@ -454,9 +532,13 @@ QString DEdit_MainWindow::saveToFile(QString filename) // returns errormsg
 
 void DEdit_MainWindow::newFile()
 {
-    m_szFilename = ""; // clear current filename
-    // clear dea
-    wdgEditor->clearCompleteDEA();
+    if(userReallyWantsToCloseFile())
+    {
+        m_szFilename = ""; // clear current filename
+        // clear dea
+        wdgEditor->clearCompleteDEA();
+        resetWindowTitle();
+    }
 }
 
 void DEdit_MainWindow::openFile()
@@ -472,17 +554,22 @@ void DEdit_MainWindow::openFile()
     {
         return;
     }
+    
+    if(!userReallyWantsToCloseFile())
+    {
+        return;
+    }
     QString result = loadFromFile(filename);
     if(!result.isEmpty())
     {
         QMessageBox::critical(this, tr("Error when opening file"), result);
     }
     else
-    {// if opening was successfull
+    {   // if opening was successfull
         // then we have a new filename
         m_szFilename = filename;
-        
     }
+    resetWindowTitle();
     
 }
 
@@ -559,6 +646,88 @@ void DEdit_MainWindow::dropEvent(QDropEvent* event)
     {// if opening was successfull
         // then we have a new filename
         m_szFilename = filename;
+        resetWindowTitle();
     }
 }
+
+
+
+void DEdit_MainWindow::closeEvent(QCloseEvent* event)
+{
+    if(!event)
+    {
+        return;
+    }
+    if(userReallyWantsToCloseFile())
+    {
+        saveConfig();
+        event->accept();
+    }
+    else
+    {
+        event->ignore();
+    }
+}
+
+
+void DEdit_MainWindow::undo()
+{
+    wdgEditor->undo();
+}
+
+void DEdit_MainWindow::redo()
+{
+    wdgEditor->redo();
+}
+
+void DEdit_MainWindow::reinitEditMenu()
+{
+    //qDebug("reinit edit menu");
+    mnaUndo->setEnabled(wdgEditor->isUndoPossible());
+    mnaRedo->setEnabled(wdgEditor->isRedoPossible());
+}
+
+
+void DEdit_MainWindow::saveConfig()
+{
+    ConfigIO config;
+    config.setMainWindow(this);
+    config.setEditorWidget(wdgEditor);
+    config.saveConfig();
+}
+
+void DEdit_MainWindow::loadConfig()
+{
+    ConfigIO config;
+    config.setMainWindow(this);
+    config.setEditorWidget(wdgEditor);
+    config.loadConfig();
+}
+
+
+
+bool DEdit_MainWindow::userReallyWantsToCloseFile()
+{
+    return TRUE;
+}
+
+
+void DEdit_MainWindow::resetWindowTitle()
+{
+    QString szNewWindowTitle;
+    QString szFilename = tr("New File");
+    if(!m_szFilename.isEmpty())
+    {
+        QStringList list = m_szFilename.split(QDir::separator());
+        if(list.size() > 0)
+        {
+            szFilename = list.last();
+        }
+    }
+    szNewWindowTitle = szFilename;
+    szNewWindowTitle += " - ";
+    szNewWindowTitle += tr("Dea Editor");
+    setWindowTitle(szNewWindowTitle);
+}
+
 

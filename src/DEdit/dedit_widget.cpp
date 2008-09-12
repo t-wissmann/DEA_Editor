@@ -34,10 +34,14 @@ DEdit_Widget::DEdit_Widget() :
 {
     // init some members
     m_pDea = NULL;
+    m_bDeaWasChanged = FALSE;
     m_eMode = ModeNormal;
     m_nGridResolution = 0; // disable grid per default
     m_bAutoEditNewStates = FALSE; // disable auto edit per default
     m_bAutoEditNewTransitions = TRUE;
+    // events that call save of history
+    m_nHistorySaveReasonFlags = m_nDefaultHistorySaveReasonFlags;
+    
     // for states
     m_pDraggedState = NULL;
     m_pHoveredState = NULL;
@@ -67,7 +71,10 @@ DEdit_Widget::DEdit_Widget() :
     // activate context menu
     setContextMenuPolicy(Qt::DefaultContextMenu);
     createContextMenu();
+    // init history
+    m_cHistory.setEditorWidget(this);
     
+    // retranslate etc..
     retranslateUi();
     reloadIcons();
 }
@@ -215,6 +222,7 @@ void DEdit_Widget::addState(QPoint atPosition)
     // now refresh widget
     update();
     emitDeaWasChanged(); // dea just has been edited
+    sendHistoryChangeRequest(ChangeTypeStateAdded); // save current dea to history
 }
 
 
@@ -268,6 +276,7 @@ void DEdit_Widget::removeState()
     emitDeaWasChanged(); // dea just has been edited
     // now refresh widget
     update();
+    sendHistoryChangeRequest(ChangeTypeStateRemoved); // save current dea to history
 }
 
 void DEdit_Widget::addTransition()
@@ -682,6 +691,8 @@ bool DEdit_Widget::isInDragMode() const
     return (bool)m_pDraggedState;
 }
 
+/// START: EVENTS
+
 void DEdit_Widget::keyPressEvent(QKeyEvent* event)
 {
     if(isLocked())
@@ -816,6 +827,7 @@ void DEdit_Widget::contextMenuEvent(QContextMenuEvent* event)
     }
 }
 
+/// END: EVENTS
 
 void DEdit_Widget::setStateSelected(int index)
 {
@@ -932,6 +944,8 @@ bool DEdit_Widget::isLocked() const
     return m_eMode == ModeLocked;
 }
 
+
+
 int DEdit_Widget::stateIndexAt(QPoint point, bool searchFromTheEnd)
 {
     int index = -1;
@@ -1003,8 +1017,19 @@ void DEdit_Widget::setCurrentMode(EMode mode)
 }
 
 
+void DEdit_Widget::setDeaWasChanged(bool wasChanged)
+{
+    m_bDeaWasChanged = wasChanged;
+}
+
+bool DEdit_Widget::isDeaWasChanged()
+{
+    return m_bDeaWasChanged;
+}
+
 void DEdit_Widget::emitDeaWasChanged()
 {
+    setDeaWasChanged();
     emit deaWasChanged();
 }
 
@@ -1060,6 +1085,7 @@ void DEdit_Widget::createTransition(DEdit_GraphicalState* from, DEdit_GraphicalS
     }
     emitDeaWasChanged(); // dea just has been edited
     update();
+    sendHistoryChangeRequest(ChangeTypeTransitionAdded); // save current dea to history
 }
 
 
@@ -1137,6 +1163,7 @@ void DEdit_Widget::removeTransition()
     m_pSelectedTransition = NULL;
     m_pHoveredTransition = NULL;
     update();
+    sendHistoryChangeRequest(ChangeTypeTransitionRemoved); // save current dea to history
 }
 
 void DEdit_Widget::removeTransition(DEdit_GraphicalTransition* transition)
@@ -1255,6 +1282,7 @@ void DEdit_Widget::editSelectedState()
     setSelectedState_StartState(state->m_bStartState);
     updateStateContextMenu();
     emitDeaWasChanged(); // dea just has been edited
+    sendHistoryChangeRequest(ChangeTypeStateEdited);
     update();
 }
 
@@ -1294,6 +1322,7 @@ void DEdit_Widget::editSelectedTransition()
         m_pDraggedTransition = NULL;
     }
     emitDeaWasChanged(); // dea just has been edited
+    sendHistoryChangeRequest(ChangeTypeTransitionEdited);
     update();
 }
 
@@ -1681,6 +1710,7 @@ void DEdit_Widget::setSelectedState_FinalState(bool finalState)
         state->m_pData->setFinalState(finalState);
     }
     emitDeaWasChanged(); // dea just has been edited
+    sendHistoryChangeRequest(ChangeTypeStateEdited);
     update();
 }
 
@@ -1717,6 +1747,7 @@ void DEdit_Widget::setSelectedState_StartState(bool startState)
     }
     
     emitDeaWasChanged(); // dea just has been edited
+    sendHistoryChangeRequest(ChangeTypeStateEdited);
     update();
 }
 
@@ -1738,6 +1769,91 @@ void DEdit_Widget::putErrorMessage(QString msg)
 {
     QMessageBox::critical(window(), tr("DEA Editor"), msg);
 }
+
+/// START: HISTORY
+
+void DEdit_Widget::undo()
+{
+    if(isUndoPossible())
+    {
+        m_cHistory.undo();
+        emitDeaWasChanged();
+        emit historyChanged();
+    }
+}
+
+void DEdit_Widget::redo()
+{
+    if(isRedoPossible())
+    {
+        m_cHistory.redo();
+        emitDeaWasChanged();
+        emit historyChanged();
+    }
+}
+
+
+bool DEdit_Widget::isUndoPossible()
+{
+    return m_cHistory.isUndoPossible();
+}
+
+bool DEdit_Widget::isRedoPossible()
+{
+    return m_cHistory.isRedoPossible();
+}
+
+
+void DEdit_Widget::sendHistoryChangeRequest(EDeaChangeType eType)
+{
+    if(m_bAutoEditNewTransitions
+       && ChangeTypeTransitionAdded == eType
+       && (ChangeTypeTransitionEdited & m_nHistorySaveReasonFlags))
+    {
+        // if a history item is saved on edit
+        // we don't need to save it for TransitionAdded,
+        // because when a transition gets added, the editTransition() gets called
+        // and so history will be saved
+        return;
+    }
+    if(m_bAutoEditNewStates
+      && ChangeTypeStateAdded == eType
+      && (ChangeTypeStateEdited & m_nHistorySaveReasonFlags))
+    {
+        // same as for transition added
+        return;
+    }
+    if(m_nHistorySaveReasonFlags & eType)
+    {
+        // if current type needs a new history item
+        // then create a new item
+        m_cHistory.saveCurrentStateToHistory();
+        emit historyChanged();
+    }
+}
+
+void DEdit_Widget::setMaxHistorySize(int size)
+{
+    if(size != m_cHistory.maxHistorySize())
+    {
+        m_cHistory.setMaxHistorySize(size);
+    }
+    emit historyChanged();
+}
+
+int  DEdit_Widget::maxHistorySize() const
+{
+    return m_cHistory.maxHistorySize();
+}
+
+void DEdit_Widget::clearHistory()
+{
+    m_cHistory.clear();
+    emit historyChanged();
+}
+
+/// END: HISTORY
+
 
 /// START SOME VISUAL OPTIONS
 void DEdit_Widget::setGridResolution(int resolution)

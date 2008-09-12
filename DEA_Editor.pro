@@ -24,6 +24,7 @@ HEADERS += \ # DEA
            src/io/xmlencoder.h \
            src/io/xmlloader.h \
            src/io/iconcatcher.h \
+           src/io/configio.h \
            \ # widgets
            src/widgets/commandbuttondnd.h \ 
            src/widgets/colorbutton.h \
@@ -36,8 +37,11 @@ HEADERS += \ # DEA
            \ # dialogs for editor
            src/DEdit/dedit_editstatedia.h \
            src/DEdit/dedit_edittransitiondia.h \
+           \ # for multilanguage support
+           src/multilanguage/translateableobject.h\
            \ # Main Editor
            src/DEdit/dedit_mainwindow.h \
+           src/DEdit/dedit_history.h \
            src/DEdit/dedit_widget.h \
            src/DEdit/dedit_widgetpainter.h \
            src/DEdit/dedit_appearance.h \
@@ -55,6 +59,7 @@ SOURCES += src/main.cpp \
            src/io/xmlencoder.cpp \
            src/io/xmlloader.cpp \
            src/io/iconcatcher.cpp \
+           src/io/configio.cpp \
            \ # widgets
            src/widgets/commandbuttondnd.cpp \ 
            src/widgets/colorbutton.cpp \ 
@@ -67,8 +72,11 @@ SOURCES += src/main.cpp \
            \ # dialogs for editor
            src/DEdit/dedit_editstatedia.cpp \
            src/DEdit/dedit_edittransitiondia.cpp \
+           \ # for multilanguage support
+           src/multilanguage/translateableobject.cpp\
            \ # Main Editor
            src/DEdit/dedit_mainwindow.cpp \
+           src/DEdit/dedit_history.cpp \
            src/DEdit/dedit_widget.cpp \
            src/DEdit/dedit_widgetpainter.cpp \
            src/DEdit/dedit_appearance.cpp \
