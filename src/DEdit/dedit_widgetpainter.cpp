@@ -581,7 +581,7 @@ void DEdit_WidgetPainter::recreateStatePens()
 {
     m_cStateLabelPen.setWidth(3);
     m_cStateLabelPen.setColor(m_cAppearance.m_cStateLabelColor);
-    m_cStateLabelFont.setBold(TRUE);
+    m_cStateLabelFont = m_cAppearance.m_cStateLabelFont;
 }
 
 
@@ -702,7 +702,7 @@ void DEdit_WidgetPainter::recreateTransitionPens()
     
     // for label
     m_cTransitionLabelPen.setColor(m_cAppearance.m_cTransitionLabelColor);
-    m_cTransitionLabelFont.setBold(TRUE);
+    m_cTransitionLabelFont = m_cAppearance.m_cTransitionLabelFont;
 }
 
 

@@ -2,8 +2,10 @@
 #define __DIA_CONFIGUREDEDITWIDGET_H_
 
 #include <QDialog>
+#include <multilanguage/translateableobject.h>
 
 class DEdit_Widget;
+class DEdit_MainWindow;
 class AppearanceEditWidget;
 
 // widgets
@@ -19,13 +21,15 @@ class QStackedWidget;
 class QSplitter;
 class QSlider;
 class QSplitter;
+class TranslationManagerWidget;
 
 // layouts
 class QHBoxLayout;
 class QVBoxLayout;
 class QGridLayout;
 
-class Dia_ConfigureDEditWidget : public QDialog
+class Dia_ConfigureDEditWidget : public QDialog,
+      public TranslateableObject
 {
     Q_OBJECT
 public:
@@ -38,6 +42,9 @@ public:
     void setWidgetToEdit(DEdit_Widget* widget);
     DEdit_Widget* widgetToEdit();
     
+    void setMainWindowToEdit(DEdit_MainWindow* mainwindow);
+    DEdit_MainWindow* mainWindowToEdit();
+    
 public slots:
     void applyChanges();
     void setCurrentCategoryName(QString name);
@@ -47,7 +54,7 @@ private:
     void allocateWidgets();
     void createLayouts();
     void connectSlots();
-        
+    
     // widgets
     QPushButton* btnOk;
     QPushButton* btnCancel;
@@ -80,6 +87,8 @@ private:
     QSlider*     slidHistorySize;
     QSpinBox*    spinHistorySize;
     QPushButton* btnHistoryClear;
+    // language
+    TranslationManagerWidget* wdgTranslations;
     
     
     
@@ -97,6 +106,7 @@ private:
     
     
     DEdit_Widget* m_pWidgetToEdit;
+    DEdit_MainWindow* m_pMainWindowToEdit;
 };
 
 #endif

@@ -4,6 +4,7 @@
 
 #include <QWidget>
 #include <QIcon>
+#include <multilanguage/translateableobject.h>
 
 class DEA_State;
 class DEdit_GraphicalState;
@@ -25,7 +26,8 @@ class QGridLayout;
 class QTimer;
 #include<QTime>
 
-class DEdit_ExecDeaWidget : public QWidget
+                class DEdit_ExecDeaWidget : public QWidget,
+                public TranslateableObject
 {
     Q_OBJECT
 public:

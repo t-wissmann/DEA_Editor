@@ -2,6 +2,7 @@
 #define __DEDIT_APPEARANCE_H_
 
 #include <QColor>
+#include <QFont>
 
 
 class DEdit_ColorTripple
@@ -36,6 +37,7 @@ public:
     DEdit_ColorTripple m_cStateResultDenied;
     DEdit_ColorTripple m_cStateResultAccepted;
     QColor             m_cStateLabelColor;
+    QFont              m_cStateLabelFont;
     
     
     QColor          m_cTransitionNormal;
@@ -43,6 +45,7 @@ public:
     QColor          m_cTransitionSelected;
     QColor          m_cTransitionExecuted;
     QColor          m_cTransitionLabelColor;
+    QFont           m_cTransitionLabelFont;
     
     static void createTangoDefault(DEdit_Appearance* app);
     

@@ -23,6 +23,7 @@
 #include <QDockWidget>
 #include <QScrollArea>
 #include <QToolBar>
+#include <QSpacerItem>
 
 // other qt-classes
 #include <QApplication>
@@ -37,6 +38,7 @@
 #include <QList>
 #include <QUrl>
 #include <QKeyEvent>
+#include <QWhatsThis>
 
 // layouts
 #include <QHBoxLayout>
@@ -81,6 +83,8 @@ void DEdit_MainWindow::initMembers()
     m_diaSourceViewer = NULL;
     m_diaConfigureDEditWidget = NULL;
     m_diaAbout = NULL;
+    // other members
+    m_szBackgroundColor = "Window";
 }
 
 void DEdit_MainWindow::allocateWidgets()
@@ -96,7 +100,10 @@ void DEdit_MainWindow::allocateWidgets()
     btnMoveUp->setVisible(FALSE);
     btnMoveDown = new QPushButton;
     btnMoveDown->setVisible(FALSE);
+    itemToolButtonStretch = new QSpacerItem(1, 1);
     
+    btnStretchToolButtons = new QPushButton;
+    btnStretchToolButtons->setCheckable(TRUE);
     
     // create statusbar
     statusBar();
@@ -113,9 +120,11 @@ void DEdit_MainWindow::createLayouts()
     layoutToolButtons->addWidget(btnAddTransition);
     layoutToolButtons->addWidget(btnRemoveItem);
     layoutToolButtons->addWidget(btnEditItem);
-    layoutToolButtons->addStretch();
+    //layoutToolButtons->addStretch();
     layoutToolButtons->addWidget(btnMoveUp);
     layoutToolButtons->addWidget(btnMoveDown);
+    layoutToolButtons->addWidget(btnStretchToolButtons);
+    layoutToolButtons->addItem(itemToolButtonStretch);
     QWidget* wdgFoo = new QWidget; // only a widget to add a layout to a dockwidget
     wdgFoo->setLayout(layoutToolButtons);
     dockToolButtons->setWidget(wdgFoo);
@@ -136,8 +145,10 @@ void DEdit_MainWindow::createLayouts()
     scrollCentral = new QScrollArea;
     scrollCentral->setWidget(wdgEditor);
     scrollCentral->setWidgetResizable(TRUE);
-    scrollCentral->setFrameStyle(QFrame::NoFrame);
+    
+    //scrollCentral->setFrameStyle(QFrame::NoFrame);
     scrollCentral->setLineWidth(0);
+    
     QPalette pal = scrollCentral->palette();
     QColor bgColor = pal.color(QPalette::Window);
     bgColor.setAlpha(0);
@@ -171,6 +182,8 @@ void DEdit_MainWindow::createActions()
     mnaShowToolButtonsDock = dockToolButtons->toggleViewAction();
     mnaShowProperties = dockProperties->toggleViewAction();
     mnaShowExecDeaDock = dockExecDea->toggleViewAction();
+    mnaStetchToolButtons = new QAction(pActionParent);
+    mnaStetchToolButtons->setCheckable(TRUE);
     // mnuSettings
     mnaShowToolBar = NULL; // will be set in createToolBars();
     mnaShowStatusBar = new QAction(pActionParent);
@@ -181,6 +194,7 @@ void DEdit_MainWindow::createActions()
     mnaShowMenuBar->setChecked(TRUE);
     mnaConfigureEditor = new QAction(pActionParent);
     // mnuHelp
+    mnaWhatsThis = QWhatsThis::createAction(pActionParent);
     mnaAbout = new QAction(pActionParent);
     mnaAboutQt = new QAction(pActionParent);
 }
@@ -217,6 +231,7 @@ void DEdit_MainWindow::createMenuBar()
     mnuView->addAction(mnaShowToolButtonsDock);
     mnuView->addAction(mnaShowProperties);
     mnuView->addAction(mnaShowExecDeaDock);
+    mnuView->addAction(mnaStetchToolButtons);
     mnuView->addSeparator();
     mnuView->addAction(mnaShowSourceCode);
     
@@ -228,6 +243,8 @@ void DEdit_MainWindow::createMenuBar()
     mnuSettings->addAction(mnaConfigureEditor);
     
     mnuHelp = menuBar()->addMenu("help");
+    mnuHelp->addAction(mnaWhatsThis);
+    mnuHelp->addSeparator();
     mnuHelp->addAction(mnaAbout);
     mnuHelp->addAction(mnaAboutQt);
 }
@@ -241,6 +258,9 @@ void DEdit_MainWindow::connectSlots()
     connect(btnMoveDown, SIGNAL(clicked()), wdgEditor, SLOT(moveSelectionDown()));
     connect(btnAddTransition, SIGNAL(clicked()), wdgEditor, SLOT(addTransition()));
     connect(btnEditItem, SIGNAL(clicked()), wdgEditor, SLOT(editItem()));
+    connect(btnStretchToolButtons, SIGNAL(toggled(bool)), this, SLOT(setStretchToolButtons(bool)));
+    
+    
     connect(wdgEditor, SIGNAL(currentModeChanged(DEdit_Widget::EMode)), this,
             SLOT(resetStatusBarText(DEdit_Widget::EMode)));
     connect(wdgEditor, SIGNAL(deaWasChanged()), wdgProperties, SLOT(refreshFromDea()));
@@ -257,6 +277,7 @@ void DEdit_MainWindow::connectSlots()
     connect(mnaUndo, SIGNAL(triggered()), this, SLOT(undo()));
     connect(mnaRedo, SIGNAL(triggered()), this, SLOT(redo()));
     // mnuView
+    connect(mnaStetchToolButtons, SIGNAL(toggled(bool)), this, SLOT(setStretchToolButtons(bool)));
     connect(mnaShowSourceCode, SIGNAL(triggered()), this, SLOT(showSourceCode()));
     // mnuSettings
     // mnaShowToolBar was already connected in createToolBars()
@@ -280,7 +301,13 @@ void DEdit_MainWindow::initWidgets()
     dockExecDea->setObjectName("DockExecDea");
     tlbMainToolBar->setObjectName("ToolBarMain");
     
+    // activate stretch per default
+    setStretchToolButtons(TRUE);
+    // hide stretch button in dockwidget per default
+    setStretchToolButtonsButtonVisible(FALSE);
     
+    setFrameVisible(FALSE);
+    setBackgroundColor("Window");
     // init undo / redo
     reinitEditMenu();
 }
@@ -299,11 +326,18 @@ void DEdit_MainWindow::retranslateUi()
     
     // tool buttons
     btnAddState->setText(tr("Add State"));
+    btnAddState->setWhatsThis(tr("This adds a new State.\n"
+				 "You also can drag this button to the position, where the State shall be added."));
     btnAddTransition->setText(tr("Add Transition"));
+    btnAddTransition->setWhatsThis(tr("Click to add a new transition.\n"
+				 "Then click on the first state of the transition, then on the second state."));
     btnRemoveItem->setText(tr("Remove"));
+    btnRemoveItem->setWhatsThis(tr("Removes the currently selected State or Transition"));
     btnEditItem->setText(tr("Edit"));
+    btnEditItem->setWhatsThis(tr("Edits the currently selected State or Transition"));
     btnMoveUp->setText(tr("Move up"));
     btnMoveDown->setText(tr("Move down"));
+    btnStretchToolButtons->setText(tr("Stretch"));
     
     
     // actions
@@ -323,6 +357,7 @@ void DEdit_MainWindow::retranslateUi()
     mnaShowToolButtonsDock->setText(tr("Show Tool Buttons"));
     mnaShowExecDeaDock->setText(tr("Show \'Execute Dea\'"));
     mnaShowProperties->setText(tr("Show Properties"));
+    mnaStetchToolButtons->setText(tr("Stretch Tool Buttons"));
     mnaShowSourceCode->setText(tr("Show Source Code"));
     // mnuSettings
     mnaShowToolBar->setText(tr("Show Toolbar"));
@@ -331,6 +366,7 @@ void DEdit_MainWindow::retranslateUi()
     mnaShowStatusBar->setText(tr("Show Statusbar"));
     mnaConfigureEditor->setText(tr("Configure Editor"));
     // mnuHelp
+    mnaWhatsThis->setText(tr("What's this?"));
     mnaAbout->setText(tr("About Dea Editor"));
     mnaAboutQt->setText(tr("About Qt"));
     // menus
@@ -345,15 +381,16 @@ void DEdit_MainWindow::reloadIcons()
 {
     setWindowIcon(IconCatcher::getIcon("dea_editor", 48));
     // actions
-    mnaNewFile->setIcon(IconCatcher::getIcon("filenew"));
-    mnaOpen->setIcon(IconCatcher::getIcon("fileopen"));
-    mnaSave->setIcon(IconCatcher::getIcon("filesave"));
-    mnaSaveAs->setIcon(IconCatcher::getIcon("filesaveas"));
+    mnaNewFile->setIcon(IconCatcher::getMenuBarToolBarIcon("filenew"));
+    mnaOpen->setIcon(IconCatcher::getMenuBarToolBarIcon("fileopen"));
+    mnaSave->setIcon(IconCatcher::getMenuBarToolBarIcon("filesave"));
+    mnaSaveAs->setIcon(IconCatcher::getMenuBarToolBarIcon("filesaveas"));
     mnaQuit->setIcon(IconCatcher::getIcon("exit"));
-    mnaUndo->setIcon(IconCatcher::getIcon("undo"));
-    mnaRedo->setIcon(IconCatcher::getIcon("redo"));
+    mnaUndo->setIcon(IconCatcher::getMenuBarToolBarIcon("undo"));
+    mnaRedo->setIcon(IconCatcher::getMenuBarToolBarIcon("redo"));
     
     mnaConfigureEditor->setIcon(IconCatcher::getIcon("configure"));
+    mnaWhatsThis->setIcon(IconCatcher::getIcon("help", 16));
     mnaAbout->setIcon(IconCatcher::getIcon("dea_editor", 48));
     // tool buttons
     btnAddState->setIcon(IconCatcher::getIcon("add"));
@@ -462,6 +499,7 @@ void DEdit_MainWindow::showConfigureEditorDialog()
         m_diaConfigureDEditWidget->setAttribute(Qt::WA_QuitOnClose, FALSE);
     }
     m_diaConfigureDEditWidget->setWidgetToEdit(wdgEditor);
+    m_diaConfigureDEditWidget->setMainWindowToEdit(this);
     m_diaConfigureDEditWidget->show();
 }
 
@@ -507,6 +545,8 @@ void DEdit_MainWindow::saveFileAs()
         // if file save was successfull
         // then we have a new filename
         m_szFilename = otherFilename;
+        // filename has been changed
+        resetWindowTitle(); // so reset filename in window title
     }
 }
 
@@ -592,6 +632,9 @@ QString DEdit_MainWindow::loadFromFile(QString filename) // returns errormsg
     }
     else
     {
+        // new file, new history
+        wdgEditor->clearHistory();
+        // print success to status bar :)
         statusBar()->showMessage(tr("File %filename successfully loaded").replace("%filename", filename), 3000);
     }
     return szResult;
@@ -730,4 +773,123 @@ void DEdit_MainWindow::resetWindowTitle()
     setWindowTitle(szNewWindowTitle);
 }
 
+
+TranslationManager* DEdit_MainWindow::translationManager()
+{
+    return &m_TranslationManager;
+}
+
+
+void DEdit_MainWindow::setStretchToolButtons(bool on)
+{
+    QSizePolicy newPolicy = btnAddState->sizePolicy();
+    if(on)
+    {
+        itemToolButtonStretch->changeSize(0, 0);
+        newPolicy = QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    }
+    else
+    {
+        itemToolButtonStretch->changeSize(0, 0, QSizePolicy::Minimum, QSizePolicy::Expanding);
+        newPolicy = QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+    }
+    // apply new size policy to buttons
+    btnAddState->setSizePolicy(newPolicy);
+    btnAddTransition->setSizePolicy(newPolicy);
+    btnRemoveItem->setSizePolicy(newPolicy);
+    btnEditItem->setSizePolicy(newPolicy);
+    btnMoveUp->setSizePolicy(newPolicy);
+    btnMoveDown->setSizePolicy(newPolicy);
+    btnStretchToolButtons->setSizePolicy(newPolicy);
+    // update layout
+    layoutToolButtons->update();
+    
+    mnaStetchToolButtons->setChecked(on);
+    btnStretchToolButtons->setChecked(on);
+}
+
+
+bool DEdit_MainWindow::areToolButtonsStretched() const
+{
+    return btnStretchToolButtons->isChecked();
+}
+
+
+
+bool DEdit_MainWindow::isStretchToolButtonsButtonVisible() const
+{
+    return btnStretchToolButtons->isVisible();
+}
+
+void DEdit_MainWindow::setStretchToolButtonsButtonVisible(bool visible)
+{
+    btnStretchToolButtons->setVisible(visible);
+}
+
+
+void DEdit_MainWindow::setFrameVisible(bool visible)
+{
+    if(visible)
+    {
+        scrollCentral->setLineWidth(1);
+        // set to default frame style of scroll views
+        scrollCentral->setFrameStyle(QFrame::Sunken | QFrame::StyledPanel);
+    }
+    else
+    {
+        scrollCentral->setFrameStyle(QFrame::NoFrame);
+        scrollCentral->setLineWidth(0);
+    }
+}
+
+bool DEdit_MainWindow::isFrameVisible() const
+{
+    return (0 != scrollCentral->lineWidth());
+}
+
+
+void DEdit_MainWindow::setBackgroundColor(QString color)
+{
+    QBrush newBackground = wdgEditor->palette().window();
+    if(color.toLower() == "window")
+    {
+        newBackground = QBrush(QColor(255, 255, 255, 0)); // transparent
+    }
+    else if(color.toLower() == "base")
+    {
+        newBackground = palette().base();
+    }
+    else if(QColor(color).isValid())
+    {
+        newBackground = QBrush(QColor(color));
+    }
+    else
+    {
+        return;
+    }
+    // apply changes
+    m_szBackgroundColor = color;
+    QPalette pal = wdgEditor->palette();
+    pal.setBrush(QPalette::Window, newBackground);
+    wdgEditor->setPalette(pal);
+    
+}
+
+QString DEdit_MainWindow::backgroundColor() const
+{
+    return m_szBackgroundColor;
+}
+
+
+void DEdit_MainWindow::setMoveUpMoveDownButtonsVisible(bool visible)
+{
+    btnMoveUp->setVisible(visible);
+    btnMoveDown->setVisible(visible);
+}
+
+
+bool DEdit_MainWindow::areMoveUpMoveDownButtonsVisible() const
+{
+    return  btnMoveUp->isVisible();
+}
 

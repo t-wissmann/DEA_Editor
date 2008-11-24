@@ -20,7 +20,7 @@ public:
     void setEditorWidget(DEdit_Widget* widget);
     DEdit_Widget* editorWidget();
     
-    void clear();
+    void clear(bool createNewItem = TRUE);
     
     void undo();
     void redo();
@@ -34,7 +34,7 @@ private:
     void removeItemAt(int index);
     
     int m_nMaxHistorySize;
-    int m_nCurrentPosition; // 0 = current
+    int m_nCurrentPosition; // 0 = newest
     QList<xmlObject*> m_HistoryList;
     
     DEdit_Widget* m_pEditorWidget;

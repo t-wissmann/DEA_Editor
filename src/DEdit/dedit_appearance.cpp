@@ -34,7 +34,8 @@ void DEdit_Appearance::createTangoDefault(DEdit_Appearance* app)
     app->m_cStateResultDenied.createStateFromBasicColor(QColor("#EF2929"));
     app->m_cStateResultAccepted.createStateFromBasicColor(QColor("#73D216"));
     app->m_cStateLabelColor = QColor(238, 238, 238);
-    
+    app->m_cStateLabelFont = QFont(); // this is the the default font
+    app->m_cStateLabelFont.setBold(TRUE); // only difference: bold
     // transitions
     
     app->m_cTransitionNormal = QColor(0, 0, 0);
@@ -42,6 +43,8 @@ void DEdit_Appearance::createTangoDefault(DEdit_Appearance* app)
     app->m_cTransitionSelected = QColor(239, 41, 41);
     app->m_cTransitionExecuted = QColor("#EDD400");
     app->m_cTransitionLabelColor = QColor(238, 238, 238);
+    app->m_cTransitionLabelFont = QFont(); // this is the the default font
+    app->m_cTransitionLabelFont.setBold(TRUE); // only difference: bold
     
 }
 

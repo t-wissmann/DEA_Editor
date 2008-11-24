@@ -3,6 +3,7 @@
 #define __DIA_DEASOURCEVIEWER_H_
 
 #include <QDialog>
+#include <multilanguage/translateableobject.h>
 
 class QPushButton;
 class QTextEdit;
@@ -12,7 +13,8 @@ class QVBoxLayout;
 
 class DEdit_Widget;
 
-class Dia_DeaSourceViewer : public QDialog
+class Dia_DeaSourceViewer : public QDialog,
+      public TranslateableObject
 {
     Q_OBJECT
 public:

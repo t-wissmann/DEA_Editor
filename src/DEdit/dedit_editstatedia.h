@@ -3,6 +3,7 @@
 #define __DEDIT_EDITSTATEDIA_H_
 
 #include <QDialog>
+#include <multilanguage/translateableobject.h>
 
 class DEdit_GraphicalState;
 class DEdit_Widget;
@@ -19,7 +20,8 @@ class QVBoxLayout;
 class QDialogButtonBox;
 
 
-class DEdit_EditStateDia : public QDialog
+class DEdit_EditStateDia : public QDialog,
+      public TranslateableObject
 {
     Q_OBJECT
 public:

@@ -3,6 +3,7 @@
 #define __DEDIT_EDITTRANSITIONDIA_H_
 
 #include <QDialog>
+#include <multilanguage/translateableobject.h>
 
 class DEdit_GraphicalTransition;
 class DEdit_Widget;
@@ -22,7 +23,8 @@ class QHBoxLayout;
 class QVBoxLayout;
 class QGridLayout;
 
-class DEdit_EditTransitionDia : public QDialog
+class DEdit_EditTransitionDia : public QDialog,
+      public TranslateableObject
 {
     Q_OBJECT
 public:

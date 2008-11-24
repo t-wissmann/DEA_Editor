@@ -6,7 +6,7 @@
 
 TEMPLATE = app
 DESTDIR = bin/
-TARGET = 
+TARGET = dea_editor
 DEPENDPATH += . src src/DEdit
 CONFIG += qt warn_off  #warn_on #Debugging-Informationen und Warnungen werden ausgegeben
 INCLUDEPATH += . src
@@ -30,6 +30,7 @@ HEADERS += \ # DEA
            src/widgets/colorbutton.h \
            src/widgets/appearanceeditwidget.h \ 
            src/widgets/colortrippleedit.h  \
+           src/widgets/fontbutton.h  \
            \ # general dialogs
            src/dialogs/dia_deasourceviewer.h \
            src/dialogs/dia_configurededitwidget.h \
@@ -38,7 +39,9 @@ HEADERS += \ # DEA
            src/DEdit/dedit_editstatedia.h \
            src/DEdit/dedit_edittransitiondia.h \
            \ # for multilanguage support
-           src/multilanguage/translateableobject.h\
+           src/multilanguage/translateableobject.h \
+           src/multilanguage/translationmanager.h \
+           src/multilanguage/translationmanagerwidget.h \
            \ # Main Editor
            src/DEdit/dedit_mainwindow.h \
            src/DEdit/dedit_history.h \
@@ -65,6 +68,7 @@ SOURCES += src/main.cpp \
            src/widgets/colorbutton.cpp \ 
            src/widgets/appearanceeditwidget.cpp \ 
            src/widgets/colortrippleedit.cpp  \
+           src/widgets/fontbutton.cpp  \
            \ # general dialogs
            src/dialogs/dia_deasourceviewer.cpp \
            src/dialogs/dia_configurededitwidget.cpp \
@@ -73,7 +77,9 @@ SOURCES += src/main.cpp \
            src/DEdit/dedit_editstatedia.cpp \
            src/DEdit/dedit_edittransitiondia.cpp \
            \ # for multilanguage support
-           src/multilanguage/translateableobject.cpp\
+           src/multilanguage/translateableobject.cpp \
+           src/multilanguage/translationmanager.cpp \
+           src/multilanguage/translationmanagerwidget.cpp \
            \ # Main Editor
            src/DEdit/dedit_mainwindow.cpp \
            src/DEdit/dedit_history.cpp \

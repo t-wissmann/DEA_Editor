@@ -2,6 +2,7 @@
 #include "dia_configurededitwidget.h"
 
 #include <DEdit/dedit_widget.h>
+#include <DEdit/dedit_mainwindow.h>
 #include <io/iconcatcher.h>
 
 #include <DEdit/dedit_graphicalstate.h>
@@ -22,6 +23,7 @@
 #include <QSplitter>
 #include <widgets/colorbutton.h>
 #include <widgets/appearanceeditwidget.h>
+#include <multilanguage/translationmanagerwidget.h>
 
 // layouts
 #include <QGridLayout>
@@ -96,6 +98,8 @@ void Dia_ConfigureDEditWidget::allocateWidgets()
     slidHistorySize->setRange(0, 40);
     btnHistoryClear = new QPushButton;
     
+    // language / translations
+    wdgTranslations = new TranslationManagerWidget;
     
     // listbox
     lstCategory = new QListWidget;
@@ -121,6 +125,10 @@ void Dia_ConfigureDEditWidget::allocateWidgets()
     currentItem->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
     currentItem = new QListWidgetItem(lstCategory);
     currentItem->setText("history");
+    currentItem->setTextAlignment(Qt::AlignLeft | Qt::AlignVCenter);
+    currentItem->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
+    currentItem = new QListWidgetItem(lstCategory);
+    currentItem->setText("language");
     currentItem->setTextAlignment(Qt::AlignLeft | Qt::AlignVCenter);
     currentItem->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
     
@@ -179,6 +187,7 @@ void Dia_ConfigureDEditWidget::createLayouts()
     stackCategory->addWidget(wdgAppearance);
     stackCategory->addWidget(wdgProportions);
     stackCategory->addWidget(wdgHistory);
+    stackCategory->addWidget(wdgTranslations);
     
     
     QHBoxLayout* layoutStack = new QHBoxLayout; // create extra layout
@@ -260,6 +269,8 @@ void Dia_ConfigureDEditWidget::retranslateUi()
     if(item) item->setText(tr("Sizes"));
     item = lstCategory->item(3);
     if(item) item->setText(tr("History"));
+    item = lstCategory->item(4);
+    if(item) item->setText(tr("Language"));
     
 }
 
@@ -280,6 +291,8 @@ void Dia_ConfigureDEditWidget::reloadIcons()
     if(item) item->setIcon(IconCatcher::getIcon("applications-accessories", 48));
     item = lstCategory->item(3);
     if(item) item->setIcon(IconCatcher::getIcon("history", 48));
+    item = lstCategory->item(4);
+    if(item) item->setIcon(IconCatcher::getIcon("config-language", 48));
 }
 
 
@@ -321,6 +334,22 @@ DEdit_Widget* Dia_ConfigureDEditWidget::widgetToEdit()
 }
 
 
+void Dia_ConfigureDEditWidget::setMainWindowToEdit(DEdit_MainWindow* mainwindow)
+{
+    m_pMainWindowToEdit = mainwindow;
+    if(!m_pMainWindowToEdit)
+    {
+        return;
+    }
+    wdgTranslations->setTranslationManager(m_pMainWindowToEdit->translationManager());
+}
+
+DEdit_MainWindow* Dia_ConfigureDEditWidget::mainWindowToEdit()
+{
+    return m_pMainWindowToEdit;
+}
+
+
 void Dia_ConfigureDEditWidget::applyChanges()
 {
     if(!m_pWidgetToEdit)
@@ -347,6 +376,9 @@ void Dia_ConfigureDEditWidget::applyChanges()
     
     // apply changes to history
     m_pWidgetToEdit->setMaxHistorySize(spinHistorySize->value());
+    
+    // translate ;D
+    wdgTranslations->applyChanges();
     
     // important: recreate all templates so that the new colors have effect
     m_pWidgetToEdit->recreateAllGuiTemplates();
@@ -377,6 +409,8 @@ void Dia_ConfigureDEditWidget::restoreDefaults()
     spinHistorySize->setValue(5);
     
     wdgAppearance->restoreDefaults();
+    
+    wdgTranslations->restoreDefaults();
 }
 
 

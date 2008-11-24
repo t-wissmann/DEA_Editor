@@ -5,6 +5,7 @@
 
 #include <QWidget>
 
+#include <multilanguage/translateableobject.h>
 class DEdit_Appearance;
 
 // widgets
@@ -13,11 +14,13 @@ class QCheckBox;
 class ColorButton;
 class QLabel;
 class QGroupBox;
+class FontButton;
 // layouts
 class QGridLayout;
 class QVBoxLayout;
 
-class AppearanceEditWidget : public QWidget
+class AppearanceEditWidget : public QWidget,
+      public TranslateableObject
 {
     Q_OBJECT
 public:
@@ -47,6 +50,8 @@ private:
     ColorTrippleEdit* wdgStateResultAccepted;
     QLabel*           lblStateLabelColor;
     ColorButton*      btnStateLabelColor;
+    QLabel*           lblStateLabelFont;
+    FontButton*       btnStateLabelFont;
 
     // transitions
     QGroupBox*      grpTransitionColors;
@@ -60,6 +65,8 @@ private:
     ColorButton*    btnTransitionExecuted;
     QLabel*         lblTransitionLabelColor;
     ColorButton*    btnTransitionLabelColor;
+    QLabel*         lblTransitionLabelFont;
+    FontButton*     btnTransitionLabelFont;
     
     
     // layouts

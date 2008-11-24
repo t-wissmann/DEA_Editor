@@ -3,6 +3,7 @@
 
 
 #include <QWidget>
+#include <multilanguage/translateableobject.h>
 
 #include <QList>
 // graphical
@@ -39,7 +40,8 @@ class QDragLeaveEvent;
 class QDropEvent;
 class QContextMenuEvent;
 
-class DEdit_Widget : public QWidget
+class DEdit_Widget : public QWidget,
+      public TranslateableObject
 {
     Q_OBJECT;
     
@@ -129,6 +131,8 @@ public:
     bool isLocked() const;
     DEdit_Appearance* appearance();
     void recreateAllGuiTemplates();
+    void setAllowNonDeterministic(bool bAllow);
+    bool allowNonDeterministic() const;
     bool isDeaWasChanged();
     // for history
     bool isUndoPossible();
@@ -225,6 +229,7 @@ private:
     int             m_nGridResolution;
     bool            m_bAutoEditNewStates;
     bool            m_bAutoEditNewTransitions;
+    bool            m_bAllowNonDeterministic;
     QString         m_szLastSyntaxError; // needed for createDeaFromFile()
     
     // context menu

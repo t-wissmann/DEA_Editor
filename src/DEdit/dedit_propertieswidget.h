@@ -4,6 +4,7 @@
 
 
 #include <QWidget>
+#include <multilanguage/translateableobject.h>
 
 class DEA;
 // widgets
@@ -16,7 +17,8 @@ class QVBoxLayout;
 class QGridLayout;
 
 
-class DEdit_PropertiesWidget : public QWidget
+class DEdit_PropertiesWidget : public QWidget,
+      public TranslateableObject
 {
     Q_OBJECT
 public:

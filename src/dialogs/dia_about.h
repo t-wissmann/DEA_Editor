@@ -4,6 +4,7 @@
 
 
 #include <QDialog>
+#include <multilanguage/translateableobject.h>
 
 class QPushButton;
 class QLabel;
@@ -15,7 +16,8 @@ class QHBoxLayout;
 class QVBoxLayout;
 class QBoxLayout;
 
-class Dia_About : public QDialog
+class Dia_About : public QDialog,
+      public TranslateableObject
 {
     Q_OBJECT
 public:

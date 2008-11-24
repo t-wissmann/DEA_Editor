@@ -5,6 +5,7 @@
 
 #include <DEA/dea.h>
 #include <multilanguage/translateableobject.h>
+#include <multilanguage/translationmanager.h>
 // dialogs
 class Dia_DeaSourceViewer;
 class Dia_ConfigureDEditWidget;
@@ -20,6 +21,7 @@ class DEdit_ExecDeaWidget;
 class QScrollArea;
 class DEdit_PropertiesWidget;
 class QToolBar;
+class QSpacerItem;
 
 // events
 class QDragEnterEvent;
@@ -59,6 +61,15 @@ public:
     
     bool userReallyWantsToCloseFile();
     
+    bool areToolButtonsStretched() const;
+    bool isStretchToolButtonsButtonVisible() const;
+    TranslationManager* translationManager();
+    void setFrameVisible(bool visible);
+    bool isFrameVisible() const;
+    void setBackgroundColor(QString color);
+    QString backgroundColor() const;
+    void setMoveUpMoveDownButtonsVisible(bool visible);
+    bool areMoveUpMoveDownButtonsVisible() const;
 public slots:
     void newFile();
     void openFile();
@@ -72,6 +83,8 @@ public slots:
     void redo();
     void reinitEditMenu();
     void resetWindowTitle();
+    void setStretchToolButtons(bool on);
+    void setStretchToolButtonsButtonVisible(bool visible);
 protected:
     virtual void dragEnterEvent(QDragEnterEvent* event);
     virtual void dropEvent(QDropEvent* event);
@@ -98,6 +111,8 @@ private:
     QPushButton* btnEditItem;
     QPushButton* btnMoveUp;
     QPushButton* btnMoveDown;
+    QSpacerItem* itemToolButtonStretch;
+    QPushButton* btnStretchToolButtons;
     
     // dock widgets
     QDockWidget* dockToolButtons;
@@ -125,6 +140,7 @@ private:
     QAction*     mnaShowToolButtonsDock;
     QAction*     mnaShowExecDeaDock;
     QAction*     mnaShowProperties;
+    QAction*     mnaStetchToolButtons;
     QAction*     mnaShowSourceCode;
     // mnuSettings
     QAction*     mnaShowToolBar;
@@ -132,6 +148,7 @@ private:
     QAction*     mnaShowMenuBar;
     QAction*     mnaConfigureEditor;
     // mnuHelp
+    QAction*     mnaWhatsThis;
     QAction*     mnaAboutQt;
     QAction*     mnaAbout;
     // menus in menubar
@@ -152,6 +169,8 @@ private:
     Dia_About*                m_diaAbout;
     
     // members
+    TranslationManager m_TranslationManager;
+    QString m_szBackgroundColor;
     QString m_szFilename;
     DEA m_cDea;
 };

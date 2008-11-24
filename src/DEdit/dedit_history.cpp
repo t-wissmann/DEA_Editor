@@ -12,7 +12,9 @@ DEdit_History::DEdit_History(DEdit_Widget* pEditorWidget)
 
 DEdit_History::~DEdit_History()
 {
-    clear();
+    clear(
+          FALSE // important: dont create a new history item !!!
+         );
 }
 
 
@@ -52,7 +54,7 @@ void DEdit_History::setEditorWidget(DEdit_Widget* widget)
 }
 
 
-void DEdit_History::clear()
+void DEdit_History::clear(bool createNewItem)
 {
     //qDebug("clearing history...");
     xmlObject* currentObject;
@@ -64,7 +66,15 @@ void DEdit_History::clear()
             delete currentObject;
         }
     }
+    m_nCurrentPosition = 0; // reset current position
     m_HistoryList.clear();
+    
+    if(createNewItem)
+    {
+        // and now: create new history item
+        // and so the first new action can be undone
+        saveCurrentStateToHistory();
+    }
 }
 
 DEdit_Widget* DEdit_History::editorWidget()

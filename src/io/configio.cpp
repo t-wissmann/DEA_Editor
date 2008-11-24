@@ -7,6 +7,8 @@
 #include <DEdit/dedit_graphicalstate.h>
 #include <DEdit/dedit_graphicaltransition.h>
 #include <DEdit/dedit_mainwindow.h>
+
+#include <multilanguage/translationmanager.h>
 #include <QSettings>
 #include <QtDebug>
 #include <QDir>
@@ -19,7 +21,7 @@ ConfigIO::ConfigIO()
     m_pEditorWidget = NULL;
     m_pMainWindow = NULL;
     QSettings::setPath(QSettings::IniFormat, QSettings::UserScope, "$HOME/.dea_editor");
-    QSettings::setDefaultFormat(QSettings::IniFormat);
+    //QSettings::setDefaultFormat(QSettings::IniFormat);
 }
 
 ConfigIO::~ConfigIO()
@@ -65,12 +67,28 @@ bool ConfigIO::saveConfig()
     
     if(m_pMainWindow)
     {
+        // start of general
+        TranslationManager* translMan = m_pMainWindow->translationManager();
+        if(translMan)
+        {
+            settings.setValue("useSystemLanguage", translMan->useSystemLanguage());
+            if(!translMan->useSystemLanguage())
+            {// only (re)set this, if current language is not system language
+                settings.setValue("language", translMan->currentLanguage());
+            }
+        }
+        // end of general
+        
         settings.beginGroup("MainWindow");
         settings.setValue("size", m_pMainWindow->size());
-        settings.setValue("maximized", m_pMainWindow->isMaximized());
         settings.setValue("state", m_pMainWindow->saveState());
         settings.setValue("menuBarVisible", m_pMainWindow->menuBar()->isVisible());
         settings.setValue("statusBarVisible", m_pMainWindow->statusBar()->isVisible());
+        settings.setValue("stretchToolButtons", m_pMainWindow->areToolButtonsStretched());
+        settings.setValue("showStretchToolButtons", m_pMainWindow->isStretchToolButtonsButtonVisible());
+        settings.setValue("showMoveUpMoveDownButtons", m_pMainWindow->areMoveUpMoveDownButtonsVisible());
+        settings.setValue("drawFrame", m_pMainWindow->isFrameVisible());
+        settings.setValue("backgroundColor", m_pMainWindow->backgroundColor());
         settings.endGroup();
     }
     if(m_pEditorWidget)
@@ -79,6 +97,7 @@ bool ConfigIO::saveConfig()
         settings.beginGroup("EditorWidget_Behavior");
         settings.setValue("autoEditNewStates", m_pEditorWidget->autoEditNewStates());
         settings.setValue("gridResolution", m_pEditorWidget->gridResolution());
+        settings.setValue("allowNonDeterministic", m_pEditorWidget->allowNonDeterministic());
         settings.endGroup();
         
         
@@ -102,6 +121,7 @@ bool ConfigIO::saveConfig()
             settings.setValue("stateResultAcceptedInnerBorder", app->m_cStateResultAccepted.m_cColor[1].name());
             settings.setValue("stateResultAcceptedOuterBorder", app->m_cStateResultAccepted.m_cColor[2].name());
             settings.setValue("stateLabel",        app->m_cStateLabelColor.name());
+            settings.setValue("stateFont",        app->m_cStateLabelFont.toString());
             
             
             settings.setValue("transitionNormal", app->m_cTransitionNormal.name());
@@ -109,6 +129,7 @@ bool ConfigIO::saveConfig()
             settings.setValue("transitionSelected", app->m_cTransitionSelected.name());
             settings.setValue("transitionExecuted", app->m_cTransitionExecuted.name());
             settings.setValue("transitionLabel", app->m_cTransitionLabelColor.name());
+            settings.setValue("transitionFont", app->m_cTransitionLabelFont.toString());
             settings.endGroup();
         }
         
@@ -145,12 +166,33 @@ bool ConfigIO::loadConfig()
     
     if(m_pMainWindow)
     {
+        // start of general
+        TranslationManager* translMan = m_pMainWindow->translationManager();
+        if(translMan)
+        {
+            if(settings.value("useSystemLanguage", FALSE).toBool())
+            {
+                translMan->translateToSystemLanguage();
+            }
+            else
+            {
+                translMan->translateTo(settings.value("language",
+                                            TranslationManager::systemLanguage()).toString());
+            }
+        }
+        // end of general
+        
         settings.beginGroup("MainWindow");
         m_pMainWindow->resize(settings.value("size", m_pMainWindow->size()).toSize());
         // maximized will be ignored
         m_pMainWindow->restoreState(settings.value("state").toByteArray());
         m_pMainWindow->mnaShowMenuBar->setChecked(settings.value("menuBarVisible", TRUE).toBool());
         m_pMainWindow->mnaShowStatusBar->setChecked(settings.value("statusBarVisible", TRUE).toBool());
+        m_pMainWindow->setStretchToolButtons(settings.value("stretchToolButtons", TRUE).toBool());
+        m_pMainWindow->setStretchToolButtonsButtonVisible(settings.value("showStretchToolButtons", m_pMainWindow->isStretchToolButtonsButtonVisible()).toBool());
+        m_pMainWindow->setMoveUpMoveDownButtonsVisible(settings.value("showMoveUpMoveDownButtons", m_pMainWindow->areMoveUpMoveDownButtonsVisible()).toBool());
+        m_pMainWindow->setFrameVisible(settings.value("drawFrame", m_pMainWindow->isFrameVisible()).toBool());
+        m_pMainWindow->setBackgroundColor(settings.value("backgroundColor", m_pMainWindow->backgroundColor()).toString());
         settings.endGroup();
     }
     
@@ -160,6 +202,7 @@ bool ConfigIO::loadConfig()
         settings.beginGroup("EditorWidget_Behavior");
         LOAD_DEDIT_WIDGET_VALUE("autoEditNewStates", autoEditNewStates, setAutoEditNewStates, toBool);
         LOAD_DEDIT_WIDGET_VALUE("gridResolution", gridResolution, setGridResolution, toInt);
+        LOAD_DEDIT_WIDGET_VALUE("allowNonDeterministic", allowNonDeterministic, setAllowNonDeterministic, toBool);
         settings.endGroup();
         
         
@@ -189,12 +232,16 @@ bool ConfigIO::loadConfig()
             
             
             LOAD_DEDIT_COLOR(app, "stateLabel", m_cStateLabelColor);
+            app->m_cStateLabelFont.fromString(settings.value("stateFont",
+                app->m_cStateLabelFont.toString()).toString());
             
             LOAD_DEDIT_COLOR(app, "transitionNormal", m_cTransitionNormal);
             LOAD_DEDIT_COLOR(app, "transitionHovered", m_cTransitionHovered);
             LOAD_DEDIT_COLOR(app, "transitionSelected", m_cTransitionSelected);
             LOAD_DEDIT_COLOR(app, "transitionExecuted", m_cTransitionExecuted);
             LOAD_DEDIT_COLOR(app, "transitionLabel", m_cTransitionLabelColor);
+            app->m_cTransitionLabelFont.fromString(settings.value("transitionFont",
+                app->m_cTransitionLabelFont.toString()).toString());
             
             settings.endGroup();
         }

@@ -57,8 +57,8 @@ void DEdit_EditTransitionDia::allocateWidgets()
     lblCurve  = new QLabel;
     slidCurve = new QSlider(Qt::Horizontal);
     spinCurve = new QSpinBox;
-    slidCurve->setRange(-1000, 1000);
-    spinCurve->setRange(-1000, 1000);
+    slidCurve->setRange(-10000, 10000);
+    spinCurve->setRange(-10000, 10000);
     
     // commadn buttons
     btnAllUpperLetters = new CommandButtonDND("text/plain", "ABCDEFGHIJKLMNOPQRSTUVWXYZ");
@@ -91,10 +91,11 @@ void DEdit_EditTransitionDia::createLayouts()
     layoutCurve->addWidget(btnResetCurve);
     // new version:
     // curve can be configured by dragging:
-    lblCurve->setVisible(FALSE);
-    slidCurve->setVisible(FALSE);
-    spinCurve->setVisible(FALSE);
-    btnResetCurve->setVisible(FALSE);
+    bool bCurveEditVisible = FALSE;
+    lblCurve->setVisible(bCurveEditVisible);
+    slidCurve->setVisible(bCurveEditVisible);
+    spinCurve->setVisible(bCurveEditVisible);
+    btnResetCurve->setVisible(bCurveEditVisible);
     
     
     layoutParent = new QVBoxLayout;
@@ -218,7 +219,8 @@ bool DEdit_EditTransitionDia::applyChanges()
                 msg += infoLine;
             }
         }
-        if(!msg.isEmpty())
+        if(!m_pParent->allowNonDeterministic()
+         && !msg.isEmpty())
         {// if there are some multible used symbols -> ERROR
             QString text = tr("Couldn't apply symbols, because some "
                     "symbols were already used in other transitions "

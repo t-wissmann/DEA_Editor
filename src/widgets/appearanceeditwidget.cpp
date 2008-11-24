@@ -6,6 +6,7 @@
 #include "colortrippleedit.h"
 #include <QLabel>
 #include <widgets/colorbutton.h>
+#include <widgets/fontbutton.h>
 #include <QCheckBox>
 #include <QGroupBox>
 // layouts
@@ -44,7 +45,8 @@ void AppearanceEditWidget::allocateWidgets()
     lblStateLabelColor = new QLabel;
     btnStateLabelColor = new ColorButton;
     btnStateLabelColor->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
-    
+    lblStateLabelFont = new QLabel;
+    btnStateLabelFont = new FontButton;
     // transitions
     grpTransitionColors = new QGroupBox;
     
@@ -63,6 +65,8 @@ void AppearanceEditWidget::allocateWidgets()
     lblTransitionLabelColor = new QLabel;
     btnTransitionLabelColor = new ColorButton;
     btnTransitionLabelColor->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
+    lblTransitionLabelFont = new QLabel;
+    btnTransitionLabelFont = new FontButton;
     
 }
 
@@ -81,6 +85,9 @@ void AppearanceEditWidget::createLayouts()
     layoutStateColors->addWidget(lblStateLabelColor, row, 0);
     layoutStateColors->addWidget(btnStateLabelColor, row++, 1);
     
+    layoutStateColors->addWidget(lblStateLabelFont, row, 0);
+    layoutStateColors->addWidget(btnStateLabelFont, row++, 1);
+    
     grpStateColors->setLayout(layoutStateColors);
     
     // transitions
@@ -96,6 +103,8 @@ void AppearanceEditWidget::createLayouts()
     layoutTransitionColors->addWidget(btnTransitionExecuted, row++, 1);
     layoutTransitionColors->addWidget(lblTransitionLabelColor, row, 0);
     layoutTransitionColors->addWidget(btnTransitionLabelColor, row++, 1);
+    layoutTransitionColors->addWidget(lblTransitionLabelFont, row, 0);
+    layoutTransitionColors->addWidget(btnTransitionLabelFont, row++, 1);
     
     grpTransitionColors->setLayout(layoutTransitionColors);
     
@@ -125,6 +134,7 @@ void AppearanceEditWidget::retranslateUi()
     wdgStateResultAccepted->setText(tr("Accepted:"));
     chkAdvancedColors->setText(tr("Custom Border"));
     lblStateLabelColor->setText(tr("Label color:"));
+    lblStateLabelFont->setText(tr("Font:"));
     grpStateColors->setTitle(tr("Colors for States"));
     
     grpTransitionColors->setTitle(tr("Colors for Transitions"));
@@ -133,6 +143,7 @@ void AppearanceEditWidget::retranslateUi()
     lblTransitionSelected->setText(tr("Selected:"));
     lblTransitionExecuted->setText(tr("Executed:"));
     lblTransitionLabelColor->setText(tr("Label color:"));
+    lblTransitionLabelFont->setText(tr("Font:"));
     
 }
 
@@ -167,6 +178,7 @@ void AppearanceEditWidget::initColorsFromAppearance(DEdit_Appearance* app)
     wdgStateResultDenied->initColorsFromColorTripple(&app->m_cStateResultDenied);
     wdgStateResultAccepted->initColorsFromColorTripple(&app->m_cStateResultAccepted);
     btnStateLabelColor->setColor(app->m_cStateLabelColor);
+    btnStateLabelFont->setFont(app->m_cStateLabelFont);
     chkAdvancedColors->setChecked(TRUE);
     
     // transitions
@@ -175,6 +187,7 @@ void AppearanceEditWidget::initColorsFromAppearance(DEdit_Appearance* app)
     btnTransitionSelected->setColor(app->m_cTransitionSelected);
     btnTransitionExecuted->setColor(app->m_cTransitionExecuted);
     btnTransitionLabelColor->setColor(app->m_cTransitionLabelColor);
+    btnTransitionLabelFont->setFont(app->m_cTransitionLabelFont);
 }
 
 DEdit_Appearance* AppearanceEditWidget::appearanceToEdit()
@@ -195,12 +208,14 @@ void AppearanceEditWidget::applyChanges()
     wdgStateResultDenied->applyChanges();
     wdgStateResultAccepted->applyChanges();
     m_pAppearance->m_cStateLabelColor = btnStateLabelColor->color();
+    m_pAppearance->m_cStateLabelFont  = btnStateLabelFont->font();
     // transitions
     m_pAppearance->m_cTransitionNormal = btnTransitionNormal->color();
     m_pAppearance->m_cTransitionHovered = btnTransitionHovered->color();
     m_pAppearance->m_cTransitionSelected = btnTransitionSelected->color();
     m_pAppearance->m_cTransitionExecuted = btnTransitionExecuted->color();
     m_pAppearance->m_cTransitionLabelColor = btnTransitionLabelColor->color();
+    m_pAppearance->m_cTransitionLabelFont  = btnTransitionLabelFont->font();
 }
 
 

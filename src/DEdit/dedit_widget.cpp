@@ -39,6 +39,7 @@ DEdit_Widget::DEdit_Widget() :
     m_nGridResolution = 0; // disable grid per default
     m_bAutoEditNewStates = FALSE; // disable auto edit per default
     m_bAutoEditNewTransitions = TRUE;
+    m_bAllowNonDeterministic = FALSE;
     // events that call save of history
     m_nHistorySaveReasonFlags = m_nDefaultHistorySaveReasonFlags;
     
@@ -77,6 +78,7 @@ DEdit_Widget::DEdit_Widget() :
     // retranslate etc..
     retranslateUi();
     reloadIcons();
+    
 }
 
 DEdit_Widget::~DEdit_Widget(){
@@ -197,6 +199,7 @@ void DEdit_Widget::addState(QPoint atPosition)
         DEBUG_MSG("addState(QPoint)", "m_pDea = 0");
         return;
     }
+    
     setCurrentMode(ModeNormal);
     QString stateName = QString::number(m_StateList.size()+1);
     int number = 0;
@@ -242,6 +245,8 @@ void DEdit_Widget::removeState()
     {
         return;
     }
+    
+    
     DEdit_GraphicalState* state = &(m_StateList[m_nSelectedStateIndex]);
     
     // remove all transitions, that use state
@@ -277,6 +282,7 @@ void DEdit_Widget::removeState()
     // now refresh widget
     update();
     sendHistoryChangeRequest(ChangeTypeStateRemoved); // save current dea to history
+
 }
 
 void DEdit_Widget::addTransition()
@@ -989,6 +995,22 @@ void DEdit_Widget::setCurrentMode(EMode mode)
     {// nothing to do
         return;
     }
+    if(m_eMode == ModeDragState)
+    {
+        // if mode WAS ModeDragState
+        // and if now mode has changed
+        // -> state was moved
+        sendHistoryChangeRequest(ChangeTypeStateMoved);
+    }
+    
+    if(m_eMode == ModeDragTransition)
+    {
+        // if mode WAS ModeDragTransition
+        // and if now mode has changed
+        // -> transition curve was changed/dragged
+        sendHistoryChangeRequest(ChangeTypeTransitionCurveChanged);
+    }
+    
     m_eMode = mode;
     QCursor newCursor;
     switch(m_eMode)
@@ -1052,7 +1074,8 @@ void DEdit_Widget::createTransition(DEdit_GraphicalState* from, DEdit_GraphicalS
         return;
     }
     
-    if(graphicalTransitionForStartAndEnd(from, to))
+    if( !allowNonDeterministic()  // don't check this, if this "hack" is aktivated
+        && graphicalTransitionForStartAndEnd(from, to))
     {
         // if transition already exists
         // then don't add a new transition
@@ -1069,6 +1092,7 @@ void DEdit_Widget::createTransition(DEdit_GraphicalState* from, DEdit_GraphicalS
         return;
     }
     
+    
     // create new transition in DEA
     DEA_Transition* transition = m_pDea->createTransition(from->m_pData, to->m_pData, '\0');
     // init new graphical transition
@@ -1083,9 +1107,9 @@ void DEdit_Widget::createTransition(DEdit_GraphicalState* from, DEdit_GraphicalS
         // edit it
         editSelectedTransition();
     }
+    //sendHistoryChangeRequest(ChangeTypeTransitionAdded); // save current dea to history
     emitDeaWasChanged(); // dea just has been edited
     update();
-    sendHistoryChangeRequest(ChangeTypeTransitionAdded); // save current dea to history
 }
 
 
@@ -1197,7 +1221,7 @@ void DEdit_Widget::removeTransition(DEdit_GraphicalTransition* transition)
         return;
     }
     
-    // remove transition from m_pDe
+    // remove transition from m_pDea
     m_pDea->removeTransition(transition->m_pData);
     m_TransitionList.removeAt(index);
     emitDeaWasChanged(); // dea just has been edited
@@ -1322,8 +1346,8 @@ void DEdit_Widget::editSelectedTransition()
         m_pDraggedTransition = NULL;
     }
     emitDeaWasChanged(); // dea just has been edited
-    sendHistoryChangeRequest(ChangeTypeTransitionEdited);
     update();
+    sendHistoryChangeRequest(ChangeTypeTransitionEdited);
 }
 
 
@@ -1665,6 +1689,11 @@ void DEdit_Widget::clearCompleteDEA()
         // return if widget was locked
         return;
     }
+    if(!m_pDea)
+    {
+        return;
+    }
+    
     /// clear GRAPHICAL DEA
     // states
     m_StateList.clear();
@@ -1906,6 +1935,17 @@ void DEdit_Widget::recreateAllGuiTemplates()
     m_cWidgetPainter.setAllItemsToWasChanged();
     update();
 }
+
+void DEdit_Widget::setAllowNonDeterministic(bool bAllow)
+{
+    m_bAllowNonDeterministic = bAllow;
+}
+
+bool DEdit_Widget::allowNonDeterministic() const
+{
+    return m_bAllowNonDeterministic;
+}
+
 /// END SOME VISUAL OPTIONS
 
 

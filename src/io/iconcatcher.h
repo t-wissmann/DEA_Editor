@@ -17,6 +17,7 @@ public:
     static bool wasInitialized() { return m_bWasInitialized; };
     static QIcon getIcon(QString name, QString extension, int size = 16);
     static QIcon getIcon(QString name, int size = 16);
+    static QIcon getMenuBarToolBarIcon(QString name);
     
     static QString m_szIconDir;
     
