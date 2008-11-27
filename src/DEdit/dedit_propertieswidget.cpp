@@ -168,9 +168,9 @@ void DEdit_PropertiesWidget::retranslateUi()
     txtTransitions->setToolTip(lblTransitions->toolTip());
     
     lblAlphabet->setText(QString(QChar(0x03A3))); //  0x03A3 = sigma
-    lblStates->setText("<i>S</i>");
+    lblStates->setText("<i>Q</i>");
     lblTransitions->setText(QString(QChar(0x03B4))); // 0x03B4 = delta
-    lblStartState->setText("s0");
+    lblStartState->setText("<i>q0</i>");
     lblFinalStates->setText("<i>F</i>");
 }
 
