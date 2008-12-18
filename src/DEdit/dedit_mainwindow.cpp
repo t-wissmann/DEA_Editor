@@ -392,6 +392,7 @@ void DEdit_MainWindow::reloadIcons()
     mnaConfigureEditor->setIcon(IconCatcher::getIcon("configure"));
     mnaWhatsThis->setIcon(IconCatcher::getIcon("help", 16));
     mnaAbout->setIcon(IconCatcher::getIcon("dea_editor", 48));
+    mnaAboutQt->setIcon(IconCatcher::getIcon("about", 16));
     // tool buttons
     btnAddState->setIcon(IconCatcher::getIcon("add"));
     btnAddTransition->setIcon(IconCatcher::getIcon("add"));
@@ -891,5 +892,15 @@ void DEdit_MainWindow::setMoveUpMoveDownButtonsVisible(bool visible)
 bool DEdit_MainWindow::areMoveUpMoveDownButtonsVisible() const
 {
     return  btnMoveUp->isVisible();
+}
+
+void DEdit_MainWindow::setCentralWidgetMargin(int nMargin)
+{
+    layoutParent->setMargin(nMargin);
+}
+
+int DEdit_MainWindow::centralWidgetMargin() const
+{
+    return layoutParent->margin();
 }
 

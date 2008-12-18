@@ -88,6 +88,7 @@ bool ConfigIO::saveConfig()
         settings.setValue("showStretchToolButtons", m_pMainWindow->isStretchToolButtonsButtonVisible());
         settings.setValue("showMoveUpMoveDownButtons", m_pMainWindow->areMoveUpMoveDownButtonsVisible());
         settings.setValue("drawFrame", m_pMainWindow->isFrameVisible());
+        settings.setValue("centralWidgetMargin", m_pMainWindow->centralWidgetMargin());
         settings.setValue("backgroundColor", m_pMainWindow->backgroundColor());
         settings.endGroup();
     }
@@ -192,6 +193,7 @@ bool ConfigIO::loadConfig()
         m_pMainWindow->setStretchToolButtonsButtonVisible(settings.value("showStretchToolButtons", m_pMainWindow->isStretchToolButtonsButtonVisible()).toBool());
         m_pMainWindow->setMoveUpMoveDownButtonsVisible(settings.value("showMoveUpMoveDownButtons", m_pMainWindow->areMoveUpMoveDownButtonsVisible()).toBool());
         m_pMainWindow->setFrameVisible(settings.value("drawFrame", m_pMainWindow->isFrameVisible()).toBool());
+        m_pMainWindow->setCentralWidgetMargin(settings.value("centralWidgetMargin", m_pMainWindow->centralWidgetMargin()).toInt());
         m_pMainWindow->setBackgroundColor(settings.value("backgroundColor", m_pMainWindow->backgroundColor()).toString());
         settings.endGroup();
     }

@@ -70,6 +70,8 @@ public:
     QString backgroundColor() const;
     void setMoveUpMoveDownButtonsVisible(bool visible);
     bool areMoveUpMoveDownButtonsVisible() const;
+    void setCentralWidgetMargin(int nMargin);
+    int centralWidgetMargin() const;
 public slots:
     void newFile();
     void openFile();
