@@ -41,6 +41,7 @@
 #include <QWhatsThis>
 
 // layouts
+#include <QBoxLayout>
 #include <QHBoxLayout>
 #include <QVBoxLayout>
 
@@ -114,7 +115,7 @@ void DEdit_MainWindow::createLayouts()
     
     // dock tool buttons
     dockToolButtons = new QDockWidget;
-    layoutToolButtons = new QVBoxLayout;
+    layoutToolButtons = new QBoxLayout(QBoxLayout::TopToBottom);
     layoutToolButtons->setMargin(4);
     layoutToolButtons->addWidget(btnAddState);
     layoutToolButtons->addWidget(btnAddTransition);
@@ -130,17 +131,19 @@ void DEdit_MainWindow::createLayouts()
     dockToolButtons->setWidget(wdgFoo);
     addDockWidget(Qt::LeftDockWidgetArea, dockToolButtons);
     
-    // dock properties
-    dockProperties =  new QDockWidget;
-    wdgProperties = new DEdit_PropertiesWidget;
-    dockProperties->setWidget(wdgProperties);
-    addDockWidget(Qt::RightDockWidgetArea, dockProperties);
     
     // dock exec dea
     dockExecDea = new QDockWidget;
     wdgExecDea = new DEdit_ExecDeaWidget;
     dockExecDea->setWidget(wdgExecDea);
     addDockWidget(Qt::BottomDockWidgetArea, dockExecDea);
+
+    // dock properties
+    dockProperties =  new QDockWidget;
+    wdgProperties = new DEdit_PropertiesWidget;
+    dockProperties->setWidget(wdgProperties);
+    addDockWidget(Qt::RightDockWidgetArea, dockProperties);
+
     // scroll area
     scrollCentral = new QScrollArea;
     scrollCentral->setWidget(wdgEditor);
@@ -184,6 +187,8 @@ void DEdit_MainWindow::createActions()
     mnaShowExecDeaDock = dockExecDea->toggleViewAction();
     mnaStetchToolButtons = new QAction(pActionParent);
     mnaStetchToolButtons->setCheckable(TRUE);
+    mnaAlignToolsHorizontal = new QAction(pActionParent);
+    mnaAlignToolsHorizontal->setCheckable(TRUE);
     // mnuSettings
     mnaShowToolBar = NULL; // will be set in createToolBars();
     mnaShowStatusBar = new QAction(pActionParent);
@@ -232,6 +237,7 @@ void DEdit_MainWindow::createMenuBar()
     mnuView->addAction(mnaShowProperties);
     mnuView->addAction(mnaShowExecDeaDock);
     mnuView->addAction(mnaStetchToolButtons);
+    mnuView->addAction(mnaAlignToolsHorizontal);
     mnuView->addSeparator();
     mnuView->addAction(mnaShowSourceCode);
     
@@ -259,7 +265,7 @@ void DEdit_MainWindow::connectSlots()
     connect(btnAddTransition, SIGNAL(clicked()), wdgEditor, SLOT(addTransition()));
     connect(btnEditItem, SIGNAL(clicked()), wdgEditor, SLOT(editItem()));
     connect(btnStretchToolButtons, SIGNAL(toggled(bool)), this, SLOT(setStretchToolButtons(bool)));
-    
+    connect(mnaAlignToolsHorizontal, SIGNAL(toggled(bool)), this, SLOT(setToolsAlignmentHorizontal(bool)));
     
     connect(wdgEditor, SIGNAL(currentModeChanged(DEdit_Widget::EMode)), this,
             SLOT(resetStatusBarText(DEdit_Widget::EMode)));
@@ -306,8 +312,15 @@ void DEdit_MainWindow::initWidgets()
     // hide stretch button in dockwidget per default
     setStretchToolButtonsButtonVisible(FALSE);
     
-    setFrameVisible(FALSE);
-    setBackgroundColor("Window");
+    // windows/kde like
+        setFrameVisible(FALSE);
+        setBackgroundColor("Window");
+
+    // gtk-like ;D
+        // setFrameVisible(TRUE);
+        // setBackgroundColor("Base");
+        // setCentralWidgetMargin(5);
+
     // init undo / redo
     reinitEditMenu();
 }
@@ -358,6 +371,7 @@ void DEdit_MainWindow::retranslateUi()
     mnaShowExecDeaDock->setText(tr("Show \'Execute Dea\'"));
     mnaShowProperties->setText(tr("Show Properties"));
     mnaStetchToolButtons->setText(tr("Stretch Tool Buttons"));
+    mnaAlignToolsHorizontal->setText(tr("Align Tool Buttons Horizontal"));
     mnaShowSourceCode->setText(tr("Show Source Code"));
     // mnuSettings
     mnaShowToolBar->setText(tr("Show Toolbar"));
@@ -902,5 +916,30 @@ void DEdit_MainWindow::setCentralWidgetMargin(int nMargin)
 int DEdit_MainWindow::centralWidgetMargin() const
 {
     return layoutParent->margin();
+}
+
+void DEdit_MainWindow::setToolsAlignmentHorizontal(bool horizontal)
+{
+    if(horizontal)
+    {
+        // horizontal can be QBoxLayout::LeftToRight or QBoxLayout::RightToLeft
+        // depends on: if language is right to left or left to right
+        layoutToolButtons->setDirection(QApplication::isLeftToRight ? 
+                                        QBoxLayout::LeftToRight :
+                                        QBoxLayout::RightToLeft );
+    }
+    else
+    {
+        // but vertical only can be QBoxLayout::TopToBottom
+        layoutToolButtons->setDirection(QBoxLayout::TopToBottom);
+    }
+    mnaAlignToolsHorizontal->setChecked(horizontal);
+}
+
+bool DEdit_MainWindow::isToolsAlignmentHorizontal() const
+{
+    // horizontal can be QBoxLayout::LeftToRight or QBoxLayout::RightToLeft
+    // but vertical only can be QBoxLayout::TopToBottom
+    return (layoutToolButtons->direction() != QBoxLayout::TopToBottom);
 }
 

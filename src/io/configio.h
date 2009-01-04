@@ -22,8 +22,10 @@ public:
     
     bool saveConfig();
     bool loadConfig();
+    bool loadConfigFromFile(QString fileName);
     bool createConfigDir();
     static QString getConfigDirPath();
+    static QString getGlobalConfigDirPath();
     static bool isConfigDirExisting();
     
     static int rangeIntValue(int value, int min, int max);

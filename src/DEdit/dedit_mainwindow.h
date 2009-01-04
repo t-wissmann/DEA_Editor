@@ -35,6 +35,7 @@ class QMenu;
 class QAction;
 
 // layouts
+class QBoxLayout;
 class QHBoxLayout;
 class QVBoxLayout;
 
@@ -72,6 +73,7 @@ public:
     bool areMoveUpMoveDownButtonsVisible() const;
     void setCentralWidgetMargin(int nMargin);
     int centralWidgetMargin() const;
+    bool isToolsAlignmentHorizontal() const;
 public slots:
     void newFile();
     void openFile();
@@ -87,6 +89,7 @@ public slots:
     void resetWindowTitle();
     void setStretchToolButtons(bool on);
     void setStretchToolButtonsButtonVisible(bool visible);
+    void setToolsAlignmentHorizontal(bool horizontal);
 protected:
     virtual void dragEnterEvent(QDragEnterEvent* event);
     virtual void dropEvent(QDropEvent* event);
@@ -143,6 +146,7 @@ private:
     QAction*     mnaShowExecDeaDock;
     QAction*     mnaShowProperties;
     QAction*     mnaStetchToolButtons;
+    QAction*     mnaAlignToolsHorizontal;
     QAction*     mnaShowSourceCode;
     // mnuSettings
     QAction*     mnaShowToolBar;
@@ -161,7 +165,7 @@ private:
     QMenu*       mnuHelp;
     
     // layouts
-    QVBoxLayout* layoutToolButtons;
+    QBoxLayout*  layoutToolButtons;
     QScrollArea* scrollCentral;
     QHBoxLayout* layoutParent;
     

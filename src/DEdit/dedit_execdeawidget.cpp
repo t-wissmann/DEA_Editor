@@ -50,6 +50,10 @@ DEdit_ExecDeaWidget::DEdit_ExecDeaWidget(QWidget* parent)
     
     retranslateUi();
     reloadIcons();
+    
+    // init widgets
+    chkTimerControlled->setChecked(TRUE);
+    
 }
 
 DEdit_ExecDeaWidget::~DEdit_ExecDeaWidget()

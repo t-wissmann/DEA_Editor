@@ -12,6 +12,7 @@
 #include <QSettings>
 #include <QtDebug>
 #include <QDir>
+#include <QApplication>
 
 #include <QMenuBar>
 #include <QStatusBar>
@@ -85,6 +86,7 @@ bool ConfigIO::saveConfig()
         settings.setValue("menuBarVisible", m_pMainWindow->menuBar()->isVisible());
         settings.setValue("statusBarVisible", m_pMainWindow->statusBar()->isVisible());
         settings.setValue("stretchToolButtons", m_pMainWindow->areToolButtonsStretched());
+        settings.setValue("alignToolButtonsHorizontal", m_pMainWindow->isToolsAlignmentHorizontal());
         settings.setValue("showStretchToolButtons", m_pMainWindow->isStretchToolButtonsButtonVisible());
         settings.setValue("showMoveUpMoveDownButtons", m_pMainWindow->areMoveUpMoveDownButtonsVisible());
         settings.setValue("drawFrame", m_pMainWindow->isFrameVisible());
@@ -157,11 +159,19 @@ bool ConfigIO::saveConfig()
 
 bool ConfigIO::loadConfig()
 {
+    // at first: load global config
+    loadConfigFromFile(getGlobalConfigDirPath() + "dea_editorrc");
+    // if config dir doesn't exists, then skip loading users config
     if(!isConfigDirExisting())
     {
         return TRUE;
     }
     QString fileName = getConfigDirPath() + "dea_editorrc";
+    loadConfigFromFile(fileName);
+}
+
+bool ConfigIO::loadConfigFromFile(QString fileName)
+{
     QSettings settings(fileName, QSettings::IniFormat);
     
     
@@ -171,14 +181,14 @@ bool ConfigIO::loadConfig()
         TranslationManager* translMan = m_pMainWindow->translationManager();
         if(translMan)
         {
-            if(settings.value("useSystemLanguage", FALSE).toBool())
+            if(settings.value("useSystemLanguage", translMan->useSystemLanguage()).toBool())
             {
                 translMan->translateToSystemLanguage();
             }
             else
             {
                 translMan->translateTo(settings.value("language",
-                                            TranslationManager::systemLanguage()).toString());
+                                       translMan->currentLanguage()).toString());
             }
         }
         // end of general
@@ -190,6 +200,7 @@ bool ConfigIO::loadConfig()
         m_pMainWindow->mnaShowMenuBar->setChecked(settings.value("menuBarVisible", TRUE).toBool());
         m_pMainWindow->mnaShowStatusBar->setChecked(settings.value("statusBarVisible", TRUE).toBool());
         m_pMainWindow->setStretchToolButtons(settings.value("stretchToolButtons", TRUE).toBool());
+        m_pMainWindow->setToolsAlignmentHorizontal(settings.value("alignToolButtonsHorizontal", FALSE).toBool());
         m_pMainWindow->setStretchToolButtonsButtonVisible(settings.value("showStretchToolButtons", m_pMainWindow->isStretchToolButtonsButtonVisible()).toBool());
         m_pMainWindow->setMoveUpMoveDownButtonsVisible(settings.value("showMoveUpMoveDownButtons", m_pMainWindow->areMoveUpMoveDownButtonsVisible()).toBool());
         m_pMainWindow->setFrameVisible(settings.value("drawFrame", m_pMainWindow->isFrameVisible()).toBool());
@@ -303,6 +314,11 @@ QString ConfigIO::getConfigDirPath()
 #endif
 }
 
+
+QString ConfigIO::getGlobalConfigDirPath()
+{
+    return QApplication::applicationDirPath() + QDir::separator();
+}
 
 int ConfigIO::rangeIntValue(int value, int min, int max)
 {
