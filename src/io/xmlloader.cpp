@@ -317,6 +317,7 @@ bool xmlLoader::parseNextAttribute(xmlObject* target)
     
     m_szBuf[m_nParsingPosition] = '\0'; //replace valueindicator by '\0'
     attribute->setValueFromXmlCode(&(m_szBuf[valueposition])); // write value to attributeclass
+    
     m_szBuf[m_nParsingPosition] = valueindicator; //restore old char
     
     m_nParsingPosition++; // leave ' or ": name="value"-> <-

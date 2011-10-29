@@ -27,6 +27,10 @@
 #include <string.h>
 #include "error.h"
 
+// default value:
+// #define TW_XML_STRLEN 80
+// highly experimental: 
+#define TW_XML_STRLEN 1024 
 
 class xmlAttribute
 {
@@ -36,8 +40,8 @@ class xmlAttribute
         SetValue("");
     };
     public:
-        char    szName[80];
-        char    szValue[80];
+        char    szName[TW_XML_STRLEN];
+        char    szValue[TW_XML_STRLEN];
         int     nValueToInt(void);
         float   nValueToFloat(void);
         double  nValueToDouble(void);
@@ -58,7 +62,7 @@ class xmlObject
 {
     public:
         //MEMBER_Variables
-        char           szName[80];
+        char           szName[TW_XML_STRLEN];
         
         //FUNCTIONS
         //CON-/DESTRUCTOR
@@ -89,9 +93,9 @@ class xmlObject
         int             nDeleteObject(xmlObject* objectToDelete);
         xmlObject*      cTakeObjectFromList(xmlObject* object);
         xmlObject*      cGetObjectByIdentifier (int nIdentifier);
-        xmlObject*      cGetObjectByName (char szObjectName[80]);
-        xmlObject*      cGetObjectByAttributeValue (char szAttributeName[80], char szAttributeValue[80]);
-        int             nGetObjectIdentifierByAttributeValue (char szAttributeName[80], char szAttributeValue[80]);
+        xmlObject*      cGetObjectByName (char szObjectName[TW_XML_STRLEN]);
+        xmlObject*      cGetObjectByAttributeValue (char szAttributeName[TW_XML_STRLEN], char szAttributeValue[TW_XML_STRLEN]);
+        int             nGetObjectIdentifierByAttributeValue (char szAttributeName[TW_XML_STRLEN], char szAttributeValue[TW_XML_STRLEN]);
         void            swapObjects(xmlObject* objectOne, xmlObject* objectTwo);
         void            swapObjects(int objectOne, int objectTwo);
         void            moveObjectTo(xmlObject* objectToMove, int newPosition);

@@ -328,7 +328,7 @@ void DEdit_Widget::mouseMoveEvent(QMouseEvent* event)
     }
     bool hasToRepaint = FALSE;
     
-    if(handleStateDrag(event))
+    if(handleStateDrag(event)) // dragging of state is in an own function
     {
         hasToRepaint = TRUE;
     }
@@ -431,8 +431,9 @@ bool DEdit_Widget::handleStateDrag(QMouseEvent* event)
         // move to axis of grid
         if(m_nGridResolution > 0)
         {
-            newX = newX - newX % m_nGridResolution;
-            newY = newY - newY % m_nGridResolution;
+            QPoint newPos = alignPointToGrid(QPoint(newX, newY));
+            newX = newPos.x();
+            newY = newPos.y();
         }
         
         m_pDraggedState->move(newX, newY);
@@ -761,7 +762,7 @@ void DEdit_Widget::dragMoveEvent (QDragMoveEvent* event )
         // return if widget was locked
         return;
     }
-    m_cDropPreviewPosition = event->pos();
+    m_cDropPreviewPosition = alignPointToGrid(event->pos());
     if(m_bAboutToDrop)
     {
         update();
@@ -797,7 +798,7 @@ void DEdit_Widget::dropEvent(QDropEvent* event)
     QString text = event->mimeData()->data(dndMimeFormat());
     if(text == dndAddStateCommand())
     {
-        addState(event->pos());
+        addState(alignPointToGrid(event->pos()));
     }
     m_bAboutToDrop = FALSE;
 }
@@ -814,7 +815,8 @@ void DEdit_Widget::contextMenuEvent(QContextMenuEvent* event)
     setCurrentMode(ModeNormal);
     
     // backup context menu position for add state
-    m_cContextMenuPosition = event->pos();
+    // and align this position to grid
+    m_cContextMenuPosition = alignPointToGrid(event->pos());
     
     // only show context menu
     // if an item is selected
@@ -1885,6 +1887,28 @@ void DEdit_Widget::clearHistory()
 
 
 /// START SOME VISUAL OPTIONS
+QPoint DEdit_Widget::alignPointToGrid(QPoint p) const
+{
+    if(m_nGridResolution) // only align, if grid resolution is != 0
+    {
+        int dX = p.x() % m_nGridResolution;
+        int dY = p.y() % m_nGridResolution;
+        int halfgrid = m_nGridResolution/2;
+        if (dX >= halfgrid)
+        {
+            dX -= m_nGridResolution;
+        }
+        if (dY >= halfgrid)
+        {
+            dY -= m_nGridResolution;
+        }
+        
+        p.setX( p.x() - dX );
+        p.setY( p.y() - dY );
+    }
+    return p;
+}
+
 void DEdit_Widget::setGridResolution(int resolution)
 {
     m_nGridResolution = resolution;

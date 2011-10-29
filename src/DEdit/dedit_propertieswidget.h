@@ -11,12 +11,14 @@ class DEA;
 class QLabel;
 class QFrame;
 class QLineEdit;
+class QTextEdit;
+#include <QTextCursor>
 // layouts
 class QHBoxLayout;
 class QVBoxLayout;
 class QGridLayout;
 
-
+#define DEdit_Properties_TextWidget QTextEdit
 class DEdit_PropertiesWidget : public QWidget,
       public TranslateableObject
 {
@@ -29,7 +31,7 @@ public:
     DEA* dea();
     
     void retranslateUi();
-    static void initPropertyValueWidgets(QLineEdit* lineedit);
+    static void initPropertyValueWidgets(DEdit_Properties_TextWidget* lineedit);
     static void initPropertyNameWidgets(QLabel* lineedit);
 public slots:
     void refreshFromDea();
@@ -43,22 +45,22 @@ private:
     
     // widgets
     QLabel* lblName;
-    QLineEdit* txtName;
+    DEdit_Properties_TextWidget* txtName;
     QLabel* lblDescription;
-    QLineEdit* txtDescription;
+    DEdit_Properties_TextWidget* txtDescription;
     // properties
     QFrame*    frmPropeties;
     QLabel*    lblStates;
-    QLineEdit*    txtStates;
+    DEdit_Properties_TextWidget*    txtStates;
     QLabel*    lblTransitions;
-    QLineEdit*    txtTransitions;
+    DEdit_Properties_TextWidget*    txtTransitions;
     QLabel*    lblAlphabet;
-    QLineEdit*    txtAlphabet;
+    DEdit_Properties_TextWidget*    txtAlphabet;
     QLabel*    lblStartState;
-    QLineEdit*    txtStartState;
+    DEdit_Properties_TextWidget*    txtStartState;
     QLabel*    lblFinalStates;
-    QLineEdit*    txtFinalStates;
-    
+    DEdit_Properties_TextWidget*    txtFinalStates;
+    QTextCursor cCursor;
     
     // layouts
     QGridLayout* layoutNameDescription;

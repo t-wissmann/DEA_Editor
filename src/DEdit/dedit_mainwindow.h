@@ -60,7 +60,10 @@ public:
     void saveConfig();
     void loadConfig();
     
+    virtual QMenu*  createPopupMenu();
+    
     bool userReallyWantsToCloseFile();
+    bool hasDataChanged() const;
     
     bool areToolButtonsStretched() const;
     bool isStretchToolButtonsButtonVisible() const;
@@ -74,6 +77,7 @@ public:
     void setCentralWidgetMargin(int nMargin);
     int centralWidgetMargin() const;
     bool isToolsAlignmentHorizontal() const;
+    void setIsAddingTransition(bool adding); // set if user currently wants to add an transition
 public slots:
     void newFile();
     void openFile();
@@ -90,6 +94,7 @@ public slots:
     void setStretchToolButtons(bool on);
     void setStretchToolButtonsButtonVisible(bool visible);
     void setToolsAlignmentHorizontal(bool horizontal);
+    void setDataHasChanged(bool bChanged = TRUE);
 protected:
     virtual void dragEnterEvent(QDragEnterEvent* event);
     virtual void dropEvent(QDropEvent* event);
@@ -163,7 +168,8 @@ private:
     QMenu*       mnuView;
     QMenu*       mnuSettings;
     QMenu*       mnuHelp;
-    
+    // popup menu
+    QMenu*       mnuPopupMenu;
     // layouts
     QBoxLayout*  layoutToolButtons;
     QScrollArea* scrollCentral;
@@ -178,6 +184,7 @@ private:
     TranslationManager m_TranslationManager;
     QString m_szBackgroundColor;
     QString m_szFilename;
+    bool    m_bDataChanged;
     DEA m_cDea;
 };
 

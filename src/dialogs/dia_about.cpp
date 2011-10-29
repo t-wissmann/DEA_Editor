@@ -2,6 +2,7 @@
 #include "dia_about.h"
 
 #include <io/iconcatcher.h>
+#include <QApplication>
 
 #include <QLabel>
 #include <QPushButton>
@@ -42,16 +43,19 @@ void Dia_About::allocateWidgets()
     // tabs
     lblTabAbout = new QLabel;
     lblTabAuthor = new QLabel;
+    lblTabLicense = new QLabel;
     tabMain = new QTabWidget;
     
     
     // init labels
-    lblTabAbout->setTextInteractionFlags(Qt::TextSelectableByMouse);
     lblTabAuthor->setTextInteractionFlags(Qt::TextSelectableByMouse);
+    lblTabAuthor->setIndent(3);
+    lblTabAbout->setTextInteractionFlags(Qt::TextSelectableByMouse);
+    lblTabAbout->setIndent(3);
     lblTabAbout->setWordWrap(TRUE);
     lblTabAbout->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
-    lblTabAbout->setIndent(3);
-    lblTabAuthor->setIndent(3);
+    lblTabLicense->setTextInteractionFlags(Qt::TextSelectableByMouse);
+    lblTabLicense->setIndent(3);
     // init font for labels
     QFont font = lblHeader->font();
     font.setPointSize(font.pointSize() + 1);
@@ -82,7 +86,8 @@ void Dia_About::createLayouts()
     foo->setLayout(layoutAbout);
     // add tabs
     tabMain->addTab(foo, "about");
-    tabMain->addTab(lblTabAuthor, "author");
+    tabMain->addTab(lblTabAuthor,  "author");
+    tabMain->addTab(lblTabLicense, "license");
     
     layoutParent = new QVBoxLayout;
     layoutParent->setMargin(3);
@@ -101,7 +106,9 @@ void Dia_About::retranslateUi()
 {
     setWindowTitle(tr("About Dea Editor"));
     lblHeader->setText(tr("Dea Editor"));
-    lblVersion->setText(tr("compiled on: %date").replace("%date", __DATE__));
+    lblVersion->setText(tr("version: %version, compiled on: %date")
+                                       .replace("%date", __DATE__)
+                                       .replace("%version", qApp->applicationVersion()));
     QString about = "<p>";
     about += tr("Dea Editor - Create and simmulate Finate State Machines")
             + "<br><br>(c) Thorsten Wi" + QChar(0x00DF) + "mann";
@@ -109,10 +116,16 @@ void Dia_About::retranslateUi()
     lblTabAbout->setText(about);
     QString author = QString("Thorsten Wi") + QChar(0x00DF) + "mann";
     author += "<br>&nbsp;&nbsp;<a href=\"mailto:edu@thorsten-wissmann.de\">edu@thorsten-wissmann.de</a>";
-    
+    QString license = "<p>";
+    license += tr("DEA Editor is under the GPLv3");
+    license += "<br><br>" + tr("See %url for more information").replace("%url",
+               "<a href=\"http://www.gnu.org/licenses/gpl.txt\">http://www.gnu.org/licenses/gpl.txt</a>");
+    license += "</p>";
+    lblTabLicense->setText(license);
     
     tabMain->setTabText(0, tr("About"));
     tabMain->setTabText(1, tr("Author"));
+    tabMain->setTabText(2, tr("License"));
     lblTabAuthor->setText(author);
     btnClose->setText(tr("Close"));
 }

@@ -25,7 +25,7 @@
 #include "xmlloader.h"
 #include "xmlencoder.h"
 
-#include <QtCore>
+// #include <QtCore>
 
 int nLayer = 0; //nLayer shows the depth of the current object
 
@@ -65,14 +65,14 @@ void    xmlAttribute::SetValueToDouble(double nNewValue)
 
 void    xmlAttribute::SetName(const char* szNewName)
 {
-    strncpy(szName, szNewName, 79);
-    szName[79] = '\0';
+    strncpy(szName, szNewName, TW_XML_STRLEN-1);
+    szName[TW_XML_STRLEN-1] = '\0';
 }
 
 void    xmlAttribute::SetValue(const char* szNewValue)
 {
-    strncpy(szValue, szNewValue, 79);
-    szValue[79] = '\0';
+    strncpy(szValue, szNewValue, TW_XML_STRLEN-1);
+    szValue[TW_XML_STRLEN-1] = '\0';
 }
 
 
@@ -130,8 +130,8 @@ char*          xmlObject::szGetName( void )
 
 void           xmlObject::setName(const char* szNewName)
 {
-    strncpy(szName, szNewName, 79);
-    szName[79] = '\0';
+    strncpy(szName, szNewName, TW_XML_STRLEN-1);
+    szName[TW_XML_STRLEN-1] = '\0';
 }
 
 
@@ -423,7 +423,7 @@ int             xmlObject::nAddObject(char* szNewName)
     if(nSetObjectCounter(nObjectCounter+1) != 0)
         return (-1);
     if(szNewName)
-        strncpy(cGetObjectByIdentifier(nObjectCounter-1)->szName, szNewName, 79);
+        strncpy(cGetObjectByIdentifier(nObjectCounter-1)->szName, szNewName, TW_XML_STRLEN-1);
     return (nObjectCounter-1);
 }
 
@@ -457,7 +457,7 @@ int             xmlObject::nDeleteObject(int nIdentifier)
     int nNewObjectCounter = nObjectCounter-1;
     int nCurrentObjectItem = 0;
     
-    qDebug("heyhey");
+    //qDebug("heyhey");
     cObjectList = (xmlObject**) malloc(nNewObjectCounter * sizeof(xmlObject*));
     
     delete cOldObjectList[nIdentifier];
@@ -523,7 +523,7 @@ xmlObject*      xmlObject::cGetObjectByIdentifier (int nIdentifier)
         return NULL;
     return cObjectList[nIdentifier];
 }
-xmlObject*      xmlObject::cGetObjectByName (char szObjectName[80])
+xmlObject*      xmlObject::cGetObjectByName (char szObjectName[TW_XML_STRLEN])
 {
     int i;
     for ( i = 0; i < nObjectCounter; i++)
@@ -534,7 +534,8 @@ xmlObject*      xmlObject::cGetObjectByName (char szObjectName[80])
     return NULL;
 }
 
-int      xmlObject::nGetObjectIdentifierByAttributeValue (char szAttributeName[80], char szAttributeValue[80])
+int      xmlObject::nGetObjectIdentifierByAttributeValue (char szAttributeName[TW_XML_STRLEN],
+                                                          char szAttributeValue[TW_XML_STRLEN])
 {
     int nCurrentObject;
     for ( nCurrentObject = 0; nCurrentObject < nObjectCounter; nCurrentObject++)
@@ -547,7 +548,8 @@ int      xmlObject::nGetObjectIdentifierByAttributeValue (char szAttributeName[8
     return -1;
 }
 
-xmlObject*      xmlObject::cGetObjectByAttributeValue (char szAttributeName[80], char szAttributeValue[80])
+xmlObject*      xmlObject::cGetObjectByAttributeValue (char szAttributeName[TW_XML_STRLEN],
+                                                       char szAttributeValue[TW_XML_STRLEN])
 {
     int nCurrentObject;
     for ( nCurrentObject = 0; nCurrentObject < nObjectCounter; nCurrentObject++)

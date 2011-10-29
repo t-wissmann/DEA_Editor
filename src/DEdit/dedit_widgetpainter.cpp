@@ -8,6 +8,10 @@
 #include <io/iconcatcher.h>
 #include <math.h>
 
+// other qt classes
+#include <QTextDocument>
+#include <QAbstractTextDocumentLayout>
+#include <QTextOption>
 // painter
 #include <QPainter>
 #include <QColor>
@@ -17,9 +21,17 @@
 #include <QPainterPath>
 #include <QFontMetrics>
 
+// for painting transition
+
+#define TRANSITION_LABEL_AREA_FLAGS (Qt::TextWrapAnywhere | Qt::AlignVCenter | Qt::AlignHCenter)
+#define TRANSITION_LABEL_WIDTH (DEdit_GraphicalState::m_nDiameter*1.5)
+
 DEdit_WidgetPainter::DEdit_WidgetPainter(DEdit_Widget* widget)
 {
     m_pWidget = widget;
+    // init attributes
+    m_bPaintRichText = TRUE;
+    
     // recreate default color theme
     DEdit_Appearance::createTangoDefault(&m_cAppearance);
     // recreate templates
@@ -30,6 +42,17 @@ DEdit_WidgetPainter::~DEdit_WidgetPainter()
 {
     
 }
+
+void DEdit_WidgetPainter::setPaintRichText(bool bPaintRichText)
+{
+    m_bPaintRichText = bPaintRichText;
+}
+
+bool DEdit_WidgetPainter::paintRichText()
+{
+    return m_bPaintRichText;
+}
+
 
 
 void DEdit_WidgetPainter::paint()
@@ -236,11 +259,17 @@ void DEdit_WidgetPainter::paintStateLabel(QPainter* painter, DEdit_GraphicalStat
     int radius = DEdit_GraphicalState::m_nDiameter/2 - margin;
     QRect labelArea(state->m_nX-radius, state->m_nY-radius,
                     radius*2, radius*2);
-    QString label = state->m_pData->name();
+    QString label = QString::fromLocal8Bit(state->m_pData->name());
     int labelFlags = Qt::AlignVCenter | Qt::AlignHCenter | Qt::TextWrapAnywhere;
-    painter->drawText(labelArea, labelFlags, label);
     
-    
+    if(m_bPaintRichText)
+    {
+        paintRichTextAt(painter, labelArea, labelFlags, label);
+    }
+    else
+    {
+        painter->drawText(labelArea, labelFlags, label);
+    }
     
     if(state->m_pData->isFinalState())
     {
@@ -250,6 +279,48 @@ void DEdit_WidgetPainter::paintStateLabel(QPainter* painter, DEdit_GraphicalStat
         painter->drawEllipse(finalStateIndicator);
     }
     
+}
+
+
+void DEdit_WidgetPainter::paintRichTextAt(QPainter* painter, const QRect &rect,
+                                int flags, QString &text)
+{
+    if(!painter)
+    {
+        return;
+    }
+    //painter->drawText(rect, flags, text);
+    QTextOption textopt((Qt::Alignment)flags);
+    textopt.setWrapMode(QTextOption::WrapAtWordBoundaryOrAnywhere);
+    QTextDocument doc;
+    doc.setHtml(text);
+    doc.setDefaultTextOption(textopt);
+    doc.setDefaultFont(painter->font());
+    doc.setPageSize(QSize(rect.width(), QWIDGETSIZE_MAX));
+    QAbstractTextDocumentLayout* layout = doc.documentLayout();
+    
+    const int height = qRound(layout->documentSize().height());
+    
+    int y = rect.y();
+    if (flags & Qt::AlignBottom)
+    {
+        y += (rect.height() - height);
+    }
+    else if (flags & Qt::AlignVCenter)
+    {
+        y += (rect.height() - height)/2;
+    }
+    
+    QAbstractTextDocumentLayout::PaintContext context;
+    context.palette.setColor(QPalette::Text, painter->pen().color());
+    context.palette.setColor(QPalette::Text, painter->pen().color());
+
+    painter->save();
+
+    painter->translate(rect.x(), y);
+    layout->draw(painter, context);
+
+    painter->restore();
 }
 
 
@@ -326,12 +397,17 @@ void DEdit_WidgetPainter::repaintTransitionPixmap(DEdit_GraphicalTransition* tra
         pixmapWidth += transition->m_cLabelArea.width()/2;
         pixmapWidth *= 2;
         pixmapHeight = pixmapWidth;
+        pixmapHeight += transition->m_cLabelArea.height();
     }
     // for execution dot
     if(transition->m_bJustExecuted)
     {
-        pixmapWidth += DEdit_GraphicalState::m_nDiameter/2;
-        pixmapHeight += DEdit_GraphicalState::m_nDiameter/2;
+        int nExecDotRadius = DEdit_GraphicalState::m_nDiameter/2;
+        // ensure that GERMAN: "nExecDotRadius ist gerade" -> keine rundungsfehler
+        //             ENGLISH: "nExecDotRadius can be divided per 2" -> no errors on abs() after deviding
+        nExecDotRadius += nExecDotRadius % 2;
+        pixmapWidth += nExecDotRadius;
+        pixmapHeight += nExecDotRadius;
     }
     
     /// compute offset
@@ -408,7 +484,7 @@ void DEdit_WidgetPainter::paintTransitionLabel
         return;
     }
     QString label = transition->graphicalLabel();
-    int flags = Qt::AlignVCenter | Qt::AlignHCenter;
+    int flags = TRANSITION_LABEL_AREA_FLAGS;
     painter->drawText(transition->m_cLabelArea, flags, label);
 }
 
@@ -428,8 +504,17 @@ void DEdit_WidgetPainter::recomputeTransitionLabelArea
     {
         int margin = m_cTransitionPen.width()/2;
         QFontMetrics fm(m_cTransitionLabelFont);
-        result.setWidth(fm.width(transition->graphicalLabel()) + 2*margin);
-        result.setHeight(fm.height() + margin);
+        //old version without wordwrap
+        //result.setWidth(fm.width(transition->graphicalLabel()) + 2*margin);
+        // result.setHeight(fm.height() + margin);
+        // newversion with wordwrap
+        result = fm.boundingRect( 0,0,TRANSITION_LABEL_WIDTH,0, // rect doesnt really matter, except width
+                          TRANSITION_LABEL_AREA_FLAGS, // flags for text
+                         transition->graphicalLabel() // text
+                       );
+        // add margin TODO
+        result.adjust(-margin, -margin, margin, margin);
+        // compute position
         QPoint lblPos = middlePointOfCurve(transition->m_pStart->positionToQPoint(),
                                            transition->m_pEnd->positionToQPoint(),
                                            transition->m_nCurve/2);

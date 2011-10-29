@@ -9,6 +9,7 @@
 // graphical
 #include "dedit_widgetpainter.h"
 #include <QLine>
+#include <QPoint>
 #include <QPixmap>
 
 
@@ -122,6 +123,7 @@ public:
     
     
     // some visual options
+    QPoint alignPointToGrid(QPoint p) const;
     void setGridResolution(int resolution);
     int gridResolution() const;
     void setAutoEditNewStates(bool on);

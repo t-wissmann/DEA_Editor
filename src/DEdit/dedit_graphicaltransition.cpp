@@ -1,7 +1,6 @@
 #include "dedit_graphicaltransition.h"
 #include "dedit_graphicalstate.h"
 #include <DEA/dea_transition.h>
-
 #include <stdlib.h>
 #include <math.h>
 // qt
@@ -97,13 +96,13 @@ bool DEdit_GraphicalTransition::startEqualsEnd() const
 }
 
 
-QString DEdit_GraphicalTransition::graphicalLabel() const
+QString DEdit_GraphicalTransition::graphicalLabel()
 {
     if(!m_pData)
     {
         return "";
     }
-    QString result = m_pData->inputSymbols();
+    QString result = symbols();
     result.replace(" ", "0x20");
     bool lower = result.contains("abcdefghijklmnopqrstuvwxyz");
     bool upper = result.contains("ABCDEFGHIJKLMNOPQRSTUVWXYZ");
@@ -152,7 +151,8 @@ void DEdit_GraphicalTransition::setSymbols(QString symbols)
     {
         return;
     }
-    m_pData->setInputSymbols(symbols.toAscii().data());
+//     m_pData->setInputSymbols(xmlEncoder::stringToXmlCode(symbols.toLocal8Bit().data()));
+    m_pData->setInputSymbols(symbols.toLocal8Bit().data());
 }
 
 QString DEdit_GraphicalTransition::symbols()
@@ -161,7 +161,9 @@ QString DEdit_GraphicalTransition::symbols()
     {
         return "";
     }
-    return m_pData->inputSymbols();
+//     qDebug("data is \"%s\"", m_pData->inputSymbols());
+//     return QString::fromLocal8Bit(xmlEncoder::xmlCodeToString(m_pData->inputSymbols()));
+    return QString::fromLocal8Bit(m_pData->inputSymbols());
 }
 
 

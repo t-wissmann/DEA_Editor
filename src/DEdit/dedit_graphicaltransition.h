@@ -51,7 +51,7 @@ public:
     
     void setSymbols(QString symbols);
     QString symbols();
-    QString graphicalLabel() const; // this is a shortened version of m_szSymbols
+    QString graphicalLabel(); // this is a shortened version of symbols()
     
     static double labelRadius();
     

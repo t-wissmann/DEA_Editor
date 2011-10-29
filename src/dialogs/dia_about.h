@@ -37,6 +37,7 @@ private:
     QLabel* lblVersion;
     QLabel* lblTabAbout;
     QLabel* lblTabAuthor;
+    QLabel* lblTabLicense;
     QLabel* lblIcon;
     
     QTabWidget* tabMain;
@@ -47,7 +48,6 @@ private:
     QHBoxLayout* layoutAbout;
     QVBoxLayout* layoutParent;
     QHBoxLayout* layoutBottom;
-    
 };
 
 

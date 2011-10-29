@@ -9,6 +9,7 @@
 #include <QLabel>
 #include <QFrame>
 #include <QLineEdit>
+#include <QTextEdit>
 // layouts
 #include <QHBoxLayout>
 #include <QVBoxLayout>
@@ -28,6 +29,7 @@ DEdit_PropertiesWidget::DEdit_PropertiesWidget(QWidget* parent)
     initWidgets();
     connectSlots();
     retranslateUi();
+    resize(50, 50);
 }
 
 DEdit_PropertiesWidget::~DEdit_PropertiesWidget()
@@ -39,22 +41,25 @@ DEdit_PropertiesWidget::~DEdit_PropertiesWidget()
 void DEdit_PropertiesWidget::allocateWidget()
 {
     lblName = new QLabel;
-    txtName = new QLineEdit;
+    txtName = new DEdit_Properties_TextWidget;
     lblDescription = new QLabel;
-    txtDescription = new QLineEdit;
+    txtDescription = new DEdit_Properties_TextWidget;
     
     // properties
     frmPropeties = new QFrame;
     lblStates = new QLabel;
-    txtStates = new QLineEdit;
+    txtStates = new DEdit_Properties_TextWidget;
     lblTransitions = new QLabel;
-    txtTransitions = new QLineEdit;
+    txtTransitions = new DEdit_Properties_TextWidget;
     lblAlphabet = new QLabel;
-    txtAlphabet = new QLineEdit;
+    txtAlphabet = new DEdit_Properties_TextWidget;
     lblStartState = new QLabel;
-    txtStartState = new QLineEdit;
+    txtStartState = new DEdit_Properties_TextWidget;
     lblFinalStates = new QLabel;
-    txtFinalStates = new QLineEdit;
+    txtFinalStates = new DEdit_Properties_TextWidget;
+    
+    // set cursor
+    cCursor.movePosition(QTextCursor::Start);
 }
 
 void DEdit_PropertiesWidget::createLayouts()
@@ -118,7 +123,7 @@ void DEdit_PropertiesWidget::initWidgets()
     
 }
 
-void DEdit_PropertiesWidget::initPropertyValueWidgets(QLineEdit* widget)
+void DEdit_PropertiesWidget::initPropertyValueWidgets(DEdit_Properties_TextWidget* widget)
 {
     if(!widget)
     {
@@ -130,8 +135,15 @@ void DEdit_PropertiesWidget::initPropertyValueWidgets(QLineEdit* widget)
     widget->setFrameShadow(QFrame::Sunken);
     widget->setWordWrap(TRUE);
     */
+    {  //only if DEdit_Properties_TextWidget is QTextEdit
+        widget->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+        widget->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+        widget->setWordWrapMode(QTextOption::WrapAnywhere);
+    }
     widget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
     widget->setReadOnly(TRUE);
+    widget->setTextInteractionFlags(Qt::LinksAccessibleByMouse | Qt::LinksAccessibleByKeyboard);
+    widget->setMinimumSize(QSize(30, 10));
 }
 
 
@@ -170,7 +182,7 @@ void DEdit_PropertiesWidget::retranslateUi()
     lblAlphabet->setText(QString(QChar(0x03A3))); //  0x03A3 = sigma
     lblStates->setText("<i>Q</i>");
     lblTransitions->setText(QString(QChar(0x03B4))); // 0x03B4 = delta
-    lblStartState->setText("<i>q0</i>");
+    lblStartState->setText("<i>q<sub>0</sub></i>");
     lblFinalStates->setText("<i>F</i>");
 }
 
@@ -201,7 +213,7 @@ void DEdit_PropertiesWidget::refreshFromDea()
         startState = m_pDea->startState()->name(); 
     }
     txtStartState->setText(startState);
-    txtStartState->setCursorPosition(0);
+    //txtStartState->setCursorPosition(0);
     QString allStates = "";
     QString finalStates = "";
     DEA_State* currentState;
@@ -228,15 +240,16 @@ void DEdit_PropertiesWidget::refreshFromDea()
                 }
             }
         }
+        allStates.replace("<br>", ""); // remove all newlines
     }
     txtStates->setText(allStates);
-    txtStates->setCursorPosition(0);
+    //txtStates->setCursorPosition(0);
     txtFinalStates->setText(finalStates);
-    txtFinalStates->setCursorPosition(0);
+    //txtFinalStates->setCursorPosition(0);
     
     txtAlphabet->setText(QString::fromLocal8Bit("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
-                            "0123456789,;.:-_#'+*~!\"§$%&/()=\\{[]}"));
-    txtAlphabet->setCursorPosition(0);
+                            "0123456789,;.:-_#'+*~!\"§$%&/()=@\\{[]}"));
+    //txtAlphabet->setCursorPosition(0);
     
     QString transitions = "";
     QString currentTransition;
@@ -254,7 +267,7 @@ void DEdit_PropertiesWidget::refreshFromDea()
             currentTransition += "(";
             currentTransition += transition->start()->name();
             currentTransition += ", ";
-            currentTransition += transition->inputSymbols();
+            currentTransition += QString::fromLocal8Bit(transition->inputSymbols());
             currentTransition += ", ";
             currentTransition += transition->end()->name();
             currentTransition += ")";
@@ -268,7 +281,14 @@ void DEdit_PropertiesWidget::refreshFromDea()
         }
     }
     txtTransitions->setText(transitions);
-    txtTransitions->setCursorPosition(0);
+    //txtTransitions->setCursorPosition(0);
+    
+    // move cursors
+    txtStates->setTextCursor(cCursor);
+    txtAlphabet->setTextCursor(cCursor);
+    txtTransitions->setTextCursor(cCursor);
+    txtStartState->setTextCursor(cCursor);
+    txtFinalStates->setTextCursor(cCursor);
 }
 
 

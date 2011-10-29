@@ -104,7 +104,7 @@ void DEdit_EditStateDia::setStateToEdit(DEdit_GraphicalState* state)
     {
         return;
     }
-    txtName->setText(m_pStateToEdit->m_pData->name());
+    txtName->setText(QString::fromLocal8Bit(m_pStateToEdit->m_pData->name()));
     chkIsFinalState->setChecked(m_pStateToEdit->m_pData->isFinalState());
     chkIsStartState->setChecked(m_pStateToEdit->m_bStartState);
 }
@@ -140,7 +140,7 @@ bool DEdit_EditStateDia::applyChanges()
         QMessageBox::critical(this, title, msg);
         return FALSE;
     }
-    m_pStateToEdit->m_pData->setName(name.toAscii().data());
+    m_pStateToEdit->m_pData->setName(name.toLocal8Bit().data());
     m_pStateToEdit->m_pData->setFinalState(chkIsFinalState->isChecked());
     m_pStateToEdit->m_bStartState = chkIsStartState->isChecked();
     if(parentWidget())

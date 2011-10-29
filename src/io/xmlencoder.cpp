@@ -23,6 +23,8 @@
 #include <QString>
 #include <QChar>
 
+QByteArray xmlEncoder::s_szReturnByteArray;
+
 xmlEncoder::xmlEncoder()
 {
 }
@@ -50,7 +52,14 @@ char* xmlEncoder::xmlCodeToString(char* string)
     returnString.replace(QString("&Ouml;"), QString::fromLocal8Bit("Ö"));
     returnString.replace(QString("&Uuml;"), QString::fromLocal8Bit("Ü"));
     returnString.replace(QString("&szlig;"), QString::fromLocal8Bit("ß"));
-    return returnString.toLocal8Bit().data();
+    
+    s_szReturnByteArray = returnString.toLocal8Bit();
+    char* output = s_szReturnByteArray.data();
+//     if(returnString.contains("ABCDEFGHI"))
+//     {
+//         qDebug("outputstring: \"%s\"", output);
+//     }
+    return output;
 }
 
 char* xmlEncoder::stringToXmlCode(char* string)
@@ -68,7 +77,8 @@ char* xmlEncoder::stringToXmlCode(char* string)
     returnString.replace(QString::fromLocal8Bit("Ö"), QString("&Ouml;"));
     returnString.replace(QString::fromLocal8Bit("Ü"), QString("&Uuml;"));
     returnString.replace(QString::fromLocal8Bit("ß"), QString("&szlig;"));
-    return returnString.toLocal8Bit().data();
+    s_szReturnByteArray = returnString.toLocal8Bit();
+    return (char*)s_szReturnByteArray.data();
 }
 
 

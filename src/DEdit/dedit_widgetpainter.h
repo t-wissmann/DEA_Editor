@@ -24,9 +24,16 @@ public:
     DEdit_WidgetPainter(DEdit_Widget* widget = 0);
     ~DEdit_WidgetPainter();
     
+    // attributes / getter-setter
+    void setPaintRichText(bool bPaintRichText);
+    bool paintRichText();
+    
+    // painting functions
     void paint();
     void paintState(QPainter* painter, DEdit_GraphicalState* state);
     void paintStateLabel(QPainter* painter, DEdit_GraphicalState* state);
+    static void paintRichTextAt(QPainter* painter, const QRect &rect,
+                                int flags, QString &text);
     
     void paintTransition(QPainter* painter, DEdit_GraphicalTransition* transition);
     void repaintTransitionPixmap(DEdit_GraphicalTransition* transition);
@@ -56,6 +63,9 @@ private:
     // members
     DEdit_Widget* m_pWidget;
     DEdit_Appearance m_cAppearance;
+    // attributes
+    bool    m_bPaintRichText;
+    
     // state template pixmaps
     QPixmap  m_cStateNormalTemplate;
     QPixmap  m_cStateHoveredTemplate;

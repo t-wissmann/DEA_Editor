@@ -69,7 +69,6 @@ DEdit_MainWindow::DEdit_MainWindow()
     
     // now load configuration
     loadConfig();
-    
 }
 
 DEdit_MainWindow::~DEdit_MainWindow()
@@ -84,8 +83,10 @@ void DEdit_MainWindow::initMembers()
     m_diaSourceViewer = NULL;
     m_diaConfigureDEditWidget = NULL;
     m_diaAbout = NULL;
+    mnuPopupMenu = NULL; // init popup menu
     // other members
     m_szBackgroundColor = "Window";
+    m_bDataChanged = FALSE;
 }
 
 void DEdit_MainWindow::allocateWidgets()
@@ -253,6 +254,16 @@ void DEdit_MainWindow::createMenuBar()
     mnuHelp->addSeparator();
     mnuHelp->addAction(mnaAbout);
     mnuHelp->addAction(mnaAboutQt);
+
+    // add some actions to main right-click menu
+    mnuPopupMenu = new QMenu(this);
+    mnuPopupMenu->addAction(mnaShowToolBar);
+    mnuPopupMenu->addAction(mnaShowMenuBar);
+    mnuPopupMenu->addAction(mnaShowStatusBar);
+    mnuPopupMenu->addSeparator();
+    mnuPopupMenu->addAction(mnaShowToolButtonsDock);
+    mnuPopupMenu->addAction(mnaShowProperties);
+    mnuPopupMenu->addAction(mnaShowExecDeaDock);
 }
 
 
@@ -270,6 +281,7 @@ void DEdit_MainWindow::connectSlots()
     connect(wdgEditor, SIGNAL(currentModeChanged(DEdit_Widget::EMode)), this,
             SLOT(resetStatusBarText(DEdit_Widget::EMode)));
     connect(wdgEditor, SIGNAL(deaWasChanged()), wdgProperties, SLOT(refreshFromDea()));
+    connect(wdgEditor, SIGNAL(deaWasChanged()), this, SLOT(setDataHasChanged()));
     connect(wdgEditor, SIGNAL(historyChanged()), this, SLOT(reinitEditMenu()));
     
     // connections for actions
@@ -323,6 +335,7 @@ void DEdit_MainWindow::initWidgets()
 
     // init undo / redo
     reinitEditMenu();
+
 }
 
 void DEdit_MainWindow::retranslateUi()
@@ -474,10 +487,12 @@ void DEdit_MainWindow::resetStatusBarText(DEdit_Widget::EMode mode)
         }
         case DEdit_Widget::ModeAddTransitionSelectFrom:{
             msg = tr("Click on the first state, and keep the mouse button pressed");
+            setIsAddingTransition(TRUE);
             break;
         }
         case DEdit_Widget::ModeAddTransitionSelectTo:{
             msg = tr("Now, drag transition to second state and release the mouse button");
+            setIsAddingTransition(TRUE);
             break;
         }
         case DEdit_Widget::ModeLocked:{
@@ -486,12 +501,24 @@ void DEdit_MainWindow::resetStatusBarText(DEdit_Widget::EMode mode)
         }
         default: {
             msg = "";
+            setIsAddingTransition(FALSE);
             break;
         }
     }
     statusBar()->showMessage(msg);
 }
 
+void DEdit_MainWindow::setIsAddingTransition(bool adding) 
+{
+    // set if user currently wants to add an transition
+    btnAddTransition->setCheckable(adding);
+    btnAddTransition->setChecked(adding);
+    // a current workaround...
+    // after setting setChecked() and setCheckable() to false
+    // then button doesn't repaint
+    btnAddTransition->update();
+
+}
 
 void DEdit_MainWindow::showSourceCode()
 {
@@ -579,6 +606,8 @@ QString DEdit_MainWindow::saveToFile(QString filename) // returns errormsg
     else
     {
         statusBar()->showMessage(tr("File %filename successfully written").replace("%filename", filename), 3000);
+        // file was saved -> data wasn't changed yet
+        setDataHasChanged(FALSE);
     }
     
     return szResult;
@@ -624,6 +653,7 @@ void DEdit_MainWindow::openFile()
         // then we have a new filename
         m_szFilename = filename;
     }
+    setDataHasChanged(FALSE);
     resetWindowTitle();
     
 }
@@ -651,6 +681,8 @@ QString DEdit_MainWindow::loadFromFile(QString filename) // returns errormsg
         wdgEditor->clearHistory();
         // print success to status bar :)
         statusBar()->showMessage(tr("File %filename successfully loaded").replace("%filename", filename), 3000);
+        // file was loaded -> so it wasn't changed yet
+        setDataHasChanged(FALSE);
     }
     return szResult;
 }
@@ -766,6 +798,32 @@ void DEdit_MainWindow::loadConfig()
 
 bool DEdit_MainWindow::userReallyWantsToCloseFile()
 {
+    // only ask to quit if data has been changed
+    
+    if (hasDataChanged())
+    {
+        QMessageBox questionBox(this);
+        QPushButton* saveButton = new QPushButton(IconCatcher::getIcon("filesave", 16), tr("Save"));
+        QPushButton* discardButton = new QPushButton(IconCatcher::getIcon("discard", 16), tr("Discard"));
+        QPushButton* rejectButton = new QPushButton(IconCatcher::getIcon("button_cancel", 16), tr("Don't Close"));
+        questionBox.addButton(saveButton, QMessageBox::ApplyRole);
+        questionBox.addButton(discardButton, QMessageBox::DestructiveRole);
+        questionBox.addButton(rejectButton, QMessageBox::RejectRole);
+        questionBox.setIconPixmap(IconCatcher::getIcon("exit", 48).pixmap(48));
+        questionBox.setText(tr("Since last saving, your DEA was changed.\nDo you want to save the changes or do you want to discard them ?"));
+        questionBox.setWindowTitle(tr("Closing DEA Editor"));
+        
+        questionBox.exec();
+        if(questionBox.clickedButton() == saveButton) {
+                saveFile();
+                return TRUE;
+        } else if(questionBox.clickedButton() == discardButton){
+                return TRUE;
+        } else if(questionBox.clickedButton() == rejectButton){
+            return FALSE;
+        }
+    }
+    // else
     return TRUE;
 }
 
@@ -783,7 +841,7 @@ void DEdit_MainWindow::resetWindowTitle()
         }
     }
     szNewWindowTitle = szFilename;
-    szNewWindowTitle += " - ";
+    szNewWindowTitle += "[*] - ";
     szNewWindowTitle += tr("Dea Editor");
     setWindowTitle(szNewWindowTitle);
 }
@@ -924,7 +982,7 @@ void DEdit_MainWindow::setToolsAlignmentHorizontal(bool horizontal)
     {
         // horizontal can be QBoxLayout::LeftToRight or QBoxLayout::RightToLeft
         // depends on: if language is right to left or left to right
-        layoutToolButtons->setDirection(QApplication::isLeftToRight ? 
+        layoutToolButtons->setDirection(QApplication::isLeftToRight ?
                                         QBoxLayout::LeftToRight :
                                         QBoxLayout::RightToLeft );
     }
@@ -943,3 +1001,33 @@ bool DEdit_MainWindow::isToolsAlignmentHorizontal() const
     return (layoutToolButtons->direction() != QBoxLayout::TopToBottom);
 }
 
+
+void DEdit_MainWindow::setDataHasChanged(bool bChanged)
+{
+    if(bChanged != m_bDataChanged)
+    {
+        m_bDataChanged = bChanged;
+        setWindowModified(m_bDataChanged);
+    }
+}
+
+bool DEdit_MainWindow::hasDataChanged() const
+{
+    return m_bDataChanged;
+}
+
+
+
+QMenu* DEdit_MainWindow::createPopupMenu()
+{
+    // add some actions to main right-click menu
+    QMenu* mnuNewMenu = new QMenu(this);
+    mnuNewMenu->addAction(mnaShowToolBar);
+    mnuNewMenu->addAction(mnaShowMenuBar);
+    mnuNewMenu->addAction(mnaShowStatusBar);
+    mnuNewMenu->addSeparator();
+    mnuNewMenu->addAction(mnaShowToolButtonsDock);
+    mnuNewMenu->addAction(mnaShowProperties);
+    mnuNewMenu->addAction(mnaShowExecDeaDock);
+    return mnuNewMenu;
+}
