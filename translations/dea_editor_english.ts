@@ -327,7 +327,7 @@
 <context>
     <name>DEdit_MainWindow</name>
     <message>
-        <location filename="../src/DEdit/dedit_mainwindow.cpp" line="831"/>
+        <location filename="../src/DEdit/dedit_mainwindow.cpp" line="845"/>
         <source>Dea Editor</source>
         <translation>DEA Editor</translation>
     </message>
@@ -388,7 +388,7 @@
     </message>
     <message>
         <location filename="../src/DEdit/dedit_mainwindow.cpp" line="373"/>
-        <location filename="../src/DEdit/dedit_mainwindow.cpp" line="792"/>
+        <location filename="../src/DEdit/dedit_mainwindow.cpp" line="806"/>
         <source>Save</source>
         <translation type="unfinished"></translation>
     </message>
@@ -478,81 +478,81 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/DEdit/dedit_mainwindow.cpp" line="493"/>
+        <location filename="../src/DEdit/dedit_mainwindow.cpp" line="494"/>
         <source>Now, drag transition to second state and release the mouse button</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/DEdit/dedit_mainwindow.cpp" line="497"/>
+        <location filename="../src/DEdit/dedit_mainwindow.cpp" line="499"/>
         <source>DEA is running, so it is currently not possible to modify the DEA</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../src/DEdit/dedit_mainwindow.cpp" line="449"/>
-        <location filename="../src/DEdit/dedit_mainwindow.cpp" line="546"/>
-        <location filename="../src/DEdit/dedit_mainwindow.cpp" line="569"/>
+        <location filename="../src/DEdit/dedit_mainwindow.cpp" line="560"/>
+        <location filename="../src/DEdit/dedit_mainwindow.cpp" line="583"/>
         <source>Error when saving file</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/DEdit/dedit_mainwindow.cpp" line="553"/>
+        <location filename="../src/DEdit/dedit_mainwindow.cpp" line="567"/>
         <source>Save File</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/DEdit/dedit_mainwindow.cpp" line="555"/>
-        <location filename="../src/DEdit/dedit_mainwindow.cpp" line="622"/>
+        <location filename="../src/DEdit/dedit_mainwindow.cpp" line="569"/>
+        <location filename="../src/DEdit/dedit_mainwindow.cpp" line="636"/>
         <source>DEA Files (*.xml)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/DEdit/dedit_mainwindow.cpp" line="589"/>
+        <location filename="../src/DEdit/dedit_mainwindow.cpp" line="603"/>
         <source>Error when writing to &apos;%filename&apos;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/DEdit/dedit_mainwindow.cpp" line="590"/>
+        <location filename="../src/DEdit/dedit_mainwindow.cpp" line="604"/>
         <source>You propably don&apos;t have the necessery Write-Rights there.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/DEdit/dedit_mainwindow.cpp" line="594"/>
+        <location filename="../src/DEdit/dedit_mainwindow.cpp" line="608"/>
         <source>File %filename successfully written</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/DEdit/dedit_mainwindow.cpp" line="621"/>
+        <location filename="../src/DEdit/dedit_mainwindow.cpp" line="635"/>
         <source>Open File</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/DEdit/dedit_mainwindow.cpp" line="635"/>
-        <location filename="../src/DEdit/dedit_mainwindow.cpp" line="719"/>
+        <location filename="../src/DEdit/dedit_mainwindow.cpp" line="649"/>
+        <location filename="../src/DEdit/dedit_mainwindow.cpp" line="733"/>
         <source>Error when opening file</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/DEdit/dedit_mainwindow.cpp" line="654"/>
+        <location filename="../src/DEdit/dedit_mainwindow.cpp" line="668"/>
         <source>Error when loading &apos;%filename&apos;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/DEdit/dedit_mainwindow.cpp" line="655"/>
+        <location filename="../src/DEdit/dedit_mainwindow.cpp" line="669"/>
         <source>Propably you donnot have the necessary Read-Rights or the file doesnot exist.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/DEdit/dedit_mainwindow.cpp" line="660"/>
+        <location filename="../src/DEdit/dedit_mainwindow.cpp" line="674"/>
         <source>Error when parsing &apos;%filename&apos;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/DEdit/dedit_mainwindow.cpp" line="661"/>
+        <location filename="../src/DEdit/dedit_mainwindow.cpp" line="675"/>
         <source>Syntax error:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/DEdit/dedit_mainwindow.cpp" line="669"/>
+        <location filename="../src/DEdit/dedit_mainwindow.cpp" line="683"/>
         <source>File %filename successfully loaded</source>
         <translation type="unfinished"></translation>
     </message>
@@ -607,7 +607,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/DEdit/dedit_mainwindow.cpp" line="820"/>
+        <location filename="../src/DEdit/dedit_mainwindow.cpp" line="834"/>
         <source>New File</source>
         <translation type="unfinished"></translation>
     </message>
@@ -654,23 +654,23 @@ Then click on the first state of the transition, then on the second state.</sour
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/DEdit/dedit_mainwindow.cpp" line="793"/>
+        <location filename="../src/DEdit/dedit_mainwindow.cpp" line="807"/>
         <source>Discard</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/DEdit/dedit_mainwindow.cpp" line="794"/>
+        <location filename="../src/DEdit/dedit_mainwindow.cpp" line="808"/>
         <source>Don&apos;t Close</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/DEdit/dedit_mainwindow.cpp" line="799"/>
+        <location filename="../src/DEdit/dedit_mainwindow.cpp" line="813"/>
         <source>Since last saving, your DEA was changed.
 Do you want to save the changes or do you want to discard them ?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/DEdit/dedit_mainwindow.cpp" line="800"/>
+        <location filename="../src/DEdit/dedit_mainwindow.cpp" line="814"/>
         <source>Closing DEA Editor</source>
         <translation type="unfinished"></translation>
     </message>
@@ -779,9 +779,13 @@ Do you want to save the changes or do you want to discard them ?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/dialogs/dia_about.cpp" line="113"/>
         <source>Dea Editor - Create and simmulate Finate State Machines</source>
-        <translation>DEA Editor - Create and simmulate Finate State Machines</translation>
+        <translation type="obsolete">DEA Editor - Create and simmulate Finate State Machines</translation>
+    </message>
+    <message>
+        <location filename="../src/dialogs/dia_about.cpp" line="113"/>
+        <source>Dea Editor - Create and simulate Finate State Machines</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../src/dialogs/dia_about.cpp" line="120"/>

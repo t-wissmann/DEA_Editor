@@ -110,7 +110,7 @@ void Dia_About::retranslateUi()
                                        .replace("%date", __DATE__)
                                        .replace("%version", qApp->applicationVersion()));
     QString about = "<p>";
-    about += tr("Dea Editor - Create and simmulate Finate State Machines")
+    about += tr("Dea Editor - Create and simulate Finate State Machines")
             + "<br><br>(c) Thorsten Wi" + QChar(0x00DF) + "mann";
     about += "</p";
     lblTabAbout->setText(about);

@@ -327,7 +327,7 @@
 <context>
     <name>DEdit_MainWindow</name>
     <message>
-        <location filename="../src/DEdit/dedit_mainwindow.cpp" line="831"/>
+        <location filename="../src/DEdit/dedit_mainwindow.cpp" line="845"/>
         <source>Dea Editor</source>
         <translation>DEA Editor</translation>
     </message>
@@ -388,7 +388,7 @@
     </message>
     <message>
         <location filename="../src/DEdit/dedit_mainwindow.cpp" line="373"/>
-        <location filename="../src/DEdit/dedit_mainwindow.cpp" line="792"/>
+        <location filename="../src/DEdit/dedit_mainwindow.cpp" line="806"/>
         <source>Save</source>
         <translation>Speichern</translation>
     </message>
@@ -478,81 +478,81 @@
         <translation>Klicken sie auf den ersten Zustand und halten sie die Maustaste gedrückt</translation>
     </message>
     <message>
-        <location filename="../src/DEdit/dedit_mainwindow.cpp" line="493"/>
+        <location filename="../src/DEdit/dedit_mainwindow.cpp" line="494"/>
         <source>Now, drag transition to second state and release the mouse button</source>
         <translation>Ziehen sie jetzt den Überganz zum zweiten Zustand und lassen sie dort die Maustaste los</translation>
     </message>
     <message>
-        <location filename="../src/DEdit/dedit_mainwindow.cpp" line="497"/>
+        <location filename="../src/DEdit/dedit_mainwindow.cpp" line="499"/>
         <source>DEA is running, so it is currently not possible to modify the DEA</source>
         <translation>DEA ist gesperrt, deshalb ist es im Moment nicht möglich, den DEA zu verändern</translation>
     </message>
     <message>
         <location filename="../src/DEdit/dedit_mainwindow.cpp" line="449"/>
-        <location filename="../src/DEdit/dedit_mainwindow.cpp" line="546"/>
-        <location filename="../src/DEdit/dedit_mainwindow.cpp" line="569"/>
+        <location filename="../src/DEdit/dedit_mainwindow.cpp" line="560"/>
+        <location filename="../src/DEdit/dedit_mainwindow.cpp" line="583"/>
         <source>Error when saving file</source>
         <translation>Fehler beim speichern der Datei</translation>
     </message>
     <message>
-        <location filename="../src/DEdit/dedit_mainwindow.cpp" line="553"/>
+        <location filename="../src/DEdit/dedit_mainwindow.cpp" line="567"/>
         <source>Save File</source>
         <translation>Datei Speichern</translation>
     </message>
     <message>
-        <location filename="../src/DEdit/dedit_mainwindow.cpp" line="555"/>
-        <location filename="../src/DEdit/dedit_mainwindow.cpp" line="622"/>
+        <location filename="../src/DEdit/dedit_mainwindow.cpp" line="569"/>
+        <location filename="../src/DEdit/dedit_mainwindow.cpp" line="636"/>
         <source>DEA Files (*.xml)</source>
         <translation>DEA-Dateien (*.xml)</translation>
     </message>
     <message>
-        <location filename="../src/DEdit/dedit_mainwindow.cpp" line="589"/>
+        <location filename="../src/DEdit/dedit_mainwindow.cpp" line="603"/>
         <source>Error when writing to &apos;%filename&apos;</source>
         <translation>Fehler beim speichern nach &apos;%filename&apos;</translation>
     </message>
     <message>
-        <location filename="../src/DEdit/dedit_mainwindow.cpp" line="590"/>
+        <location filename="../src/DEdit/dedit_mainwindow.cpp" line="604"/>
         <source>You propably don&apos;t have the necessery Write-Rights there.</source>
         <translation>Wahrscheinlcih haben sie dort nicht die nötigen Schreibrechte.</translation>
     </message>
     <message>
-        <location filename="../src/DEdit/dedit_mainwindow.cpp" line="594"/>
+        <location filename="../src/DEdit/dedit_mainwindow.cpp" line="608"/>
         <source>File %filename successfully written</source>
         <translation>Datei %filename erfolgreich gespeichert</translation>
     </message>
     <message>
-        <location filename="../src/DEdit/dedit_mainwindow.cpp" line="621"/>
+        <location filename="../src/DEdit/dedit_mainwindow.cpp" line="635"/>
         <source>Open File</source>
         <translation>Datei öffnen</translation>
     </message>
     <message>
-        <location filename="../src/DEdit/dedit_mainwindow.cpp" line="635"/>
-        <location filename="../src/DEdit/dedit_mainwindow.cpp" line="719"/>
+        <location filename="../src/DEdit/dedit_mainwindow.cpp" line="649"/>
+        <location filename="../src/DEdit/dedit_mainwindow.cpp" line="733"/>
         <source>Error when opening file</source>
         <translation>Fehler beim öffnen der Datei</translation>
     </message>
     <message>
-        <location filename="../src/DEdit/dedit_mainwindow.cpp" line="654"/>
+        <location filename="../src/DEdit/dedit_mainwindow.cpp" line="668"/>
         <source>Error when loading &apos;%filename&apos;</source>
         <translation>Fehler beim laden von &apos;%filename&apos;</translation>
     </message>
     <message>
-        <location filename="../src/DEdit/dedit_mainwindow.cpp" line="655"/>
+        <location filename="../src/DEdit/dedit_mainwindow.cpp" line="669"/>
         <source>Propably you donnot have the necessary Read-Rights or the file doesnot exist.</source>
         <translation>Wahrscheinlich besitzen sie dort nicht die nötigen Leserechte oder die Datei existiert nicht.</translation>
     </message>
     <message>
-        <location filename="../src/DEdit/dedit_mainwindow.cpp" line="660"/>
+        <location filename="../src/DEdit/dedit_mainwindow.cpp" line="674"/>
         <source>Error when parsing &apos;%filename&apos;</source>
         <translation>Fehler beim lesen von &apos;%filename&apos;</translation>
     </message>
     <message>
-        <location filename="../src/DEdit/dedit_mainwindow.cpp" line="661"/>
+        <location filename="../src/DEdit/dedit_mainwindow.cpp" line="675"/>
         <source>Syntax error:</source>
         <translation>Syntax fehler:</translation>
     </message>
     <message>
-        <location filename="../src/DEdit/dedit_mainwindow.cpp" line="669"/>
+        <location filename="../src/DEdit/dedit_mainwindow.cpp" line="683"/>
         <source>File %filename successfully loaded</source>
         <translation>Datei %filename erfolgreich geladen</translation>
     </message>
@@ -607,7 +607,7 @@
         <translation>Werkzeugleiste anzeigen</translation>
     </message>
     <message>
-        <location filename="../src/DEdit/dedit_mainwindow.cpp" line="820"/>
+        <location filename="../src/DEdit/dedit_mainwindow.cpp" line="834"/>
         <source>New File</source>
         <translation>Neue Datei</translation>
     </message>
@@ -655,24 +655,24 @@ Then click on the first state of the transition, then on the second state.</sour
         <translation>Werkzeuge horizontal anordnen</translation>
     </message>
     <message>
-        <location filename="../src/DEdit/dedit_mainwindow.cpp" line="793"/>
+        <location filename="../src/DEdit/dedit_mainwindow.cpp" line="807"/>
         <source>Discard</source>
         <translation>Verwerfen</translation>
     </message>
     <message>
-        <location filename="../src/DEdit/dedit_mainwindow.cpp" line="794"/>
+        <location filename="../src/DEdit/dedit_mainwindow.cpp" line="808"/>
         <source>Don&apos;t Close</source>
         <translation>Nicht Schließen</translation>
     </message>
     <message>
-        <location filename="../src/DEdit/dedit_mainwindow.cpp" line="799"/>
+        <location filename="../src/DEdit/dedit_mainwindow.cpp" line="813"/>
         <source>Since last saving, your DEA was changed.
 Do you want to save the changes or do you want to discard them ?</source>
         <translation>Seit dem letzten Speichern wurde Ihr DEA verändert.
 Möchten Sie die Änderungen speichern oder diese verwerfen ?</translation>
     </message>
     <message>
-        <location filename="../src/DEdit/dedit_mainwindow.cpp" line="800"/>
+        <location filename="../src/DEdit/dedit_mainwindow.cpp" line="814"/>
         <source>Closing DEA Editor</source>
         <translation>DEA Editor beenden</translation>
     </message>
@@ -785,8 +785,12 @@ Möchten Sie die Änderungen speichern oder diese verwerfen ?</translation>
         <translation>Version: %version, kompiliert am: %date</translation>
     </message>
     <message>
-        <location filename="../src/dialogs/dia_about.cpp" line="113"/>
         <source>Dea Editor - Create and simmulate Finate State Machines</source>
+        <translation type="obsolete">DEA Editor - Deterministische Endliche Automaten erstellen und simulieren</translation>
+    </message>
+    <message>
+        <location filename="../src/dialogs/dia_about.cpp" line="113"/>
+        <source>Dea Editor - Create and simulate Finate State Machines</source>
         <translation>DEA Editor - Deterministische Endliche Automaten erstellen und simulieren</translation>
     </message>
     <message>
