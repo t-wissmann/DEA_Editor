@@ -93,7 +93,7 @@ public:
     
     EMode currentMode() const;
     
-    int stateIndexAt(QPoint point, bool searchFromTheEnd = FALSE);
+    int stateIndexAt(QPoint point, bool searchFromTheEnd = false);
         //  --> searchFromTheEnd = true -> begin at last position
         //  --> searchFromTheEnd = false -> begin at index 0;
     DEdit_GraphicalTransition* transitionAt(QPoint point);
@@ -164,7 +164,7 @@ public slots:
     void setLocked(bool locked);
     void recomputeMinimumSize();
     void putErrorMessage(QString msg);
-    void setDeaWasChanged(bool wasChanged = TRUE);
+    void setDeaWasChanged(bool wasChanged = true);
     // for history
     void undo();
     void redo();

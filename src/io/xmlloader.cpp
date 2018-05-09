@@ -26,14 +26,6 @@
 #include "string.h"
 
 
-#ifndef TRUE
-#define TRUE 1
-#endif
-#ifndef FALSE
-#define FALSE 0
-#endif
-
-
 
 xmlLoader::xmlLoader()
 {
@@ -64,14 +56,14 @@ bool xmlLoader::resizeBuf(unsigned int newBufSize)
         m_szBuf = (char*) malloc(sizeof(char) * m_nBufSize);
         if( m_szBuf == NULL)
         {
-            return FALSE;
+            return false;
         }
     }
     else
     {
         m_szBuf = NULL;
     }
-    return TRUE;
+    return true;
 }
 
 
@@ -82,11 +74,11 @@ bool xmlLoader::loadFileToClass(char* szPath, xmlObject* targetClass)
 {
     if(targetClass == NULL)
     {
-        return FALSE;
+        return false;
     }
     if(!loadFileToBuf(szPath))
     {
-        return FALSE;
+        return false;
     }
     m_nParsingPosition = 0; // init Position
     // seek start of information:
@@ -94,7 +86,7 @@ bool xmlLoader::loadFileToClass(char* szPath, xmlObject* targetClass)
     if(m_szBuf[m_nParsingPosition] == '\0')
     {
         // file is empty , there is nothing to do
-        return TRUE;
+        return true;
     }
     
     return parseBufToObject(targetClass);
@@ -105,7 +97,7 @@ bool xmlLoader::parseBufToObject(xmlObject* target)
 {
     if(m_szBuf == NULL || target == NULL)
     {
-        return FALSE;
+        return false;
     }
     
     return parseNextTag(target);
@@ -116,12 +108,12 @@ bool xmlLoader::parseNextTag(xmlObject* target)
 {
     if(m_szBuf == NULL || target == NULL)
     {
-        return FALSE;
+        return false;
     }
     goToNextRelevantPosition();
     seekInBufTo('<');
     m_nParsingPosition++; // if tag looks like this: "<  header>"
-    seekInBufTo(' ', FALSE);
+    seekInBufTo(' ', false);
     
     // check if it is a comment
     if(m_szBuf[m_nParsingPosition]   == '!' &&
@@ -131,7 +123,7 @@ bool xmlLoader::parseNextTag(xmlObject* target)
         if(!seekInBufTo("-->"))
         {
             // each comment MUST have an end tag
-            return FALSE;
+            return false;
         }
         // currently:   ->-<-->foo
         // so we must move to first char after end-tag of coment
@@ -139,23 +131,23 @@ bool xmlLoader::parseNextTag(xmlObject* target)
         //so:       -->->f<--oo
         // this was a comment:
         target->setName("!--");
-        return TRUE;
+        return true;
     }
     // so it is NO comment
     
     // parse tag name
     if(!parseTagName(target))
     {
-        return FALSE;
+        return false;
     }
     goToNextRelevantPosition();
     if(!parseAttributes(target))
     {
-        return FALSE;
+        return false;
     }
     if(!goToNextRelevantPosition())
     {
-        return FALSE;
+        return false;
     }
     
     if(m_szBuf[m_nParsingPosition] == '/')
@@ -163,12 +155,12 @@ bool xmlLoader::parseNextTag(xmlObject* target)
         m_nParsingPosition++; // <tag/->><-  ...
         m_nParsingPosition++;// go out of tag: <tag/>-> <-  ..
         // now the tag has finished -> we can leave successful
-        return TRUE;
+        return true;
         
     }
     if(m_szBuf[m_nParsingPosition] == '\0')
     {// tag wasn't closed in file
-        return FALSE;
+        return false;
     }
     
     if(m_szBuf[m_nParsingPosition] == '>')
@@ -183,7 +175,7 @@ bool xmlLoader::parseNextTag(xmlObject* target)
         
         if(!goToNextRelevantPosition())
         {
-            return FALSE;
+            return false;
         }
         if(m_szBuf[m_nParsingPosition] == '<' && m_szBuf[m_nParsingPosition+1] == '/')
         {// if there is an end tag
@@ -194,7 +186,7 @@ bool xmlLoader::parseNextTag(xmlObject* target)
             //go out of tag
             m_nParsingPosition++; // </tag>-> <-
             // there are no more things to do
-            return TRUE;
+            return true;
         }
         
         // CONTENT
@@ -203,7 +195,7 @@ bool xmlLoader::parseNextTag(xmlObject* target)
             // only parse content if there is no tag
             if(!parseContent(target))
             {
-                return FALSE;
+                return false;
             }
             continue;
         
@@ -216,7 +208,7 @@ bool xmlLoader::parseNextTag(xmlObject* target)
         // 2. Parse it:
         if(!parseNextTag(newTag))
         {
-            return FALSE;
+            return false;
         }
         if(!strcmp(newTag->name(), "!--"))
         {
@@ -225,7 +217,7 @@ bool xmlLoader::parseNextTag(xmlObject* target)
             //target->nDeleteObject(newTag);
         }
     }
-    return TRUE;
+    return true;
 }
 
 
@@ -233,7 +225,7 @@ bool xmlLoader::parseTagName(xmlObject* target)
 {
     if(m_szBuf == NULL || target == NULL)
     {
-        return FALSE;
+        return false;
     }
     unsigned int nameStartPosition = m_nParsingPosition;
     seekInBufTo(' ', '/', '>'); // seek to end of name
@@ -244,7 +236,7 @@ bool xmlLoader::parseTagName(xmlObject* target)
     target->setNameFromXmlCode(&(m_szBuf[nameStartPosition]));
     //restore old buf
     m_szBuf[m_nParsingPosition] = oldChar;
-    return TRUE;
+    return true;
 }
 
 
@@ -252,7 +244,7 @@ bool xmlLoader::parseAttributes(xmlObject* target)
 {
     if(m_szBuf == NULL || target == NULL)
     {
-        return FALSE;
+        return false;
     }
     
     goToNextRelevantPosition();
@@ -263,27 +255,27 @@ bool xmlLoader::parseAttributes(xmlObject* target)
     {
         if(!parseNextAttribute(target))
         {
-            return FALSE;
+            return false;
         }
         
         if(!goToNextRelevantPosition())
         {
-            return FALSE;    
+            return false;    
         }
             
     }
-    return TRUE;
+    return true;
 }
 
 bool xmlLoader::parseNextAttribute(xmlObject* target)
 {
     if(m_szBuf == NULL || target == NULL)
     {
-        return FALSE;
+        return false;
     }
     if(m_szBuf[m_nParsingPosition] == '\0' || m_szBuf[m_nParsingPosition] == '>')
     {
-        return TRUE;
+        return true;
     }
     
     long attributeid = target->nAddAttribute("", "");
@@ -291,7 +283,7 @@ bool xmlLoader::parseNextAttribute(xmlObject* target)
     
     if(attribute == NULL)
     {
-        return FALSE;
+        return false;
     }
     
     unsigned int nameposition = m_nParsingPosition; //backup start of name
@@ -322,21 +314,21 @@ bool xmlLoader::parseNextAttribute(xmlObject* target)
     
     m_nParsingPosition++; // leave ' or ": name="value"-> <-
     
-    return TRUE;
+    return true;
 }
 
 bool xmlLoader::parseContent(xmlObject* target)
 {
     if(target == NULL || m_szBuf == NULL)
     {
-        return FALSE;
+        return false;
     }
     
-    seekInBufTo(' ', FALSE); // seek to start of content
+    seekInBufTo(' ', false); // seek to start of content
     while(m_szBuf[m_nParsingPosition] == '\n') // repeat it if there is just a newline
     {
         m_nParsingPosition++;
-        seekInBufTo(' ', FALSE); // seek to start of content
+        seekInBufTo(' ', false); // seek to start of content
     }
     unsigned int contentstart = m_nParsingPosition; // backup start of content
     seekInBufTo('<'); // seek to start of next tag or end-tag
@@ -352,7 +344,7 @@ bool xmlLoader::parseContent(xmlObject* target)
     }
     m_szBuf[m_nParsingPosition] = oldChar; // restore old buf
     // done
-    return TRUE;
+    return true;
 }
 
 
@@ -360,22 +352,22 @@ bool xmlLoader::goToNextRelevantPosition()
 {
     if(m_szBuf == NULL || m_nParsingPosition > m_nBufSize || m_szBuf[m_nParsingPosition] == '\0')
     {
-        return FALSE;
+        return false;
     }
-    seekInBufTo(' ', FALSE);
+    seekInBufTo(' ', false);
     while(m_szBuf[m_nParsingPosition] == '\n' || m_szBuf[m_nParsingPosition] == '\t')
     {
         m_nParsingPosition++;
-        seekInBufTo(' ', FALSE);
+        seekInBufTo(' ', false);
     }
-    return TRUE;
+    return true;
 }
 
 bool xmlLoader::seekInBufTo(char c1, char c2, char c3, char c4, char c5, char c6, char c7, char c8, char c9)
 {
     if(m_szBuf == NULL)
     {
-        return FALSE;
+        return false;
     }
     char cc = '\0'; // current char
     for( ;m_nParsingPosition < m_nBufSize ; m_nParsingPosition++ )
@@ -384,56 +376,56 @@ bool xmlLoader::seekInBufTo(char c1, char c2, char c3, char c4, char c5, char c6
         cc = m_szBuf[m_nParsingPosition];
         if(cc == c1 ||cc == c2 ||cc == c3 ||cc == c4 ||cc == c5 ||cc == c6 ||cc == c7 ||cc == c8 ||cc == c9)
         {
-            return TRUE;
+            return true;
         }
     }
-    return FALSE;
+    return false;
 }
 
 bool xmlLoader::seekInBufTo(char  character,   bool equalOrUnequal)
 {
     if(m_szBuf == NULL)
     {
-        return FALSE;
+        return false;
     }
     for( ;m_nParsingPosition < m_nBufSize ; m_nParsingPosition++ )
     {
          // search while char at parsing position is (un)equal character
         if(m_szBuf[m_nParsingPosition] == '\0')
         {
-            return FALSE;
+            return false;
         }
-        if(equalOrUnequal)// TRUE : search for char that is equal, search for char that is unequal
+        if(equalOrUnequal)// true : search for char that is equal, search for char that is unequal
         {
             if(m_szBuf[m_nParsingPosition] == character)
             {
-                return TRUE;
+                return true;
             }
         }
         else
         {
             if(m_szBuf[m_nParsingPosition] != character)
             {
-                return TRUE;
+                return true;
             }
         }
     }
-    return FALSE;
+    return false;
 }
 
 bool xmlLoader::seekInBufTo(char* string)
 {
     if(m_szBuf == NULL)
     {
-        return FALSE;
+        return false;
     }
     if(string == NULL)
     {
-        return FALSE;
+        return false;
     }
     if(strlen(string) == 0)
     {
-        return FALSE;
+        return false;
     }
     if(strlen(string) == 1)
     {
@@ -447,12 +439,12 @@ bool xmlLoader::seekInBufTo(char* string)
         m_nParsingPosition++;
         if(m_nParsingPosition >= m_nBufSize)
         {
-            return FALSE;
+            return false;
         }
         seekInBufTo(string[0]);
     }
     
-    return TRUE;
+    return true;
 }
 
 
@@ -466,12 +458,12 @@ bool xmlLoader::loadFileToBuf(char* szPath)
     if(szPath == NULL)
     {
         resizeBuf(0);
-        return FALSE;
+        return false;
     }
     // Try to open file
     if ((pXmlFile = fopen(szPath, "r")) == NULL)
     {
-        return FALSE;
+        return false;
     }
     // get file length and resize buf to filelength
     fseek(pXmlFile, 0, SEEK_END);
@@ -480,7 +472,7 @@ bool xmlLoader::loadFileToBuf(char* szPath)
     // one byte longer to ensure that there is a \0 at the end
     if(!resizeBuf(nFileLength+1))
     {
-        return FALSE;
+        return false;
     }
     m_szBuf[m_nBufSize-1] = '\0';
     
@@ -488,10 +480,10 @@ bool xmlLoader::loadFileToBuf(char* szPath)
     if ( !fread(m_szBuf, sizeof(char), nFileLength, pXmlFile) )
     {
         fclose( pXmlFile );
-        return FALSE;
+        return false;
     }
     fclose( pXmlFile ); //now, we don't need the file anymore
-    return TRUE;
+    return true;
 }
 
 

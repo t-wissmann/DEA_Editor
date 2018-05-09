@@ -58,7 +58,7 @@ bool ConfigIO::saveConfig()
 {
     if(!createConfigDir())
     {
-        return FALSE;
+        return false;
     }
     QString fileName = getConfigDirPath() + "dea_editorrc";
     QSettings settings(fileName, QSettings::IniFormat);
@@ -146,7 +146,7 @@ bool ConfigIO::saveConfig()
         settings.endGroup();
     }
     
-    return TRUE;
+    return true;
 }
 
 
@@ -164,7 +164,7 @@ bool ConfigIO::loadConfig()
     // if config dir doesn't exists, then skip loading users config
     if(!isConfigDirExisting())
     {
-        return TRUE;
+        return true;
     }
     QString fileName = getConfigDirPath() + "dea_editorrc";
     loadConfigFromFile(fileName);
@@ -197,10 +197,10 @@ bool ConfigIO::loadConfigFromFile(QString fileName)
         m_pMainWindow->resize(settings.value("size", m_pMainWindow->size()).toSize());
         // maximized will be ignored
         m_pMainWindow->restoreState(settings.value("state").toByteArray());
-        m_pMainWindow->mnaShowMenuBar->setChecked(settings.value("menuBarVisible", TRUE).toBool());
-        m_pMainWindow->mnaShowStatusBar->setChecked(settings.value("statusBarVisible", TRUE).toBool());
-        m_pMainWindow->setStretchToolButtons(settings.value("stretchToolButtons", TRUE).toBool());
-        m_pMainWindow->setToolsAlignmentHorizontal(settings.value("alignToolButtonsHorizontal", FALSE).toBool());
+        m_pMainWindow->mnaShowMenuBar->setChecked(settings.value("menuBarVisible", true).toBool());
+        m_pMainWindow->mnaShowStatusBar->setChecked(settings.value("statusBarVisible", true).toBool());
+        m_pMainWindow->setStretchToolButtons(settings.value("stretchToolButtons", true).toBool());
+        m_pMainWindow->setToolsAlignmentHorizontal(settings.value("alignToolButtonsHorizontal", false).toBool());
         m_pMainWindow->setStretchToolButtonsButtonVisible(settings.value("showStretchToolButtons", m_pMainWindow->isStretchToolButtonsButtonVisible()).toBool());
         m_pMainWindow->setMoveUpMoveDownButtonsVisible(settings.value("showMoveUpMoveDownButtons", m_pMainWindow->areMoveUpMoveDownButtonsVisible()).toBool());
         m_pMainWindow->setFrameVisible(settings.value("drawFrame", m_pMainWindow->isFrameVisible()).toBool());
@@ -277,7 +277,7 @@ bool ConfigIO::loadConfigFromFile(QString fileName)
         settings.endGroup();
     }
     
-    return TRUE;
+    return true;
 }
 
 
@@ -285,7 +285,7 @@ bool ConfigIO::createConfigDir()
 {
     if(isConfigDirExisting())
     {
-        return TRUE;
+        return true;
     }
     QDir dir (QDir::home());
 #ifdef Q_WS_WIN

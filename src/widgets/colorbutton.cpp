@@ -27,6 +27,7 @@
 #include <QRect>
 #include <QColorDialog>
 // for drag&drop
+#include <QDrag>
 #include <QDragEnterEvent>
 #include <QDropEvent>
 #include <QMouseEvent>
@@ -39,7 +40,7 @@ ColorButton::ColorButton(QWidget *parent)
 {
     setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     connect(this, SIGNAL(clicked()), this, SLOT(getColorFromDialog()));
-    setAcceptDrops(TRUE);
+    setAcceptDrops(true);
 }
 
 

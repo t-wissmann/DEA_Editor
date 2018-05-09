@@ -12,12 +12,12 @@ int DEdit_GraphicalTransition::m_nWithItselfTransitionRadius = 20;
 
 DEdit_GraphicalTransition::DEdit_GraphicalTransition()
 {
-    m_bChangedSinceRepaint = TRUE; // at beginning, all transitions has to be repainted
-    m_bHovered = FALSE;
-    m_bSelected = FALSE;
+    m_bChangedSinceRepaint = true; // at beginning, all transitions has to be repainted
+    m_bHovered = false;
+    m_bSelected = false;
     m_pStart = NULL;
     m_pEnd = NULL;
-    m_bJustExecuted = FALSE;
+    m_bJustExecuted = false;
     m_nCurve = 0;
     m_nDragRotationOffset = 0;
     m_fExecutionProgress = -1.0;
@@ -27,10 +27,10 @@ DEdit_GraphicalTransition::DEdit_GraphicalTransition()
 DEdit_GraphicalTransition::DEdit_GraphicalTransition(DEdit_GraphicalState* start,
                               DEdit_GraphicalState* end)
 {
-    m_bChangedSinceRepaint = TRUE; // at beginning, all transitions has to be repainted
-    m_bHovered = FALSE;
-    m_bSelected = FALSE;
-    m_bJustExecuted = FALSE;
+    m_bChangedSinceRepaint = true; // at beginning, all transitions has to be repainted
+    m_bHovered = false;
+    m_bSelected = false;
+    m_bJustExecuted = false;
     m_pStart = start;
     m_pEnd = end;
     m_nCurve = 0;
@@ -71,14 +71,14 @@ bool DEdit_GraphicalTransition::isPointContained(QPoint pointToCheck)
 {
     if(!m_pStart || !m_pEnd)
     {
-        return FALSE;
+        return false;
     }
     QPoint imgPoint = pointToCheck;
     imgPoint -= m_pStart->positionToQPoint();
     imgPoint += QPoint(m_cAlphaMask.width()/2, m_cAlphaMask.height()/2);
     QRect rect = m_cAlphaMask.rect();
     //bool result = (distanceTo(pointToCheck) <= 0.1);
-    bool result = rect.contains(imgPoint, TRUE);
+    bool result = rect.contains(imgPoint, true);
     result = result && (m_cAlphaMask.pixel(imgPoint) == qRgb(255, 255, 255));
     result = result && !m_pStart->isPointContained(pointToCheck);
     result = result && !m_pEnd->isPointContained(pointToCheck);
@@ -246,12 +246,12 @@ int DEdit_GraphicalTransition::curveByDragPosition(QPoint p1, QPoint p2, QPoint 
 
 void DEdit_GraphicalTransition::setWasChanged()
 {
-    m_bChangedSinceRepaint = TRUE;
+    m_bChangedSinceRepaint = true;
 }
 
 void DEdit_GraphicalTransition::setToNotChanged()
 {
-    m_bChangedSinceRepaint = FALSE;
+    m_bChangedSinceRepaint = false;
 }
 
 bool DEdit_GraphicalTransition::wasChangedSinceRepaint() const

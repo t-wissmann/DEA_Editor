@@ -116,10 +116,10 @@ void DEdit_PropertiesWidget::initWidgets()
     frmPropeties->setFrameShadow(QFrame::Sunken);
     
     // currently disable name and description
-    txtName->setVisible(FALSE);
-    lblName->setVisible(FALSE);
-    txtDescription->setVisible(FALSE);
-    lblDescription->setVisible(FALSE);
+    txtName->setVisible(false);
+    lblName->setVisible(false);
+    txtDescription->setVisible(false);
+    lblDescription->setVisible(false);
     
 }
 
@@ -133,7 +133,7 @@ void DEdit_PropertiesWidget::initPropertyValueWidgets(DEdit_Properties_TextWidge
     widget->setTextInteractionFlags(Qt::TextSelectableByMouse | Qt::TextSelectableByKeyboard);
     widget->setFrameShape(QFrame::Box);
     widget->setFrameShadow(QFrame::Sunken);
-    widget->setWordWrap(TRUE);
+    widget->setWordWrap(true);
     */
     {  //only if DEdit_Properties_TextWidget is QTextEdit
         widget->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
@@ -141,7 +141,7 @@ void DEdit_PropertiesWidget::initPropertyValueWidgets(DEdit_Properties_TextWidge
         widget->setWordWrapMode(QTextOption::WrapAnywhere);
     }
     widget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
-    widget->setReadOnly(TRUE);
+    widget->setReadOnly(true);
     widget->setTextInteractionFlags(Qt::LinksAccessibleByMouse | Qt::LinksAccessibleByKeyboard);
     widget->setMinimumSize(QSize(30, 10));
 }

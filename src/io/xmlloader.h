@@ -52,7 +52,7 @@ private:
     
     //member about parsing buf
     bool goToNextRelevantPosition();
-    bool seekInBufTo(char  character,   bool equalOrUnequal = 1); // TRUE search for string equal,, FALSE : search for string unequal string
+    bool seekInBufTo(char  character,   bool equalOrUnequal = 1); // true search for string equal,, false : search for string unequal string
     bool seekInBufTo(char c1, char c2, char c3, char c4 = '\0',
                      char c5 = '\0', char c6 = '\0', char c7 = '\0', char c8 = '\0', char c9 = '\0');
     bool seekInBufTo(char* string);

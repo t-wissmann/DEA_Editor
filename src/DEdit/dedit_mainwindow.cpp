@@ -39,6 +39,7 @@
 #include <QUrl>
 #include <QKeyEvent>
 #include <QWhatsThis>
+#include <QMimeData>
 
 // layouts
 #include <QBoxLayout>
@@ -63,7 +64,7 @@ DEdit_MainWindow::DEdit_MainWindow()
     reloadIcons();
     parseArguments();
     // activate drag'n'drop
-    setAcceptDrops(TRUE);
+    setAcceptDrops(true);
     
     resize(800, 600);
     
@@ -86,7 +87,7 @@ void DEdit_MainWindow::initMembers()
     mnuPopupMenu = NULL; // init popup menu
     // other members
     m_szBackgroundColor = "Window";
-    m_bDataChanged = FALSE;
+    m_bDataChanged = false;
 }
 
 void DEdit_MainWindow::allocateWidgets()
@@ -99,13 +100,13 @@ void DEdit_MainWindow::allocateWidgets()
     btnRemoveItem = new QPushButton;
     btnEditItem = new QPushButton;
     btnMoveUp = new QPushButton;
-    btnMoveUp->setVisible(FALSE);
+    btnMoveUp->setVisible(false);
     btnMoveDown = new QPushButton;
-    btnMoveDown->setVisible(FALSE);
+    btnMoveDown->setVisible(false);
     itemToolButtonStretch = new QSpacerItem(1, 1);
     
     btnStretchToolButtons = new QPushButton;
-    btnStretchToolButtons->setCheckable(TRUE);
+    btnStretchToolButtons->setCheckable(true);
     
     // create statusbar
     statusBar();
@@ -148,7 +149,7 @@ void DEdit_MainWindow::createLayouts()
     // scroll area
     scrollCentral = new QScrollArea;
     scrollCentral->setWidget(wdgEditor);
-    scrollCentral->setWidgetResizable(TRUE);
+    scrollCentral->setWidgetResizable(true);
     
     //scrollCentral->setFrameStyle(QFrame::NoFrame);
     scrollCentral->setLineWidth(0);
@@ -187,17 +188,17 @@ void DEdit_MainWindow::createActions()
     mnaShowProperties = dockProperties->toggleViewAction();
     mnaShowExecDeaDock = dockExecDea->toggleViewAction();
     mnaStetchToolButtons = new QAction(pActionParent);
-    mnaStetchToolButtons->setCheckable(TRUE);
+    mnaStetchToolButtons->setCheckable(true);
     mnaAlignToolsHorizontal = new QAction(pActionParent);
-    mnaAlignToolsHorizontal->setCheckable(TRUE);
+    mnaAlignToolsHorizontal->setCheckable(true);
     // mnuSettings
     mnaShowToolBar = NULL; // will be set in createToolBars();
     mnaShowStatusBar = new QAction(pActionParent);
-    mnaShowStatusBar->setCheckable(TRUE);
-    mnaShowStatusBar->setChecked(TRUE);
+    mnaShowStatusBar->setCheckable(true);
+    mnaShowStatusBar->setChecked(true);
     mnaShowMenuBar = new QAction(pActionParent);
-    mnaShowMenuBar->setCheckable(TRUE);
-    mnaShowMenuBar->setChecked(TRUE);
+    mnaShowMenuBar->setCheckable(true);
+    mnaShowMenuBar->setChecked(true);
     mnaConfigureEditor = new QAction(pActionParent);
     // mnuHelp
     mnaWhatsThis = QWhatsThis::createAction(pActionParent);
@@ -320,16 +321,16 @@ void DEdit_MainWindow::initWidgets()
     tlbMainToolBar->setObjectName("ToolBarMain");
     
     // activate stretch per default
-    setStretchToolButtons(TRUE);
+    setStretchToolButtons(true);
     // hide stretch button in dockwidget per default
-    setStretchToolButtonsButtonVisible(FALSE);
+    setStretchToolButtonsButtonVisible(false);
     
     // windows/kde like
-        setFrameVisible(FALSE);
+        setFrameVisible(false);
         setBackgroundColor("Window");
 
     // gtk-like ;D
-        // setFrameVisible(TRUE);
+        // setFrameVisible(true);
         // setBackgroundColor("Base");
         // setCentralWidgetMargin(5);
 
@@ -487,12 +488,12 @@ void DEdit_MainWindow::resetStatusBarText(DEdit_Widget::EMode mode)
         }
         case DEdit_Widget::ModeAddTransitionSelectFrom:{
             msg = tr("Click on the first state, and keep the mouse button pressed");
-            setIsAddingTransition(TRUE);
+            setIsAddingTransition(true);
             break;
         }
         case DEdit_Widget::ModeAddTransitionSelectTo:{
             msg = tr("Now, drag transition to second state and release the mouse button");
-            setIsAddingTransition(TRUE);
+            setIsAddingTransition(true);
             break;
         }
         case DEdit_Widget::ModeLocked:{
@@ -501,7 +502,7 @@ void DEdit_MainWindow::resetStatusBarText(DEdit_Widget::EMode mode)
         }
         default: {
             msg = "";
-            setIsAddingTransition(FALSE);
+            setIsAddingTransition(false);
             break;
         }
     }
@@ -538,7 +539,7 @@ void DEdit_MainWindow::showConfigureEditorDialog()
     {
         m_diaConfigureDEditWidget = new Dia_ConfigureDEditWidget(this);
         // close this dialog, if main window gets closed
-        m_diaConfigureDEditWidget->setAttribute(Qt::WA_QuitOnClose, FALSE);
+        m_diaConfigureDEditWidget->setAttribute(Qt::WA_QuitOnClose, false);
     }
     m_diaConfigureDEditWidget->setWidgetToEdit(wdgEditor);
     m_diaConfigureDEditWidget->setMainWindowToEdit(this);
@@ -607,7 +608,7 @@ QString DEdit_MainWindow::saveToFile(QString filename) // returns errormsg
     {
         statusBar()->showMessage(tr("File %filename successfully written").replace("%filename", filename), 3000);
         // file was saved -> data wasn't changed yet
-        setDataHasChanged(FALSE);
+        setDataHasChanged(false);
     }
     
     return szResult;
@@ -653,7 +654,7 @@ void DEdit_MainWindow::openFile()
         // then we have a new filename
         m_szFilename = filename;
     }
-    setDataHasChanged(FALSE);
+    setDataHasChanged(false);
     resetWindowTitle();
     
 }
@@ -682,7 +683,7 @@ QString DEdit_MainWindow::loadFromFile(QString filename) // returns errormsg
         // print success to status bar :)
         statusBar()->showMessage(tr("File %filename successfully loaded").replace("%filename", filename), 3000);
         // file was loaded -> so it wasn't changed yet
-        setDataHasChanged(FALSE);
+        setDataHasChanged(false);
     }
     return szResult;
 }
@@ -816,15 +817,15 @@ bool DEdit_MainWindow::userReallyWantsToCloseFile()
         questionBox.exec();
         if(questionBox.clickedButton() == saveButton) {
                 saveFile();
-                return TRUE;
+                return true;
         } else if(questionBox.clickedButton() == discardButton){
-                return TRUE;
+                return true;
         } else if(questionBox.clickedButton() == rejectButton){
-            return FALSE;
+            return false;
         }
     }
     // else
-    return TRUE;
+    return true;
 }
 
 

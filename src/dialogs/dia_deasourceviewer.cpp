@@ -17,7 +17,7 @@ Dia_DeaSourceViewer::Dia_DeaSourceViewer(QWidget* parent)
 {
     m_pDeaToView = NULL;
     // close this dialog, if main window gets closed
-    setAttribute(Qt::WA_QuitOnClose, FALSE);
+    setAttribute(Qt::WA_QuitOnClose, false);
     createGui();
     retranslateUi();
     reloadIcons();
@@ -36,7 +36,7 @@ void Dia_DeaSourceViewer::createGui()
     btnRefresh = new QPushButton;
     btnClose = new QPushButton;
     txtSource = new QTextEdit;
-    txtSource->setReadOnly(TRUE);
+    txtSource->setReadOnly(true);
     txtSource->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     txtSource->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
     txtSource->setFont(QFont("mono"));

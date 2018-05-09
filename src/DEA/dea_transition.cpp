@@ -86,7 +86,7 @@ bool DEA_Transition::hasInputSymbol(char symbol)
     {
         if(m_szInputSymbols[i] == symbol)
         {
-            // return TRUE if symbol was found
+            // return true if symbol was found
             return 1;
         }
         if(m_szInputSymbols[i] == '\0')
@@ -95,7 +95,7 @@ bool DEA_Transition::hasInputSymbol(char symbol)
             break;
         }
     }
-    // return FALSE: symbol couldn't be found
+    // return false: symbol couldn't be found
     return 0;
 }
 

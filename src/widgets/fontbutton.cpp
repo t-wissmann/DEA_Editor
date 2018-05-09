@@ -21,7 +21,7 @@ FontButton::~FontButton()
 
 void FontButton::selectFontFromDialog()
 {
-    bool bAccepted = FALSE; // if user clicked OK in font dialog
+    bool bAccepted = false; // if user clicked OK in font dialog
     QFont newFont = QFontDialog::getFont(&bAccepted, font(), this);
     if(bAccepted)
     {

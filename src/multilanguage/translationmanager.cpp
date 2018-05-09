@@ -10,7 +10,7 @@
 TranslationManager::TranslationManager()
 {
     refreshTranslationList();
-    m_bUseSystemLanguage = TRUE;
+    m_bUseSystemLanguage = true;
     m_szCurrentLanguage = systemLanguage();
 }
 
@@ -53,7 +53,7 @@ QString TranslationManager::systemLanguage()
 void TranslationManager::translateToSystemLanguage()
 {
     translateTo(systemLanguage());
-    m_bUseSystemLanguage = TRUE;
+    m_bUseSystemLanguage = true;
 }
 
 void TranslationManager::translateTo(QString szLanguage)
@@ -67,7 +67,7 @@ void TranslationManager::translateTo(QString szLanguage)
     
     TranslateableObject::retranslateAllObjects();
     // reset  members
-    m_bUseSystemLanguage = FALSE;
+    m_bUseSystemLanguage = false;
     m_szCurrentLanguage = szLanguage;
 }
 

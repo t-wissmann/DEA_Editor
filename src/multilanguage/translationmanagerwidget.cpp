@@ -65,7 +65,7 @@ void TranslationManagerWidget::createGui()
     connect(m_radUseCustomLanguage, SIGNAL(toggled(bool)), m_lblLanguage, SLOT(setEnabled(bool)));
     connect(m_radUseCustomLanguage, SIGNAL(toggled(bool)), m_listTranslations, SLOT(setEnabled(bool)));
     // init widgets
-    m_radUseCustomLanguage->setChecked(TRUE);
+    m_radUseCustomLanguage->setChecked(true);
 }
 
 void TranslationManagerWidget::retranslateUi()
@@ -87,11 +87,11 @@ void TranslationManagerWidget::setTranslationManager(TranslationManager* pManage
     
     if(m_pTranslationManager->useSystemLanguage())
     {
-        m_radUseSystemLanguage->setChecked(TRUE);
+        m_radUseSystemLanguage->setChecked(true);
     }
     else
     {
-        m_radUseCustomLanguage->setChecked(TRUE);
+        m_radUseCustomLanguage->setChecked(true);
         m_listTranslations->setCurrentRow(
                         indexOfLanguage(
                      m_pTranslationManager->currentLanguage()));
@@ -122,7 +122,7 @@ void TranslationManagerWidget::applyChanges()
 
 void TranslationManagerWidget::restoreDefaults()
 {
-    m_radUseSystemLanguage->setChecked(TRUE);
+    m_radUseSystemLanguage->setChecked(true);
 }
 
 

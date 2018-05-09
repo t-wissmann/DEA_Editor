@@ -18,7 +18,7 @@ Dia_About::Dia_About(QWidget* parent)
     : QDialog(parent)
 {
     // close this dialog, if main window gets closed
-    setAttribute(Qt::WA_QuitOnClose, FALSE);
+    setAttribute(Qt::WA_QuitOnClose, false);
     allocateWidgets();
     createLayouts();
     connectSlots();
@@ -52,14 +52,14 @@ void Dia_About::allocateWidgets()
     lblTabAuthor->setIndent(3);
     lblTabAbout->setTextInteractionFlags(Qt::TextSelectableByMouse);
     lblTabAbout->setIndent(3);
-    lblTabAbout->setWordWrap(TRUE);
+    lblTabAbout->setWordWrap(true);
     lblTabAbout->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
     lblTabLicense->setTextInteractionFlags(Qt::TextSelectableByMouse);
     lblTabLicense->setIndent(3);
     // init font for labels
     QFont font = lblHeader->font();
     font.setPointSize(font.pointSize() + 1);
-    font.setBold(TRUE);
+    font.setBold(true);
     lblHeader->setFont(font);
     font = lblVersion->font();
     font.setPointSize(font.pointSize() - 1);

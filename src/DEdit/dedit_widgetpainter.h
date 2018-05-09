@@ -37,7 +37,7 @@ public:
     
     void paintTransition(QPainter* painter, DEdit_GraphicalTransition* transition);
     void repaintTransitionPixmap(DEdit_GraphicalTransition* transition);
-    void paintTransition(QPainter* painter, QLineF line, int curve, double execPosition, bool isTransitionPreview = FALSE);
+    void paintTransition(QPainter* painter, QLineF line, int curve, double execPosition, bool isTransitionPreview = false);
     void paintTransitionLabel(QPainter* painter, DEdit_GraphicalTransition* transition);
     void recomputeTransitionLabelArea(DEdit_GraphicalTransition* transition);
     
@@ -53,12 +53,12 @@ public:
     void recreateStartStateIndicator();
     
     static QPoint middlePointOfCurve(QPoint p1, QPoint p2, int curve);
-    static QPixmap recreateStateTemplate(DEdit_ColorTripple colors, int diameter, bool invertedGradient = FALSE);
-    static QPixmap recreateStateTemplate(QColor color, int diameter, bool invertedGradient = FALSE);
+    static QPixmap recreateStateTemplate(DEdit_ColorTripple colors, int diameter, bool invertedGradient = false);
+    static QPixmap recreateStateTemplate(QColor color, int diameter, bool invertedGradient = false);
     
     // general paint functions
     static void drawTangoCircle(QPainter* painter, int centerx, int centery, int radius,
-            QColor background, QColor innerborder, QColor outerborder, bool shadow, bool invertedGradient = FALSE);
+            QColor background, QColor innerborder, QColor outerborder, bool shadow, bool invertedGradient = false);
 private:
     // members
     DEdit_Widget* m_pWidget;

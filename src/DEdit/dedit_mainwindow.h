@@ -94,7 +94,7 @@ public slots:
     void setStretchToolButtons(bool on);
     void setStretchToolButtonsButtonVisible(bool visible);
     void setToolsAlignmentHorizontal(bool horizontal);
-    void setDataHasChanged(bool bChanged = TRUE);
+    void setDataHasChanged(bool bChanged = true);
 protected:
     virtual void dragEnterEvent(QDragEnterEvent* event);
     virtual void dropEvent(QDropEvent* event);

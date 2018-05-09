@@ -4,6 +4,8 @@
 # And edited by twi on So Jul 13 11:48:00 2008
 ######################################################################
 
+QT += widgets
+
 TEMPLATE = app
 DESTDIR = bin/
 TARGET = dea_editor

@@ -20,7 +20,7 @@ public:
     void setEditorWidget(DEdit_Widget* widget);
     DEdit_Widget* editorWidget();
     
-    void clear(bool createNewItem = TRUE);
+    void clear(bool createNewItem = true);
     
     void undo();
     void redo();

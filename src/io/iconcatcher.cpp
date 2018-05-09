@@ -4,11 +4,11 @@
 #include <QPixmap>
 
 QString IconCatcher::m_szIconDir = "../pic/";
-bool IconCatcher::m_bWasInitialized = FALSE;
+bool IconCatcher::m_bWasInitialized = false;
 
 void IconCatcher::init()
 {
-    m_bWasInitialized = TRUE;
+    m_bWasInitialized = true;
     m_szIconDir = QApplication::applicationDirPath() + "/../pic/";
 }
 

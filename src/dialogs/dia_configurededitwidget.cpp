@@ -47,8 +47,8 @@ Dia_ConfigureDEditWidget::Dia_ConfigureDEditWidget(QWidget* parent)
     // init widgets
     lstCategory->setCurrentRow(0);
     splitterCentral->setSizes(QList<int>() << 180 << (splitterCentral->width() - 180));
-    chkAlignToGrid->setChecked(TRUE); // force that signal is emitted
-    chkAlignToGrid->setChecked(FALSE);
+    chkAlignToGrid->setChecked(true); // force that signal is emitted
+    chkAlignToGrid->setChecked(false);
 }
 
 Dia_ConfigureDEditWidget::~Dia_ConfigureDEditWidget()
@@ -109,7 +109,7 @@ void Dia_ConfigureDEditWidget::allocateWidgets()
     lstCategory->setMinimumWidth(140);
     lstCategory->setMaximumWidth(140);
     lstCategory->setSpacing(0);
-    lstCategory->setAlternatingRowColors(TRUE);
+    lstCategory->setAlternatingRowColors(true);
     
     QListWidgetItem *currentItem = new QListWidgetItem(lstCategory);
     currentItem->setText("behavior");
@@ -133,7 +133,7 @@ void Dia_ConfigureDEditWidget::allocateWidgets()
     currentItem->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
     
     grpCategory = new QGroupBox;
-    grpCategory->setFlat(TRUE);
+    grpCategory->setFlat(true);
 }
 
 void Dia_ConfigureDEditWidget::createLayouts()
@@ -206,7 +206,7 @@ void Dia_ConfigureDEditWidget::createLayouts()
     
     // new version:
     // chkAutoEditNewTransitions cant be changed->must always be checked
-    chkAutoEditNewTransitions->setVisible(FALSE);
+    chkAutoEditNewTransitions->setVisible(false);
     
     setLayout(layoutParent);
 }
@@ -396,10 +396,10 @@ void Dia_ConfigureDEditWidget::setCurrentCategoryName(QString name)
 void Dia_ConfigureDEditWidget::restoreDefaults()
 {
     
-    chkAutoEditNewStates->setChecked(FALSE);
-    chkAutoEditNewTransitions->setChecked(TRUE);
+    chkAutoEditNewStates->setChecked(false);
+    chkAutoEditNewTransitions->setChecked(true);
     
-    chkAlignToGrid->setChecked(FALSE);
+    chkAlignToGrid->setChecked(false);
     spinGridResolution->setValue(20);
     
     spinStateDiameter->setValue(100);

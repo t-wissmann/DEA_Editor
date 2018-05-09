@@ -22,7 +22,7 @@ AppearanceEditWidget::AppearanceEditWidget(QWidget* parent)
     createLayouts();
     connectSlots();
     retranslateUi();
-    chkAdvancedColors->setChecked(TRUE);
+    chkAdvancedColors->setChecked(true);
 }
 
 AppearanceEditWidget::~AppearanceEditWidget()
@@ -179,7 +179,7 @@ void AppearanceEditWidget::initColorsFromAppearance(DEdit_Appearance* app)
     wdgStateResultAccepted->initColorsFromColorTripple(&app->m_cStateResultAccepted);
     btnStateLabelColor->setColor(app->m_cStateLabelColor);
     btnStateLabelFont->setFont(app->m_cStateLabelFont);
-    chkAdvancedColors->setChecked(TRUE);
+    chkAdvancedColors->setChecked(true);
     
     // transitions
     btnTransitionNormal->setColor(app->m_cTransitionNormal);

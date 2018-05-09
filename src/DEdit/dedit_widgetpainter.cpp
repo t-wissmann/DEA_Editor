@@ -30,7 +30,7 @@ DEdit_WidgetPainter::DEdit_WidgetPainter(DEdit_Widget* widget)
 {
     m_pWidget = widget;
     // init attributes
-    m_bPaintRichText = TRUE;
+    m_bPaintRichText = true;
     
     // recreate default color theme
     DEdit_Appearance::createTangoDefault(&m_cAppearance);
@@ -115,7 +115,7 @@ void DEdit_WidgetPainter::paint()
                 newLine.setLength(newLine.length() - stateRadius);
             }
             imagePainter.setPen(m_cTransitionPen);
-            paintTransition(&imagePainter, newLine, 0, -1.0, TRUE);
+            paintTransition(&imagePainter, newLine, 0, -1.0, true);
         }
         if(m_pWidget->m_bAboutToDrop) // if there is an state, that will be dropped so
         {
@@ -434,7 +434,7 @@ void DEdit_WidgetPainter::repaintTransitionPixmap(DEdit_GraphicalTransition* tra
     }
     
     // paint line and label background to painter
-    paintTransition(&painter, line, transition->m_nCurve, transition->m_fExecutionProgress, FALSE);
+    paintTransition(&painter, line, transition->m_nCurve, transition->m_fExecutionProgress, false);
     // reset Label Area
     QRect lblArea = transition->m_cLabelArea;
     lblArea.moveTo(QPoint(offsetX, offsetY)
@@ -464,7 +464,7 @@ void DEdit_WidgetPainter::repaintTransitionPixmap(DEdit_GraphicalTransition* tra
     // paint line and label background to alpha
     alphaPainter.drawRect(lblArea);
     alphaPainter.setBrush(Qt::NoBrush);
-    paintTransition(&alphaPainter, line, transition->m_nCurve, transition->m_fExecutionProgress, FALSE);
+    paintTransition(&alphaPainter, line, transition->m_nCurve, transition->m_fExecutionProgress, false);
     
     alphaPainter.end();
     transition->m_cAlphaMask = alphaMask;
@@ -676,11 +676,11 @@ void DEdit_WidgetPainter::recreateAllStateTemplates()
     int diameter = DEdit_GraphicalState::m_nDiameter;
     m_cStateNormalTemplate = recreateStateTemplate(m_cAppearance.m_cStateNormal, diameter);
     recreateStateHoveredTemplate();
-    m_cStateSelectedTemplate = recreateStateTemplate(m_cAppearance.m_cStateSelected, diameter, TRUE);
+    m_cStateSelectedTemplate = recreateStateTemplate(m_cAppearance.m_cStateSelected, diameter, true);
     m_cStateDraggedTemplate = m_cStateSelectedTemplate;
-    m_cStateCurrentlyExecutedTemplate = recreateStateTemplate(m_cAppearance.m_cStateExecuted, diameter, TRUE);
-    m_cStateResultDeniedTemplate = recreateStateTemplate(m_cAppearance.m_cStateResultDenied, diameter, TRUE);
-    m_cStateResultAcceptedTemplate = recreateStateTemplate(m_cAppearance.m_cStateResultAccepted, diameter, TRUE);
+    m_cStateCurrentlyExecutedTemplate = recreateStateTemplate(m_cAppearance.m_cStateExecuted, diameter, true);
+    m_cStateResultDeniedTemplate = recreateStateTemplate(m_cAppearance.m_cStateResultDenied, diameter, true);
+    m_cStateResultAcceptedTemplate = recreateStateTemplate(m_cAppearance.m_cStateResultAccepted, diameter, true);
 }
 
 void DEdit_WidgetPainter::recreateStateHoveredTemplate()
@@ -803,7 +803,7 @@ QPixmap DEdit_WidgetPainter::recreateStateTemplate(DEdit_ColorTripple colors, in
     
     // init painter
     QPainter pixPainter(&resultPixmap);
-    pixPainter.setRenderHint(QPainter::Antialiasing, TRUE);
+    pixPainter.setRenderHint(QPainter::Antialiasing, true);
     // start paint
     int half_pix_width = pix_width/2; // half of the width
     drawTangoCircle(&pixPainter, half_pix_width, half_pix_width, circle_radius,

@@ -3,6 +3,7 @@
 #include <QMouseEvent>
 #include <QApplication>
 #include <QMimeData>
+#include <QDrag>
 
 CommandButtonDND::CommandButtonDND()
     : QPushButton()
@@ -72,7 +73,7 @@ QPixmap CommandButtonDND::DNDPixmap() const
 void CommandButtonDND::startDrag()
 {
     QMimeData *mimeData = new QMimeData;
-    mimeData->setData(m_szMimeType, m_szCommand.toAscii());
+    mimeData->setData(m_szMimeType, m_szCommand.toUtf8());
     QDrag* drag = new QDrag(this);
     /*
     // new: allways don't use drag n drop pixmap

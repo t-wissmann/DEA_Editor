@@ -13,7 +13,7 @@ DEdit_History::DEdit_History(DEdit_Widget* pEditorWidget)
 DEdit_History::~DEdit_History()
 {
     clear(
-          FALSE // important: dont create a new history item !!!
+          false // important: dont create a new history item !!!
          );
 }
 

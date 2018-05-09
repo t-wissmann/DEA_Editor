@@ -91,7 +91,7 @@ void DEdit_EditTransitionDia::createLayouts()
     layoutCurve->addWidget(btnResetCurve);
     // new version:
     // curve can be configured by dragging:
-    bool bCurveEditVisible = FALSE;
+    bool bCurveEditVisible = false;
     lblCurve->setVisible(bCurveEditVisible);
     slidCurve->setVisible(bCurveEditVisible);
     spinCurve->setVisible(bCurveEditVisible);
@@ -159,7 +159,7 @@ bool DEdit_EditTransitionDia::applyChanges()
 {
     if(!m_pTransitionToEdit)
     {
-        return FALSE;
+        return false;
     }
     QString symbols = txtSymbols->text();
     QString newSymbols = "";
@@ -233,7 +233,7 @@ bool DEdit_EditTransitionDia::applyChanges()
                                QMessageBox::Ok, this);
             msgbox.setDetailedText(msg);
             msgbox.exec();
-            return FALSE;
+            return false;
         }
     }
     
@@ -244,7 +244,7 @@ bool DEdit_EditTransitionDia::applyChanges()
     {
         parentWidget()->update();
     }
-    return TRUE;
+    return true;
 }
 
 

@@ -27,6 +27,7 @@
 #include <QDropEvent>
 #include <QDragMoveEvent>
 #include <QContextMenuEvent>
+#include <QMimeData>
 
 DEdit_Widget::DEdit_Widget() :
   QWidget(),
@@ -34,12 +35,12 @@ DEdit_Widget::DEdit_Widget() :
 {
     // init some members
     m_pDea = NULL;
-    m_bDeaWasChanged = FALSE;
+    m_bDeaWasChanged = false;
     m_eMode = ModeNormal;
     m_nGridResolution = 0; // disable grid per default
-    m_bAutoEditNewStates = FALSE; // disable auto edit per default
-    m_bAutoEditNewTransitions = TRUE;
-    m_bAllowNonDeterministic = FALSE;
+    m_bAutoEditNewStates = false; // disable auto edit per default
+    m_bAutoEditNewTransitions = true;
+    m_bAllowNonDeterministic = false;
     // events that call save of history
     m_nHistorySaveReasonFlags = m_nDefaultHistorySaveReasonFlags;
     
@@ -47,7 +48,7 @@ DEdit_Widget::DEdit_Widget() :
     m_pDraggedState = NULL;
     m_pHoveredState = NULL;
     m_nSelectedStateIndex = -1;
-    m_bAboutToDrop = FALSE;
+    m_bAboutToDrop = false;
     m_pStartState = NULL;
     // for transitions
     m_pHoveredTransition = NULL;
@@ -64,11 +65,11 @@ DEdit_Widget::DEdit_Widget() :
     setFocusPolicy(Qt::StrongFocus);
     
     // activate mouse tracking to activate hover effect
-    setMouseTracking(TRUE);
+    setMouseTracking(true);
     // activate focus to activate keyPressEvent
     setFocusPolicy(Qt::ClickFocus);
     // activate drops
-    setAcceptDrops(TRUE);
+    setAcceptDrops(true);
     // activate context menu
     setContextMenuPolicy(Qt::DefaultContextMenu);
     createContextMenu();
@@ -100,9 +101,9 @@ void DEdit_Widget::createContextMenu()
     m_mnaResetTransitionCurve = new QAction(NULL);
     // states
     m_mnaSetFinalState = new QAction(NULL);
-    m_mnaSetFinalState->setCheckable(TRUE);
+    m_mnaSetFinalState->setCheckable(true);
     m_mnaSetStartState = new QAction(NULL);
-    m_mnaSetStartState->setCheckable(TRUE);
+    m_mnaSetStartState->setCheckable(true);
     // for state
     m_mnuContextMenuState->addAction(m_mnaSetStartState);
     m_mnuContextMenuState->addAction(m_mnaSetFinalState);
@@ -206,7 +207,7 @@ void DEdit_Widget::addState(QPoint atPosition)
     // find first free name
     while(findStateByName(QString::number(++number)));
     
-    DEA_State* newState = m_pDea->addState(QString::number(number).toAscii().data());
+    DEA_State* newState = m_pDea->addState(QString::number(number).toUtf8().data());
     DEdit_GraphicalState graphicalState(newState);
     graphicalState.m_pWidgetPainter = &m_cWidgetPainter;
     graphicalState.move(atPosition.x(), atPosition.y());
@@ -326,11 +327,11 @@ void DEdit_Widget::mouseMoveEvent(QMouseEvent* event)
     {
         return;
     }
-    bool hasToRepaint = FALSE;
+    bool hasToRepaint = false;
     
     if(handleStateDrag(event)) // dragging of state is in an own function
     {
-        hasToRepaint = TRUE;
+        hasToRepaint = true;
     }
     switch(m_eMode)
     {
@@ -350,7 +351,7 @@ void DEdit_Widget::mouseMoveEvent(QMouseEvent* event)
                 //qDebug("curve = %d;  offset = %d", curve, m_pDraggedTransition->m_nDragRotationOffset);
                 m_pDraggedTransition->setWasChanged();
             }
-            hasToRepaint = TRUE;
+            hasToRepaint = true;
             break;
         }
         case ModeAddTransitionSelectFrom:
@@ -366,7 +367,7 @@ void DEdit_Widget::mouseMoveEvent(QMouseEvent* event)
                 p2 = QPoint(m_pHoveredState->m_nX, m_pHoveredState->m_nY);
             }
             m_cNewTransitionLine = QLine(m_cNewTransitionLine.p1(), p2);
-            hasToRepaint = TRUE; // request for repaint
+            hasToRepaint = true; // request for repaint
 
             break;
         }
@@ -387,16 +388,16 @@ void DEdit_Widget::mouseMoveEvent(QMouseEvent* event)
                 {
                     if(m_pHoveredTransition)
                     {
-                        m_pHoveredTransition->m_bHovered = FALSE;
+                        m_pHoveredTransition->m_bHovered = false;
                         m_pHoveredTransition->setWasChanged();
                     }
                     if(transition)
                     {
-                        transition->m_bHovered = TRUE;
+                        transition->m_bHovered = true;
                         transition->setWasChanged();
                     }
                     m_pHoveredTransition = transition;
-                    hasToRepaint = TRUE;
+                    hasToRepaint = true;
                 }
             }
             break;
@@ -413,9 +414,9 @@ bool DEdit_Widget::handleStateDrag(QMouseEvent* event)
 {
     if(!event)
     {
-        return FALSE;
+        return false;
     }
-    bool hasToRepaint = FALSE;
+    bool hasToRepaint = false;
     // if is in dragged mode
     if(m_pDraggedState)
     {
@@ -438,7 +439,7 @@ bool DEdit_Widget::handleStateDrag(QMouseEvent* event)
         
         m_pDraggedState->move(newX, newY);
         m_pDraggedState->setWasChanged();
-        hasToRepaint = TRUE;
+        hasToRepaint = true;
         recomputeMinimumSize();
     }
     else
@@ -447,7 +448,7 @@ bool DEdit_Widget::handleStateDrag(QMouseEvent* event)
         m_pHoveredState = NULL;
         // only check if a state is hovered
         // if we aren't in drag mode at the moment
-        bool currentStateIsHovered = FALSE;
+        bool currentStateIsHovered = false;
         bool newHoverValue;
         DEdit_GraphicalState* currentState;
          // start with last item
@@ -457,7 +458,7 @@ bool DEdit_Widget::handleStateDrag(QMouseEvent* event)
             // if hovered item was found
             if(currentStateIsHovered)
             {// then deactivate all other items
-                newHoverValue = FALSE;
+                newHoverValue = false;
             }
             else // else check, if current item is hovered item
             {
@@ -470,7 +471,7 @@ bool DEdit_Widget::handleStateDrag(QMouseEvent* event)
                 // if isHovered has to be changed
                 currentState->isHovered = newHoverValue;
                 // then repaint
-                hasToRepaint = TRUE;
+                hasToRepaint = true;
             }
             if(newHoverValue)
             {
@@ -508,7 +509,7 @@ void DEdit_Widget::mousePressEvent(QMouseEvent* event)
         {
             // then hovered item has to be dragged
             // activate item
-            currentState->isSelected = TRUE;
+            currentState->isSelected = true;
             currentState->setWasChanged();
             m_nSelectedStateIndex = i;
             if(m_eMode == ModeNormal)
@@ -517,7 +518,7 @@ void DEdit_Widget::mousePressEvent(QMouseEvent* event)
                 // and only if left mousebutton is pressed
                 if(event->button() == Qt::LeftButton)
                 {
-                    currentState->isDragged = TRUE;
+                    currentState->isDragged = true;
                     currentState->m_nDragOffsetX = event->pos().x() - currentState->m_nX;
                     currentState->m_nDragOffsetY = event->pos().y() - currentState->m_nY;
                     // item was found, we don't need to search anymore
@@ -543,14 +544,14 @@ void DEdit_Widget::mousePressEvent(QMouseEvent* event)
         else
         {
             // deselect others 
-            currentState->isSelected = FALSE;
+            currentState->isSelected = false;
         }
     }
     // unselect all other items
     while(i > 0)
     {
         i--;
-        m_StateList[i].isSelected = FALSE;
+        m_StateList[i].isSelected = false;
     }
     
     
@@ -568,7 +569,7 @@ void DEdit_Widget::mousePressEvent(QMouseEvent* event)
         // if current item is hovered
         if(currentTransition->m_bHovered)
         {
-            currentTransition->m_bSelected = TRUE;
+            currentTransition->m_bSelected = true;
             currentTransition->setWasChanged();
             m_pSelectedTransition = currentTransition;
             m_pDraggedTransition = currentTransition;
@@ -589,7 +590,7 @@ void DEdit_Widget::mousePressEvent(QMouseEvent* event)
         }
         else
         {
-            currentTransition->m_bSelected = FALSE;
+            currentTransition->m_bSelected = false;
         }
     }
     
@@ -617,7 +618,7 @@ void DEdit_Widget::mouseReleaseEvent(QMouseEvent*)
     if(m_pDraggedState)
     {
         // set isDragged Attribute to false
-        m_pDraggedState->isDragged = FALSE;
+        m_pDraggedState->isDragged = false;
         // m_pDraggedState now isn't dragged anymore
         m_pDraggedState = NULL;
         setCurrentMode(ModeNormal);
@@ -750,7 +751,7 @@ void DEdit_Widget::dragEnterEvent(QDragEnterEvent* event)
 //#ifdef Q_WS_WIN
         // only needed for drag'n'drop pixmap
         // replacement
-        m_bAboutToDrop = TRUE;
+        m_bAboutToDrop = true;
 //#endif
     }
 }
@@ -773,7 +774,7 @@ void DEdit_Widget::dragLeaveEvent (QDragLeaveEvent* event )
 {
     if(m_bAboutToDrop)
     {
-        m_bAboutToDrop = FALSE;
+        m_bAboutToDrop = false;
         update();
     }
 }
@@ -800,7 +801,7 @@ void DEdit_Widget::dropEvent(QDropEvent* event)
     {
         addState(alignPointToGrid(event->pos()));
     }
-    m_bAboutToDrop = FALSE;
+    m_bAboutToDrop = false;
 }
 
 
@@ -842,17 +843,17 @@ void DEdit_Widget::setStateSelected(int index)
     // deselect old selection
     if(m_nSelectedStateIndex >= 0 && m_nSelectedStateIndex < m_StateList.size())
     {
-        m_StateList[m_nSelectedStateIndex].isSelected = FALSE;
+        m_StateList[m_nSelectedStateIndex].isSelected = false;
     }
     // and also deselect transitions
     if(m_pSelectedTransition)
     {
-        m_pSelectedTransition->m_bSelected = FALSE;
+        m_pSelectedTransition->m_bSelected = false;
     }
     // select new item
     if(index >= 0 && index < m_StateList.size())
     {
-        m_StateList[index].isSelected = TRUE;
+        m_StateList[index].isSelected = true;
     }
     // set m_nSelectedStateIndex to new selected index
     m_nSelectedStateIndex = index;
@@ -865,20 +866,20 @@ void DEdit_Widget::setTransitionSelected(int index)
     // deselect old selection
     if(m_pSelectedTransition)
     {
-        m_pSelectedTransition->m_bSelected = FALSE;
+        m_pSelectedTransition->m_bSelected = false;
         m_pSelectedTransition->setWasChanged();
         m_pSelectedTransition = NULL;
     }
     // and also deselect states
     if(m_nSelectedStateIndex >= 0 && m_nSelectedStateIndex < m_StateList.size())
     {
-        m_StateList[m_nSelectedStateIndex].isSelected = FALSE;
+        m_StateList[m_nSelectedStateIndex].isSelected = false;
     }
     m_nSelectedStateIndex = -1;
     // select new transition
     if(index >= 0 && index < m_TransitionList.size())
     {
-        m_TransitionList[index].m_bSelected = TRUE;
+        m_TransitionList[index].m_bSelected = true;
         m_pSelectedTransition = &m_TransitionList[index];
         m_pSelectedTransition->setWasChanged();
     }
@@ -1411,8 +1412,8 @@ void DEdit_Widget::writeGraphicalStatesToFile(xmlObject* stateList)
         // write attributes to statelist
         object = stateList->cAddObject("stateposition");
         object->cAddAttribute("name", szName);
-        object->cAddAttribute("x", QString::number(x).toAscii().data());
-        object->cAddAttribute("y", QString::number(y).toAscii().data());
+        object->cAddAttribute("x", QString::number(x).toUtf8().data());
+        object->cAddAttribute("y", QString::number(y).toUtf8().data());
     }
 }
 
@@ -1447,7 +1448,7 @@ void DEdit_Widget::writeGraphicalTransitionsToFile(xmlObject* transitionList)
         object->cAddAttribute("start", startname);
         object->cAddAttribute("end",   endname);
         object->cAddAttribute("symbol", symbols.toLocal8Bit().data());
-        object->cAddAttribute("curve", QString::number(curve).toAscii().data());
+        object->cAddAttribute("curve", QString::number(curve).toUtf8().data());
     }
 }
 
@@ -1457,42 +1458,42 @@ bool DEdit_Widget::createDeaFromFile(xmlObject* file)
     {
         m_szLastSyntaxError = tr("Editor currently is locked, please unlock first");
         // return if widget was locked
-        return FALSE;
+        return false;
     }
     clearCompleteDEA();
     if(!m_pDea)
     {
         m_szLastSyntaxError = "Internal Error: m_pDea = NULL";
-        return FALSE;
+        return false;
     }
     /// at first: init m_pDea
     if(!m_pDea->initFromFile(file))
     {
         m_szLastSyntaxError = "Error in state or transition list";
-        return FALSE;
+        return false;
     }
     
     xmlObject* graphicalStates = file->cGetObjectByName("graphicalstates");
     if(!graphicalStates)
     {
         m_szLastSyntaxError = "Arbitrary tag <graphicalstates> is missing in <automat>";
-        return FALSE;
+        return false;
     }
     if(!createGraphicalStatesFromFile(graphicalStates))
     {
-        return FALSE;
+        return false;
     }
     xmlObject* graphicalTransitions = file->cGetObjectByName("graphicaltransitions");
     if(!createGraphicalTransitionsFromFile(graphicalTransitions))
     {
-        return FALSE;
+        return false;
     }
     // state position has changed
     // so recompute minimum size, so that we can see all states
     recomputeMinimumSize();
     emitDeaWasChanged(); // dea just has been edited
     update();
-    return TRUE;
+    return true;
 }
 
 
@@ -1501,11 +1502,11 @@ bool DEdit_Widget::createGraphicalStatesFromFile(xmlObject* stateList)
     if(isLocked())
     {
         // return if widget was locked
-        return FALSE;
+        return false;
     }
     if(!stateList || !m_pDea)
     {
-        return FALSE;
+        return false;
     }
     xmlObject* stateObject;
     xmlAttribute* attribute;
@@ -1525,7 +1526,7 @@ bool DEdit_Widget::createGraphicalStatesFromFile(xmlObject* stateList)
         if(!attribute)
         {
             m_szLastSyntaxError = "in <stateposition>: attribute name=\"\" is missing";
-            return FALSE;
+            return false;
         }
         szStateName = attribute->value();
         pState = m_pDea->findState(szStateName);
@@ -1533,21 +1534,21 @@ bool DEdit_Widget::createGraphicalStatesFromFile(xmlObject* stateList)
         {
             m_szLastSyntaxError = "<stateposition> has name " + QString(szStateName) + "\n";
             m_szLastSyntaxError += "but there is no such state in <zustaende>";
-            return FALSE;
+            return false;
         }
         /// read attribute positon: x and y
         attribute = stateObject->cGetAttributeByName("x");
         if(!attribute)
         {
             m_szLastSyntaxError = "in <stateposition>: attribute x=\"\" is missing";
-            return FALSE;
+            return false;
         }
         x = attribute->nValueToInt();
         attribute = stateObject->cGetAttributeByName("y");
         if(!attribute)
         {
             m_szLastSyntaxError = "in <stateposition>: attribute y=\"\" is missing";
-            return FALSE;
+            return false;
         }
         y = attribute->nValueToInt();
         
@@ -1564,7 +1565,7 @@ bool DEdit_Widget::createGraphicalStatesFromFile(xmlObject* stateList)
         }
     }
     
-    return TRUE;
+    return true;
 }
 
 
@@ -1573,12 +1574,12 @@ bool DEdit_Widget::createGraphicalTransitionsFromFile(xmlObject* transitionList)
     if(isLocked())
     {
         // return if widget was locked
-        return FALSE;
+        return false;
     }
     // info: parameter xmlObject* transitionList not needed yet
     if(!m_pDea)
     {
-        return FALSE;
+        return false;
     }
     DEdit_GraphicalTransition graphicalTransition;
     DEA_Transition* transition;
@@ -1601,7 +1602,7 @@ bool DEdit_Widget::createGraphicalTransitionsFromFile(xmlObject* transitionList)
         if(!from || !to)
         {
             m_szLastSyntaxError = "Creating graphical transitions: Internal Pointer Error: (!from || !to)";
-            return FALSE;
+            return false;
         }
         // graphical start and end
         graphFrom = findStateByName(from->name());
@@ -1609,7 +1610,7 @@ bool DEdit_Widget::createGraphicalTransitionsFromFile(xmlObject* transitionList)
         if(!graphFrom || !graphTo)
         {
             m_szLastSyntaxError = "Creating graphical transitions: Internal Pointer Error: (!graphFrom || !graphTo)";
-            return FALSE;
+            return false;
         }
         transitionGuiInfo = findGraphicalTransitionObject(transitionList, from->name(), to->name(), transition->inputSymbols());
         if(transitionGuiInfo
@@ -1626,7 +1627,7 @@ bool DEdit_Widget::createGraphicalTransitionsFromFile(xmlObject* transitionList)
         m_TransitionList.append(graphicalTransition);
     }
     
-    return TRUE;
+    return true;
 }
 
 
@@ -1764,7 +1765,7 @@ void DEdit_Widget::setSelectedState_StartState(bool startState)
         // then unselect old startstate
         if(m_pStartState)
         {
-            m_pStartState->m_bStartState = FALSE;
+            m_pStartState->m_bStartState = false;
         }
         // then set just edited state to new start state
         m_pStartState = state;

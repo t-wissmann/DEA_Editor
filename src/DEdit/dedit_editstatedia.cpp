@@ -126,7 +126,7 @@ bool DEdit_EditStateDia::applyChanges()
 {
     if(!m_pStateToEdit || !m_pStateToEdit->m_pData)
     {
-        return FALSE;
+        return false;
     }
     QString name = txtName->text();
     DEdit_GraphicalState* item = m_pParent ? m_pParent->findStateByName(name) : NULL;
@@ -138,7 +138,7 @@ bool DEdit_EditStateDia::applyChanges()
                 .replace("%statename", name) + "\n";
         msg += tr("Please choose an other name");
         QMessageBox::critical(this, title, msg);
-        return FALSE;
+        return false;
     }
     m_pStateToEdit->m_pData->setName(name.toLocal8Bit().data());
     m_pStateToEdit->m_pData->setFinalState(chkIsFinalState->isChecked());
@@ -147,6 +147,6 @@ bool DEdit_EditStateDia::applyChanges()
     {
         parentWidget()->update();
     }
-    return TRUE;
+    return true;
 }
 

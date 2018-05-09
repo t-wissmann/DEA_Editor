@@ -31,9 +31,9 @@ DEdit_ExecDeaWidget::DEdit_ExecDeaWidget(QWidget* parent)
 {
     // init some members
     m_pDeaWidget = NULL;
-    m_bRunning = FALSE;
-    m_bPaused = FALSE;
-    m_bErrorOccured = FALSE;
+    m_bRunning = false;
+    m_bPaused = false;
+    m_bErrorOccured = false;
     m_nCurrentPosition = 0;
     m_pCurrentState = NULL;
     m_nTransitionAnimationTime = 1000;
@@ -52,7 +52,7 @@ DEdit_ExecDeaWidget::DEdit_ExecDeaWidget(QWidget* parent)
     reloadIcons();
     
     // init widgets
-    chkTimerControlled->setChecked(TRUE);
+    chkTimerControlled->setChecked(true);
     
 }
 
@@ -67,21 +67,21 @@ void DEdit_ExecDeaWidget::allocateWidgets()
     btnStart = new QPushButton;
     btnStop = new QPushButton;
     btnPause  = new QPushButton;
-    btnPause->setVisible(FALSE);
+    btnPause->setVisible(false);
     btnSingleStep = new QPushButton;
     btnLocked = new QPushButton;
-    btnLocked->setCheckable(TRUE);
+    btnLocked->setCheckable(true);
     // output / console
     txtOutput = new QTextEdit;
-    txtOutput->setReadOnly(TRUE);
+    txtOutput->setReadOnly(true);
     txtOutput->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     txtOutput->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
-    txtOutput->setVisible(FALSE);
+    txtOutput->setVisible(false);
     btnShowHideOutput = new QPushButton;
-    btnShowHideOutput->setCheckable(TRUE);
-    btnShowHideOutput->setChecked(FALSE);
+    btnShowHideOutput->setCheckable(true);
+    btnShowHideOutput->setChecked(false);
     btnClearOutput = new QPushButton;
-    btnClearOutput->setVisible(FALSE);
+    btnClearOutput->setVisible(false);
     // timer
     chkTimerControlled = new QCheckBox;
     lblTimerInterval = new QLabel;
@@ -244,7 +244,7 @@ void DEdit_ExecDeaWidget::resetWidgetProperties()
     btnClearInputString->setEnabled(!m_bRunning);
     if(m_bRunning)
     {
-        btnLocked->setChecked(TRUE);
+        btnLocked->setChecked(true);
     }
     btnLocked->setEnabled(!m_bRunning);
 }
@@ -269,9 +269,9 @@ void DEdit_ExecDeaWidget::start()
     }
     removeAllResultIndicators();
     putMessage(tr("Starting DEA..."));
-    m_bRunning = TRUE;
-    m_bPaused = FALSE;
-    m_bErrorOccured = FALSE;
+    m_bRunning = true;
+    m_bPaused = false;
+    m_bErrorOccured = false;
     resetLastTransition(m_pLastTransition);
     resetWidgetProperties();
     
@@ -283,7 +283,7 @@ void DEdit_ExecDeaWidget::start()
     resetCurrentState(m_pDeaWidget->graphicalStartState()); // set m_pCurrentState to start
     if(!m_pCurrentState)
     {
-        m_bErrorOccured = TRUE;
+        m_bErrorOccured = true;
         putMessage(tr("Error when starting: No start state defined!"));
         stop();
         updateResultLabel();
@@ -301,13 +301,13 @@ void DEdit_ExecDeaWidget::start()
 
 void DEdit_ExecDeaWidget::stop()
 {
-    m_bRunning = FALSE;
-    m_bPaused = FALSE;
+    m_bRunning = false;
+    m_bPaused = false;
     
     resetLastTransition(NULL);
     if(m_pCurrentState)
     {
-        m_pCurrentState->m_bCurrentlyExecutedState = FALSE;
+        m_pCurrentState->m_bCurrentlyExecutedState = false;
     }
     
     
@@ -322,7 +322,7 @@ void DEdit_ExecDeaWidget::stop()
 
 void DEdit_ExecDeaWidget::pause()
 {
-    m_bPaused = TRUE;
+    m_bPaused = true;
     resetWidgetProperties();
 }
 
@@ -354,7 +354,7 @@ void DEdit_ExecDeaWidget::executeToNextState()
             
             text = tr("End of string has been reached but current state \'%statename\' is NOT a final state.").replace("%statename", state->name());
             text += "\n" + tr("\'%inputstring\' DENIED").replace("%inputstring", m_szStringToCheck);
-            m_bErrorOccured = TRUE;
+            m_bErrorOccured = true;
             // add space so that in lblResult, we can see a red rect at end of string
             m_szStringToCheck += "  ";
             putMessage(text);
@@ -364,7 +364,7 @@ void DEdit_ExecDeaWidget::executeToNextState()
         updateResultLabel();
         return;
     }
-    char currentSymbol = m_szStringToCheck[m_nCurrentPosition].toAscii();
+    char currentSymbol = QChar(m_szStringToCheck[m_nCurrentPosition]).toLatin1();
     
     DEA_Transition* transition = state->findTransitionForSymbol(currentSymbol);
     if(!transition)
@@ -372,7 +372,7 @@ void DEdit_ExecDeaWidget::executeToNextState()
         QString text;
         text = tr("No Transition found for \'%symbol\' at state \'%statename\'")
                 .replace("%symbol", QString(currentSymbol)).replace("%statename", state->name());
-        m_bErrorOccured = TRUE;
+        m_bErrorOccured = true;
         text += "\n" + tr("\'%inputstring\' DENIED").replace("%inputstring", m_szStringToCheck);
         putMessage(text);
         m_pCurrentState->m_eResultIndicator = DEdit_GraphicalState::ResultDenied;
@@ -427,7 +427,7 @@ void DEdit_ExecDeaWidget::resetLastTransition(DEdit_GraphicalTransition* transit
     // deselect old transition
     if(m_pLastTransition)
     {
-        m_pLastTransition->m_bJustExecuted = FALSE;
+        m_pLastTransition->m_bJustExecuted = false;
         m_pLastTransition->setExecutionProgress(-1.0);
         m_pLastTransition->setWasChanged();
     }
@@ -436,7 +436,7 @@ void DEdit_ExecDeaWidget::resetLastTransition(DEdit_GraphicalTransition* transit
     // select new transition
     if(m_pLastTransition)
     {
-        m_pLastTransition->m_bJustExecuted = TRUE;
+        m_pLastTransition->m_bJustExecuted = true;
         m_pLastTransition->setExecutionProgress(0.0);
         m_pLastTransition->setWasChanged();
     }
@@ -450,12 +450,12 @@ void DEdit_ExecDeaWidget::resetCurrentState(DEdit_GraphicalState* state)
     // deselect old currentState
     if(m_pCurrentState)
     {
-        m_pCurrentState->m_bCurrentlyExecutedState = FALSE;
+        m_pCurrentState->m_bCurrentlyExecutedState = false;
     }
     // select new currentState
     if(state)
     {
-        state->m_bCurrentlyExecutedState = TRUE;
+        state->m_bCurrentlyExecutedState = true;
     }
     // set newCurrentState to m_pCurrentState
     m_pCurrentState = state;

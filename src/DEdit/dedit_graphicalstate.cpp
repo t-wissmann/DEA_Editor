@@ -7,7 +7,7 @@ int DEdit_GraphicalState::m_nDiameter = 100;
 
 DEdit_GraphicalState::DEdit_GraphicalState(DEA_State* state)
 {
-    m_bChangedSinceRepaint = TRUE; // at beginning, all states has to be repainted
+    m_bChangedSinceRepaint = true; // at beginning, all states has to be repainted
     m_pData = state;
     m_pWidgetPainter = NULL;
     m_nX = 0;
@@ -73,11 +73,11 @@ bool DEdit_GraphicalState::wasChangedSinceRepaint() const
 
 void DEdit_GraphicalState::setWasChanged()
 {
-    m_bChangedSinceRepaint = TRUE;
+    m_bChangedSinceRepaint = true;
 }
 
 void DEdit_GraphicalState::setToNotChanged()
 {
-    m_bChangedSinceRepaint = FALSE;
+    m_bChangedSinceRepaint = false;
 }
 
