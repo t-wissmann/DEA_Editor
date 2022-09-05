@@ -194,7 +194,7 @@ long           xmlObject::nSetAttributeCounter(int nNewAttributeCounter)
     }
     if(cOldAttributeList != NULL)
     {
-        delete cOldAttributeList;
+        delete[] cOldAttributeList;
     }
     
     
@@ -384,7 +384,7 @@ long           xmlObject::nSetObjectCounter(int nNewObjectCounter)
         }
         if(oldObjectList != NULL)
         {
-            delete oldObjectList;
+            delete[] oldObjectList;
         }
     }
     
@@ -717,7 +717,7 @@ void           xmlObject::hardAppendToContent(char* szStringToAppend)
     if(oldContentLength > 0)
     {
         strcpy(szContent, oldContent);
-        delete oldContent;
+        delete[] oldContent;
     }
     else
     {
